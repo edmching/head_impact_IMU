@@ -1,7 +1,7 @@
-#Head Impact IMU firmware
+# Head Impact IMU firmware
 
-#Introduction
-The base project folder for the IMU firmware. It includes the nRF SDK source files and the nrf52832_mdk development board config files. 
+# Introduction
+This is base project folder for the IMU firmware. It includes the nRF SDK source files and the nrf52832_mdk development board config files. 
 
 * To build this project we need:
     * GNU Arm Embedded Toolchain
@@ -109,3 +109,31 @@ DONE nrf52832_xxaa
 ```
 
  If you want to flash to your development board run `make flash`. 
+
+and you should see:
+```sh
+ $ make flash
+DONE nrf52832_xxaa
+Flashing: _build/nrf52832_xxaa.hex
+pyocd-flashtool -t nrf52 -se _build/nrf52832_xxaa.hex
+WARNING:pyocd.tools.flash_tool:pyocd-flashtool is deprecated; please use the new combined pyocd tool.
+INFO:pyocd.board.board:Target type is nrf52
+INFO:pyocd.coresight.dap:DP IDR = 0x2ba01477 (v1 rev2)
+INFO:pyocd.coresight.ap:AP#0 IDR = 0x24770011 (AHB-AP var1 rev2)
+INFO:pyocd.coresight.ap:AP#1 IDR = 0x02880000 (proprietary)
+INFO:pyocd.coresight.rom_table:AP#0 ROM table #0 @ 0xe00ff000 (designer=244 part=006)
+INFO:pyocd.coresight.rom_table:[0]<e000e000:SCS-M4 class=14 designer=43b part=00c>
+INFO:pyocd.coresight.rom_table:[1]<e0001000:DWT class=14 designer=43b part=002>
+INFO:pyocd.coresight.rom_table:[2]<e0002000:FPB class=14 designer=43b part=003>
+INFO:pyocd.coresight.rom_table:[3]<e0000000:ITM class=14 designer=43b part=001>
+INFO:pyocd.coresight.rom_table:[4]<e0040000:TPIU-M4 class=9 designer=43b part=9a1 devtype=11 archid=0000 devid=0:0:ca1>
+INFO:pyocd.coresight.rom_table:[5]<e0041000:ETM-M4 class=9 designer=43b part=925 devtype=13 archid=0000 devid=0:0:0>
+INFO:pyocd.coresight.cortex_m:CPU core #0 is Cortex-M4 r0p1
+INFO:pyocd.coresight.cortex_m:FPU present: FPv4-SP
+INFO:pyocd.coresight.dwt:4 hardware watchpoints
+INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
+[---|---|---|---|---|---|---|---|---|----]
+[========================================]
+INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
+```
+
