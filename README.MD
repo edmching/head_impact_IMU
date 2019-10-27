@@ -1,9 +1,9 @@
 # Head Impact IMU firmware
 
 # Introduction
-This is base project folder for the IMU firmware. It includes the nRF SDK source files and the nrf52832_mdk development board config files. 
+This is the base project folder for the IMU firmware. It includes the nRF SDK source files and the nrf52832_mdk development board config files. 
 
-* To build this project we need:
+Requirements:
     * GNU Arm Embedded Toolchain
     * GNU make [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/) 
     * pyOCD
@@ -38,7 +38,7 @@ Now you make set the path to your toolchain in the `makefile.windows` or `makefi
 nrf_sdk/components/toolchain/gcc
 ```
 
-Using a text editor set the `GNU_INSTALL_ROOT` and `GNU_VERSION`variables. For example:
+Using any text editor to set the `GNU_INSTALL_ROOT` and `GNU_VERSION`variables. For example:
 
 ``` sh
 GNU_INSTALL_ROOT := <path to install directory>/gcc-arm-none-eabi-8-2019-q3-update-win32/bin/
@@ -46,7 +46,7 @@ GNU_VERSION := 8.3.1
 GNU_PREFIX := arm-none-eabi
 ```
 
-**Where make sure you use '/' or make will not be able too find your direction!**
+**Make sure you use '/' or make will not be able too find your directory**
 
 ### Setting up GNUMake
 
@@ -68,11 +68,13 @@ You should get the following message:
  ```
 
 ### Setting up pyOCD
-[pyOCD](https://github.com/mbedmicro/pyOCD) is an open source Python library for programming and debugging for ARM Cortex-M devices. It requires Python 2.7.9 or later, or Python 3.6.0 or later.
+[pyOCD](https://github.com/mbedmicro/pyOCD) is an open source Python library for programming and debugging for ARM Cortex-M devices.
 
-Download and install Python from https://www.python.org/. For windows user, please check the "Add to PATH" box when installing.
+* Requires Python 2.7.9 or later, or Python 3.6.0 or later.
 
-We will use Pip to install pyOCD. 
+Download and install Python from https://www.python.org/. For Windows user, please check the "Add to PATH" box when installing.
+
+We will use pip to install pyOCD. 
 
 ``` sh
 pip install --pre -U pyocd
@@ -90,13 +92,12 @@ Once you have the GNU ARM toolchain, GNU make and pyOCD setup, you can build thi
 
 The `makefile` is located in  `<your path >/head_impact_IMU/ble_app/armgcc/ .
 
-Go to the app config folder and run make:
+Go to your app config folder and run make:
 ``` sh
 cd ble_app/armgcc
 make flash
 ```
-The command `make` will compile the and link the source files.
-
+The command `make` will compile the and link the source files. 
 If successful you should see:
 
 ``` sh
@@ -108,9 +109,7 @@ Preparing: _build/nrf52832_xxaa.bin
 DONE nrf52832_xxaa
 ```
 
- If you want to flash to your development board run `make flash`. 
-
-and you should see:
+ If you want to flash to your development board run `make flash` and you should see:
 ```sh
  $ make flash
 DONE nrf52832_xxaa
@@ -136,4 +135,5 @@ INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
 [========================================]
 INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
 ```
+
 
