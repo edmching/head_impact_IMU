@@ -56,15 +56,11 @@ For Windows download and install [GNUwin Make (for Windows)](http://gnuwin32.sou
 C:\Program Files (x86)\GnuWin32\bin
 ```
 
-Check to see it works by using:
+Check to see it works by using 
 
 ``` sh
-make
-```
-
-You should get the following message:
- ``` sh
- make: *** No targets specified and no makefile found.  Stop.
+$ make
+make: *** No targets specified and no makefile found.  Stop.
  ```
 
 ### Setting up pyOCD
@@ -77,13 +73,13 @@ Download and install Python from https://www.python.org/. For Windows user, plea
 We will use pip to install pyOCD. 
 
 ``` sh
-pip install --pre -U pyocd
+ $ pip install --pre -U pyocd
 ```
 
 Check to see if installed correctly:
 
 ``` sh
-pip
+ $ pip
 ```
 
 ## Building the Project
@@ -94,13 +90,14 @@ The `makefile` is located in  `<your path >/head_impact_IMU/ble_app/armgcc/ .
 
 Go to your app config folder and run make:
 ``` sh
-cd ble_app/armgcc
-make flash
+$ cd ble_app/armgcc
+$ make flash
 ```
 The command `make` will compile the and link the source files. 
 If successful you should see:
 
 ``` sh
+$ make
 Linking target: _build/nrf52832_xxaa.out
    text    data     bss     dec     hex filename
   26604     164    2464   29232    7230 _build/nrf52832_xxaa.out
