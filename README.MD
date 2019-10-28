@@ -1,5 +1,5 @@
 # Head Impact IMU Firmware
-This is the base project folder for the IMU firmware. It includes the nRF SDK source files and the nrf52832_mdk development board config files. 
+This is the base project folder for the IMU firmware. It includes the nRF5 SDK 15.2.0 source files and the nrf52832_mdk development board config files. 
 
 Requirements:
 * GNU Arm Embedded Toolchain
