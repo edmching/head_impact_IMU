@@ -44,7 +44,7 @@ GNU_VERSION := 8.3.1
 GNU_PREFIX := arm-none-eabi
 ```
 
-**Make sure you use '/' or make will not be able too find your directory**
+**Make sure you use '/' or `make` will not be able too find your directory**
 
 ### Setting up GNUMake
 
@@ -66,8 +66,8 @@ make: *** No targets specified and no makefile found.  Stop.
 
 * Requires Python 2.7.9 or later, or Python 3.6.0 or later.
 
-* Use Python 3.8.0 since Python 3.7 gives libusb error
-Download and install Python 3.8.0 from https://www.python.org/. For Windows user, please check the "Add to PATH" box when installing.
+* Use Python 3.8 since Python 3.7 gives libusb error
+Download and install Python 3.8 from https://www.python.org/. For Windows user, please check the "Add to PATH" box when installing.
 
 We will use pip to install pyOCD. 
 
