@@ -18,3 +18,4 @@ material/*
 .mbed
 projectfiles
 *.py*
+.vscode/

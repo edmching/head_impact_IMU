@@ -2,7 +2,7 @@ PROJECT_NAME     := ble_app_blinky_nrf52832_mdk_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
-APP_DIR := ../
+APP_DIR := ..
 PROJ_DIR := ../..
 SDK_ROOT := ../../nrf_sdk
 
