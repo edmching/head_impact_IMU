@@ -44,6 +44,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h> 
+#include <nrf_drv_spi.h>
 
 #define L_ENDIAN
 
@@ -253,6 +254,8 @@ struct adxl372_device {
     fifo_config_t fifo_config;
 };
 
+void adxl372_init (void);
+
 uint8_t* adxl372_read_reg( uint8_t reg_addr);
 
 void adxl372_write_reg( uint8_t reg_addr, uint8_t reg_data);
@@ -301,7 +304,7 @@ void adxl372_reset(void);
 
 int32_t adxl372_configure_fifo (struct adxl372_device* dev, uint16_t fifo_samples, adxl372_fifo_mode_t fifo_mode, adxl372_fifo_format_t fifo_format);
 
-int32_t adxl372_get_fifo_data(struct adxl372_device* dev, adxl372_accel_data_t fifo_data, uint16_t count);
+int32_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *fifo_data);
 
 void adxl372_set_interrupts(void);
 

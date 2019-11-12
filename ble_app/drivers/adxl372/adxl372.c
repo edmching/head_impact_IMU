@@ -1,8 +1,10 @@
 #include "adxl372.h"
 #include "spi_driver.h"
 #include "nrf_delay.h"
+#include "nrf_log.h"
 
-void adxl372_init( void)
+
+void adxl372_init (void)
 {
     //Setup SPI 
     spi_init();
@@ -20,7 +22,6 @@ void adxl372_init( void)
     adxl372_set_odr(ODR_6400HZ);
     adxl372_set_wakeup_rate(WUR_52MS);
     adxl372_set_op_mode(FULL_BW_MEASUREMENT);
-    */
 
 }
 
@@ -36,7 +37,7 @@ uint8_t* adxl372_read_reg( uint8_t reg_addr)
 
     read_addr = ((reg_addr & 0xFF) << 1 | 0x01); //set R bit to 1
 
-    return spi_write_and_read(read_addr, 1);
+    return spi_write_and_read(&read_addr, 1);
 }
 
 /*
@@ -66,12 +67,12 @@ uint8_t* adxl372_multibyte_read_reg( uint8_t reg_addr, uint16_t num_bytes)
     
     read_addr = ((reg_addr & 0xFF) << 1 | 0x01); //set R bit to 1
 
-    return spi_write_and_read(read_addr, num_bytes);
+    return spi_write_and_read(&read_addr, num_bytes);
 }
 
 void adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t val)
 {
-    uint8_t reg_data;
+    uint8_t reg_data = 0;
 
     reg_data &= mask; 
     reg_data |= (val << pos) & ~mask;
@@ -168,7 +169,7 @@ void adxl372_set_inactivity_time(uint8_t time)
 
 void adxl372_set_filter_settle(adxl372_filter_settle_t mode)
 {
-    adxl372_write_reg(ADI_ADXL372_POWER_CTL, PWRCTRL_FILTER_SETTLE_MASK,PWRCTRL_FILTER_SETTLE_POS, mode);
+    adxl372_write_mask(ADI_ADXL372_POWER_CTL, PWRCTRL_FILTER_SETTLE_MASK,PWRCTRL_FILTER_SETTLE_POS, mode);
 }
 
 /*
@@ -203,7 +204,7 @@ uint8_t adxl372_get_activity_status_reg(void)
 
 void adxl372_get_highest_peak_accel_data(adxl372_accel_data_t* max_peak)
 {
-    uint8_t* buf;
+    uint8_t *buf;
     uint8_t status;
 
     do{
@@ -287,12 +288,11 @@ int32_t adxl372_configure_fifo (struct adxl372_device *dev, uint16_t fifo_sample
  */
 int32_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *fifo_data)
 {
-    uint8_t *fifo_status;
-    uint8_t *buf;
+    uint8_t fifo_status;
     fifo_status = adxl372_get_status_reg();
    
     //checks fifo overun status
-    if(*fifo_status & FIFO_OVR)
+    if(fifo_status & FIFO_OVR)
     {
         NRF_LOG_INFO("FIFO overrun \n");
         return -1; //fifo overrun
@@ -300,23 +300,25 @@ int32_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *
 
     if(dev->fifo_config.mode != BYPASSED)
     {
-        if( (*fifo_status & FIFO_RDY) || (*fifo_status & FIFO_FULL) )
+        if( (fifo_status & FIFO_RDY) || (fifo_status & FIFO_FULL) )
         {
            /*
             * FIFO holds 512 Samples,
             * Each sample is 2 bytes
             */
+            uint8_t *buf;
             buf = adxl372_multibyte_read_reg(ADI_ADXL372_FIFO_DATA, dev->fifo_config.samples*2);
+
+            //set samples from data read
+            for (int i = 0; i< dev->fifo_config.samples*2; i +=6)
+            {
+                fifo_data->x = (buf[i] << 4)   | (buf[i+1] >> 4); 
+                fifo_data->y = (buf[i+2] << 4) | (buf[i+3] >> 4); 
+                fifo_data->y = (buf[i+4] << 4) | (buf[i+5] >> 4); 
+            }
         }
     }
 
-    //set samples from data read
-    for (int i = 0; i< dev->fifo_config.samples*2; i +=6)
-    {
-        fifo_data->x = (buf[i] << 4) | (buf[i+1] >> 4); 
-        fifo_data->y = (buf[i+2] << 4) | (buf[i+3] >> 4); 
-        fifo_data->y = (buf[i+4] << 4) | (buf[i+5] >> 4); 
-    }
 
     return 1;
 }

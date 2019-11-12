@@ -114,7 +114,7 @@ endif # ifeq ($(PRETTY),1)
 # $1 path
 define quote
 '$(subst ','\'',$(1))'
-endefs
+endef
 
 # Toolchain commands
 CC      := arm-none-eabi-gcc
