@@ -1,6 +1,8 @@
 #include "nrf_drv_spi.h"
 #include "nrf_delay.h"
 #include "app_error.h"
+#include "spi_driver.h"
+#include "sdk_errors.h"
 
 #define TX_RX_BUF_LENGTH 512u  /**< SPI transaction buffer length. */
 
@@ -33,10 +35,10 @@ void spi_event_handler(nrf_drv_spi_evt_t const * p_event, void *  p_context)
 void spi_init (void)
 {
     nrf_drv_spi_config_t const spi_config = {
-        .ss_pin       = SPI_SS_PIN;
-        .miso_pin     = SPI_MISO_PIN;
-        .mosi_pin     = SPI_MOSI_PIN;
-        .sck_pin      = SPI_SCK_PIN;
+        .ss_pin       = SPI_SS_PIN,
+        .miso_pin     = SPI_MISO_PIN,
+        .mosi_pin     = SPI_MOSI_PIN,
+        .sck_pin      = SPI_SCK_PIN,
         .irq_priority = SPI_DEFAULT_CONFIG_IRQ_PRIORITY,
         .orc          = 0xFF,
         .frequency    = NRF_DRV_SPI_FREQ_4M,

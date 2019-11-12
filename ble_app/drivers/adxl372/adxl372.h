@@ -159,8 +159,8 @@
 
 #define INACT_TIMER        1     /* Inactivity timer value in multiples of 26ms */
 
-#define ADXL_INT1_PIN     7
-#define ADXL_INT2_PIN     5
+#define ADXL_INT1_PIN     7 //not used currently
+#define ADXL_INT2_PIN     5 //not used currently
 
 typedef nrf_drv_spi_t  adxl372_spi_handle_t;
 
@@ -253,8 +253,57 @@ struct adxl372_device {
     fifo_config_t fifo_config;
 };
 
-uint8_t adxl372_read_reg( uint8_t reg_addr);
+uint8_t* adxl372_read_reg( uint8_t reg_addr);
+
 void adxl372_write_reg( uint8_t reg_addr, uint8_t reg_data);
+
+uint8_t* adxl372_multibyte_read_reg( uint8_t reg_addr, uint16_t num_bytes);
+
+void adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t val);
+
+void adxl372_set_op_mode(adxl372_op_mode_t mode);
+
+void adxl372_set_odr(adxl372_odr_t odr);
+
+void adxl372_set_wakeup_rate(adxl372_wakeup_rate_t wur);
+
+void adxl372_set_bandwidth(adxl372_bw_t bw);
+
+void adxl372_set_autosleep(bool enable);
+
+void adxl372_set_act_proc_mode (adxl372_act_proc_mode_t mode);
+
+void adxl372_set_instaon_threshold(adxl372_instaon_thresh_t mode);
+
+void adxl372_set_activity_threshold(uint16_t  thresh, bool referenced, bool enable);
+
+void adxl372_set_activity2_threshold(uint16_t  thresh, bool referenced, bool enable);
+
+void adxl372_set_inactivity_threshold(uint16_t thresh, bool referenced, bool enable);
+
+void adxl372_set_activity_time(uint8_t time);
+
+void adxl372_set_inactivity_time(uint8_t time);
+
+void adxl372_set_filter_settle(adxl372_filter_settle_t mode);
+
+uint8_t adxl372_get_dev_ID(void);
+
+uint8_t adxl372_get_status_reg(void);
+
+uint8_t adxl372_get_activity_status_reg(void);
+
+void adxl372_get_highest_peak_accel_data(adxl372_accel_data_t* max_peak);
+
+void adxl372_get_accel_data(adxl372_accel_data_t* accel_data);
+
+void adxl372_reset(void);
+
+int32_t adxl372_configure_fifo (struct adxl372_device* dev, uint16_t fifo_samples, adxl372_fifo_mode_t fifo_mode, adxl372_fifo_format_t fifo_format);
+
+int32_t adxl372_get_fifo_data(struct adxl372_device* dev, adxl372_accel_data_t fifo_data, uint16_t count);
+
+void adxl372_set_interrupts(void);
 
 #endif /* ADXL372_H_ */
 
