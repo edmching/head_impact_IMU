@@ -278,7 +278,7 @@ LIB_FILES += -lc -lnosys -lm
 .PHONY: default help
 
 # Default target - first one defined
-default: adxl372_test_nrf52832_xxaa
+default: nrf52832_xxaa
 
 # Print all targets that can be built
 help:

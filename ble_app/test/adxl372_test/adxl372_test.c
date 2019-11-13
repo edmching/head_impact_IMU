@@ -22,13 +22,18 @@ int main (void)
     // Initialize.
     log_init();
 
-   
-    NRF_LOG_INFO("adxl372 test start.");
+    NRF_LOG_INFO("adxl372 test measurement mode.");
     adxl372_init();
-
+    adxl372_accel_data_t accel_data;
 
     while(1)
     {
+        adxl372_get_accel_data(&accel_data);
+        accel_data.x = (float) accel_data.x * 100/1000;
+        accel_data.y = (float) accel_data.y * 100/1000;
+        accel_data.z = (float) accel_data.z * 100/1000;
+
+        NRF_LOG_INFO("X accel = %f", accel_data.x);
 
     }
 
