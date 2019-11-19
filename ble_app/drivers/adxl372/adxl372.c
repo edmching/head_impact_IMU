@@ -14,13 +14,14 @@ void adxl372_init (void)
     gpio_init();
     */
 
-
     //initialize device settings
+    /* set up measurement mode */
     adxl372_set_op_mode(STAND_BY);
-    adxl372_set_autosleep(false);
+    adxl372_set_hpf_disable(true);
+    adxl372_set_lpf_disable(true);
     adxl372_set_bandwidth(BW_3200HZ);
     adxl372_set_odr(ODR_6400HZ);
-    adxl372_set_wakeup_rate(WUR_52MS);
+    adxl372_set_filter_settle(FILTER_SETTLE_16);
     adxl372_set_op_mode(FULL_BW_MEASUREMENT);
 
 }
@@ -81,10 +82,19 @@ void adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t v
 }
 
 /* ADXL372 Register Functions*/
-
 void adxl372_set_op_mode(adxl372_op_mode_t mode)
 {
     adxl372_write_mask(ADI_ADXL372_POWER_CTL, PWRCTRL_OPMODE_MASK, PWRCTRL_OPMODE_POS, mode);
+}
+
+void adxl372_set_hpf_disable(bool set)
+{
+    adxl372_write_mask(ADI_ADXL372_POWER_CTL, PWRCTRL_HPF_DISABLE_MASK, PWRCTRL_HPF_DISABLE_POS, set);
+}
+
+void adxl372_set_lpf_disable(bool set)
+{
+    adxl372_write_mask(ADI_ADXL372_POWER_CTL, PWRCTRL_LPF_DISABLE_MASK, PWRCTRL_LPF_DISABLE_POS, set);
 }
 
 void adxl372_set_odr(adxl372_odr_t odr)
@@ -123,7 +133,7 @@ void adxl372_set_activity_threshold(uint16_t  thresh, bool referenced, bool enab
 
     adxl372_write_reg(ADI_ADXL372_X_THRESH_ACT_H, thresh >> 3);
     adxl372_write_reg(ADI_ADXL372_X_THRESH_ACT_L, 
-                    (thresh << 5) | (referenced << 1) | enable);
+                        (thresh << 5) | (referenced << 1) | enable);
     adxl372_write_reg(ADI_ADXL372_Y_THRESH_ACT_H, thresh >> 3);
     adxl372_write_reg(ADI_ADXL372_Y_THRESH_ACT_L, (thresh << 5) | enable);
     adxl372_write_reg(ADI_ADXL372_Z_THRESH_ACT_H, thresh >> 3);
@@ -135,7 +145,7 @@ void adxl372_set_activity2_threshold(uint16_t  thresh, bool referenced, bool ena
     adxl372_set_op_mode(STAND_BY);
     adxl372_write_reg(ADI_ADXL372_X_THRESH_ACT2_H, thresh >> 3);
     adxl372_write_reg(ADI_ADXL372_X_THRESH_ACT2_L,
-                   (thresh << 5) | (referenced << 1) | enable);
+                        (thresh << 5) | (referenced << 1) | enable);
     adxl372_write_reg( ADI_ADXL372_Y_THRESH_ACT2_H, thresh >> 3);
     adxl372_write_reg(ADI_ADXL372_Y_THRESH_ACT2_L, (thresh << 5) | enable);
     adxl372_write_reg(ADI_ADXL372_Z_THRESH_ACT2_H, thresh >> 3);
@@ -149,7 +159,7 @@ void adxl372_set_inactivity_threshold(uint16_t thresh, bool referenced, bool ena
 
     adxl372_write_reg(ADI_ADXL372_X_THRESH_INACT_H, thresh >> 3);
     adxl372_write_reg(ADI_ADXL372_X_THRESH_INACT_L,
-                   (thresh << 5) | (referenced << 1) | enable);
+                        (thresh << 5) | (referenced << 1) | enable);
     adxl372_write_reg(ADI_ADXL372_Y_THRESH_INACT_H, thresh >> 3);
     adxl372_write_reg(ADI_ADXL372_Y_THRESH_INACT_L, (thresh << 5) | enable);
     adxl372_write_reg(ADI_ADXL372_Z_THRESH_INACT_H, thresh >> 3);
@@ -169,7 +179,7 @@ void adxl372_set_inactivity_time(uint8_t time)
 
 void adxl372_set_filter_settle(adxl372_filter_settle_t mode)
 {
-    adxl372_write_mask(ADI_ADXL372_POWER_CTL, PWRCTRL_FILTER_SETTLE_MASK,PWRCTRL_FILTER_SETTLE_POS, mode);
+    adxl372_write_mask(ADI_ADXL372_POWER_CTL, PWRCTRL_FILTER_SETTLE_MASK, PWRCTRL_FILTER_SETTLE_POS, mode);
 }
 
 /*

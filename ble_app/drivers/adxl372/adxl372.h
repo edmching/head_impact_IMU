@@ -128,6 +128,10 @@
 /* ADXL372_POWER_CTL */
 #define PWRCTRL_OPMODE_MASK		    0xFC
 #define PWRCTRL_OPMODE_POS          0
+#define PWRCTRL_HPF_DISABLE_MASK    0x7B
+#define PWRCTRL_HPF_DISABLE_POS     2
+#define PWRCTRL_LPF_DISABLE_MASK    0x77
+#define PWRCTRL_LPF_DISABLE_POS     3
 #define PWRCTRL_INSTON_THRESH_MASK	0xDF
 #define PWRCTRL_FILTER_SETTLE_MASK	0xEF
 #define PWRCTRL_FILTER_SETTLE_POS	4
@@ -237,8 +241,8 @@ typedef enum {
 } adxl372_instaon_thresh_t;
 
 typedef enum {
-    FILTER_SETTLE_16 = 0,
-    FILTER_SETTLE_370
+    FILTER_SETTLE_370 = 0,
+    FILTER_SETTLE_16
 } adxl372_filter_settle_t;
 
 
@@ -265,6 +269,10 @@ uint8_t* adxl372_multibyte_read_reg( uint8_t reg_addr, uint16_t num_bytes);
 void adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t val);
 
 void adxl372_set_op_mode(adxl372_op_mode_t mode);
+
+void adxl372_set_lpf_disable(bool set);
+
+void adxl372_set_hpf_disable(bool set);
 
 void adxl372_set_odr(adxl372_odr_t odr);
 
