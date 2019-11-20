@@ -128,9 +128,9 @@
 /* ADXL372_POWER_CTL */
 #define PWRCTRL_OPMODE_MASK		    0xFC
 #define PWRCTRL_OPMODE_POS          0
-#define PWRCTRL_HPF_DISABLE_MASK    0x7B
+#define PWRCTRL_HPF_DISABLE_MASK    0xFB
 #define PWRCTRL_HPF_DISABLE_POS     2
-#define PWRCTRL_LPF_DISABLE_MASK    0x77
+#define PWRCTRL_LPF_DISABLE_MASK    0xF7
 #define PWRCTRL_LPF_DISABLE_POS     3
 #define PWRCTRL_INSTON_THRESH_MASK	0xDF
 #define PWRCTRL_FILTER_SETTLE_MASK	0xEF
@@ -167,7 +167,7 @@
 #define ADXL_INT1_PIN     7 //not used currently
 #define ADXL_INT2_PIN     5 //not used currently
 
-typedef nrf_drv_spi_t  adxl372_spi_handle_t;
+typedef nrf_drv_spi_t  adxl372_spi_handle_t; //not used
 
 typedef enum {
     STAND_BY = 0,
@@ -254,19 +254,24 @@ typedef struct {
 
 
 struct adxl372_device {
-    adxl372_spi_handle_t *spi;
+    adxl372_spi_handle_t *spi; // not used
     fifo_config_t fifo_config;
 };
 
+
+// Register read and write functions
+int8_t adxl372_read_reg( uint8_t reg_addr, uint8_t *reg_data);
+
+int8_t adxl372_write_reg(uint8_t reg_addr, uint8_t reg_data);
+
+int8_t adxl372_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes);
+
+int8_t adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t val);
+//==================================================================================
+
 void adxl372_init (void);
 
-uint8_t* adxl372_read_reg( uint8_t reg_addr);
-
-void adxl372_write_reg( uint8_t reg_addr, uint8_t reg_data);
-
-uint8_t* adxl372_multibyte_read_reg( uint8_t reg_addr, uint16_t num_bytes);
-
-void adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t val);
+void adxl372_reset(void);
 
 void adxl372_set_op_mode(adxl372_op_mode_t mode);
 
@@ -308,13 +313,6 @@ void adxl372_get_highest_peak_accel_data(adxl372_accel_data_t* max_peak);
 
 void adxl372_get_accel_data(adxl372_accel_data_t* accel_data);
 
-void adxl372_reset(void);
-
-int32_t adxl372_configure_fifo (struct adxl372_device* dev, uint16_t fifo_samples, adxl372_fifo_mode_t fifo_mode, adxl372_fifo_format_t fifo_format);
-
-int32_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *fifo_data);
-
-void adxl372_set_interrupts(void);
 
 #endif /* ADXL372_H_ */
 

@@ -9,7 +9,7 @@
 #include "sdk_errors.h"
 
 void spi_init (void);
-uint8_t* spi_write_and_read ( uint8_t* tx_msg, uint16_t length);
+int8_t spi_write_and_read ( uint8_t* tx_msg, uint8_t tx_length, uint8_t* rx_msg, uint8_t rx_length);
 
 
 #endif //SPI_DRIVER_H
