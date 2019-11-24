@@ -55,12 +55,12 @@
 #define ADI_ADXL372_REVID               0x03u   /* product revision ID*/
 #define ADI_ADXL372_STATUS_1            0x04u   /* Status register 1 */
 #define ADI_ADXL372_STATUS_2            0x05u   /* Status register 2 */
-#define ADI_ADXL372_FIFO_ENTRIES_2	0x06u   /* Valid data samples in the FIFO */
-#define ADI_ADXL372_FIFO_ENTRIES_1	0x07u   /* Valid data samples in the FIFO */
+#define ADI_ADXL372_FIFO_ENTRIES_2	    0x06u   /* Valid data samples in the FIFO */
+#define ADI_ADXL372_FIFO_ENTRIES_1	    0x07u   /* Valid data samples in the FIFO */
 #define ADI_ADXL372_X_DATA_H            0x08u   /* X-axis acceleration data [11:4] */
 #define ADI_ADXL372_X_DATA_L            0x09u   /* X-axis acceleration data [3:0] | dummy LSBs */
 #define ADI_ADXL372_Y_DATA_H            0x0Au   /* Y-axis acceleration data [11:4] */
-#define ADI_ADXL372_Y_DATA_L		0x0Bu   /* Y-axis acceleration data [3:0] | dummy LSBs */
+#define ADI_ADXL372_Y_DATA_L		    0x0Bu   /* Y-axis acceleration data [3:0] | dummy LSBs */
 #define ADI_ADXL372_Z_DATA_H            0x0Cu   /* Z-axis acceleration data [11:4] */
 #define ADI_ADXL372_Z_DATA_L            0x0Du   /* Z-axis acceleration data [3:0] | dummy LSBs */
 #define ADI_ADXL372_X_MAXPEAK_H         0x15u   /* X-axis MaxPeak acceleration data [15:8] */
