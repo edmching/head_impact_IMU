@@ -27,7 +27,8 @@ typedef struct{
 } icm20649_data_t;
 
 static void log_init(void);
-
+int8_t icm20649_write_reg(uint8_t address, uint8_t data);
+int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data);
 void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data);
 
 int main (void)
@@ -37,111 +38,69 @@ int main (void)
     log_init();
 
     NRF_LOG_INFO(" ICM20649 TEST measurement mode");
+    nrf_delay_ms(10);
 
     /*********TEST READ******************/
-    nrf_delay_ms(100);
-    volatile int8_t ret;
-    uint8_t who_am_i[2];
-
-    uint8_t reg_addr;
-    reg_addr = (uint8_t) ( (0x0 >> 1) | 1 << 7 );
-
-    ret = spi_write_and_read(&reg_addr, 1, who_am_i, 2);
-    NRF_LOG_INFO("who_am_i = 0x%x (0xE1)", who_am_i[1] );
-    if(who_am_i[1] == 0xE1)
+    uint8_t who_am_i;
+    icm20649_read_reg(0x0, &who_am_i);
+    NRF_LOG_INFO("who_am_i = 0x%x (0xE1)", who_am_i );
+    if(who_am_i == 0xE1)
     {
         NRF_LOG_INFO("READ SUCCESSFUL");
-    }
-    else if(ret < 0)
-    {
-        NRF_LOG_INFO("SPI READ FAIL"); 
-        while(1); //trap
     }
     else
     {
         NRF_LOG_INFO("VAL ERROR"); 
-        while(1); //trap
+       // while(1);
     }
 
     /********************************************/
 
-    uint8_t tx_buf[2];
-    uint8_t rx_buf[2];
 
     /*********TEST WRITE******************/
-
+    uint8_t write_read;
     //PWR_MGMT 1 select best clk and disable everything else
-    tx_buf[0] = 0x6 >> 1;
-    tx_buf[1] = 0x1;
-    ret = spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x06, 0x1);
 
+    icm20649_read_reg(0x06, &write_read);
 
-    uint8_t write_read[2];
-    reg_addr = (uint8_t) ( (0x6 >> 1) | 1<< 7 );
-    spi_write_and_read(&reg_addr, 1, write_read, 2);
-    NRF_LOG_INFO("write_read = 0x%x (0x1)", write_read[1] );
-    if(write_read[1] == 0x1)
+    NRF_LOG_INFO("write_read = 0x%x (0x1)", write_read );
+    if(write_read == 0x1)
     {
         NRF_LOG_INFO("WRITE SUCCESSFUL");
     }
-    else if (ret < 0)
-    {
-        NRF_LOG_INFO("SPI WRITE FAIL");
-    }
-    else{
-        NRF_LOG_INFO("VAL ERROR");
-        while(1);//trap
-    }
+    
     /********************************************/
 
     //USER CTRL disable all
-    tx_buf[0] = (0x3 >> 1);
-    tx_buf[1] = 0x0;
-
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x03, 0x0);
 
     //LP_CONFIG disable duty cycle mode
-    tx_buf[0] = 0x5 >> 1;
-    tx_buf[1] = 0x0;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x05, 0x0);
 
     //PWR_MGMT 1 select best clk and disable everything else
-    tx_buf[0] = 0x6 >> 1;
-    tx_buf[1] = 0x1;
-    ret = spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x06, 0x1);
 
     //PWR_MGMT 2 enable accel & gyro
-    tx_buf[0] = 0x7 >> 1;
-    tx_buf[1] = 0x0;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x07, 0x0);
     
     //REG BANK SEL select userbank 2
-    tx_buf[0] = 0x7F >> 1;
-    tx_buf[1] = 0x2;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x7F, 0x2);
 
     //GYRO_CONFIG_1 bypass gyro DLPF, 2000dps
-    tx_buf[0] = 0x1 >> 1;
-    tx_buf[1] = 0x4;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x1, 0x4);
 
     //GYRO_CONFIG_2 disable self test, no avging
-    tx_buf[0] = 0x2 >> 1;
-    tx_buf[1] = 0x0;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x2, 0x0);
 
     //GYRO_CONFIG_2 disable self test, no avging
-    tx_buf[0] = 0x14 >> 1;
-    tx_buf[1] = 0x6;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x14, 0x6);
 
     //REG BANK SEL select userbank 0
-    tx_buf[0] = 0x7F >> 1;
-    tx_buf[1] = 0x0;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x7F, 0x0);
 
     icm20649_data_t data;
-
+    nrf_delay_ms(10);
     while(1)
     {
 
@@ -156,28 +115,46 @@ int main (void)
     return 0;
 }
 
+int8_t icm20649_write_reg(uint8_t address, uint8_t data)
+{
+    uint8_t tx_msg[2];
+    tx_msg[0] = address >> 1;
+    tx_msg[1] = data;
+
+    return spi_write_and_read(tx_msg, 2, NULL, 0); // send 2 bytes
+}
+
+int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data)
+{
+    uint8_t reg_addr;
+    int8_t ret;
+    uint8_t rx_buf[2];
+
+    reg_addr = (uint8_t)  ( (address >> 1) | 0x80 ); //set 1st bit for reads
+    ret = spi_write_and_read(&reg_addr, 1, rx_buf, 2);
+
+    *reg_data = rx_buf[1];
+
+    return ret;
+}
 void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data)
 {
-    uint8_t tx_buf[2];
     uint8_t rx_buf[12];
-    uint8_t reg_addr;
 
     //REG BANK SEL select userbank 0
-    tx_buf[0] = 0x7F >> 1;
-    tx_buf[1] = 0x0;
-    spi_write_and_read(tx_buf, 1, rx_buf, 1);
+    icm20649_write_reg(0x7F, 0x0);
 
-    reg_addr = (uint8_t) ( (0x2D >> 1) | 0x1 );
-    
-    spi_write_and_read(&reg_addr, 1, rx_buf, 12);
+    for(int i = 0; i < 12; ++i)
+        icm20649_read_reg(0x2D + i, &rx_buf[i]);
 
-    icm20649_data->accel_x = rx_buf[0] | rx_buf[1];
-    icm20649_data->accel_y = rx_buf[2] | rx_buf[3];
-    icm20649_data->accel_z = rx_buf[4] | rx_buf[5];
-    icm20649_data->gyro_x = rx_buf[6] | rx_buf[7];
-    icm20649_data->gyro_x = rx_buf[8] | rx_buf[9];
-    icm20649_data->gyro_x = rx_buf[10] | rx_buf[11];
+    icm20649_data->accel_x = rx_buf[0] << 8 | rx_buf[1];
+    icm20649_data->accel_y = rx_buf[2] << 8 | rx_buf[3];
+    icm20649_data->accel_z = rx_buf[4] << 8 | rx_buf[5];
+    icm20649_data->gyro_x = rx_buf[6]  << 8 | rx_buf[7];
+    icm20649_data->gyro_y = rx_buf[8]  << 8 | rx_buf[9];
+    icm20649_data->gyro_z = rx_buf[10] << 8 | rx_buf[11];
     
+
 }
 
 static void log_init(void)

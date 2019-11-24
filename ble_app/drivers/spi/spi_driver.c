@@ -36,7 +36,7 @@ void spi_init (void)
         .sck_pin      = SPI_SCK_PIN,
         .irq_priority = SPI_IRQ_PRIORITY,
         .orc          = 0xFF,
-        .frequency    = NRF_DRV_SPI_FREQ_4M,
+        .frequency    = NRF_DRV_SPI_FREQ_500K, //due to poor wiring must use slower SCK
         .mode         = NRF_DRV_SPI_MODE_0,
         .bit_order    = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST,
     };
