@@ -59,6 +59,7 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
+  $(APP_DIR)/test/vcnl4040_test \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/modules/nrfx/hal \
@@ -91,7 +92,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/libraries/util \
   $(PROJ_DIR)/config \
-  $(APP_DIR)/test/adxl372_test \
   $(SDK_ROOT)/components/libraries/csense \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ecc \
