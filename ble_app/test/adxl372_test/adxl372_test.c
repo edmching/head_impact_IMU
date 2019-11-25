@@ -35,9 +35,8 @@ int main (void)
     NRF_LOG_INFO("adxl372 test measurement mode");
 
     // READ TEST
-    nrf_delay_ms(100);
     device_id = adxl372_get_dev_ID();
-    ret |= adxl372_read_reg(ADI_ADXL372_MST_DEVID, &mst_devid);
+    ret |= adxl372_read_reg( ADI_ADXL372_MST_DEVID, &mst_devid);
     ret |= adxl372_read_reg(ADI_ADXL372_DEVID, &devid);
     if (ret < 0)
     {
@@ -96,7 +95,10 @@ int main (void)
     while(1)
     {
         adxl372_get_accel_data(&accel_data);
-    
+        accel_data.x = accel_data.x;
+        accel_data.y = accel_data.y + 2000;
+        accel_data.z = accel_data.z + 3000;
+
         NRF_LOG_INFO("X accel = %d mG, Y accel = %d mG, Z accel = %d mG", accel_data.x, accel_data.y, accel_data.z);
     
         nrf_delay_ms(1000);

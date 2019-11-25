@@ -37,7 +37,7 @@ int8_t adxl372_read_reg( uint8_t reg_addr, uint8_t *reg_data)
 
     read_addr = ((reg_addr & 0xFF) << 1) | 0x01; //set R bit to 1
 
-    ret = spi_write_and_read(&read_addr, 1, buf, 2);
+    ret = spi_write_and_read(SPI_ADXL372_CS_PIN, &read_addr, 1, buf, 2);
     if (ret < 0)
         return ret;
     
@@ -60,7 +60,7 @@ int8_t adxl372_write_reg(uint8_t reg_addr, uint8_t reg_data)
     tx_buf[0] = (reg_addr & 0xFF) << 1; //addr is 7-bits
     tx_buf[1] = reg_data;
 
-    return spi_write_and_read( tx_buf, 2, rx_buf, 2);
+    return spi_write_and_read(SPI_ADXL372_CS_PIN, tx_buf, 2, rx_buf, 2);
 }
 
 /*
@@ -78,10 +78,10 @@ int8_t adxl372_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t 
     if(num_bytes > 256)
         return -1;
 
-    read_addr = ((reg_addr & 0xFF) << 1) | 0x01; //set R bit to 1
-    memset(&rx_buf[1], 0x00, num_bytes);
+    read_addr = (reg_addr << 1) | 0x01; //set R bit to 1
+    memset(rx_buf, 0x00, num_bytes + 1);
 
-    ret = spi_write_and_read(&read_addr, 1, rx_buf, num_bytes + 1 );
+    ret = spi_write_and_read(SPI_ADXL372_CS_PIN, &read_addr, 1, rx_buf, num_bytes + 1 );
     if (ret < 0)
         return ret;
     
@@ -277,9 +277,9 @@ void adxl372_get_accel_data(adxl372_accel_data_t *accel_data)
     accel_data->z = (buf[4] << 8) | (buf[5] & 0xF0);
 
     //convert from 12 bit to 16bit and to mG
-    accel_data->x = (accel_data->x /16) * 100;
-    accel_data->y = (accel_data->y /16) * 100;
-    accel_data->z = (accel_data->z /16) * 100;
+    accel_data->x = (accel_data->x /16) *100;
+    accel_data->y = (accel_data->y /16) *100;
+    accel_data->z = (accel_data->z /16) *100;
 }
 
 void adxl372_reset(void)
