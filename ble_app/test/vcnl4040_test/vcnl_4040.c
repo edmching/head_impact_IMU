@@ -115,6 +115,11 @@ void twi_init (void)
  */
 static void read_sensor_data()
 {
+     do
+    {
+        __WFE();
+    }while (m_xfer_done == false);
+    
     m_xfer_done = false;
 
     uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
@@ -150,11 +155,6 @@ int main(void)
     while (true)
     {
         nrf_delay_ms(10);
-
-        do
-        {
-            __WFE();
-        }while (m_xfer_done == false);
 
         read_sensor_data();
         NRF_LOG_FLUSH();
