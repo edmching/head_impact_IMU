@@ -17,23 +17,24 @@
 #define TWI_INSTANCE_ID     0
 
 // Proximity sensor address
-#define VCNL4040_ADDR 0x60 //U >> 1
+#define VCNL4040_ADDR 0x60U //U >> 1
 
 // Proximity sensor command codes
-#define VCNL4040_PS_CONF1 0x03 //Lower
-#define VCNL4040_PS_CONF2 0x03 //Upper
-#define VCNL4040_PS_CONF3 0x04 //Lower
-#define VCNL4040_PS_MS 0x04 //Upper
-#define VCNL4040_PS_DATA 0x08
+#define VCNL4040_PS_CONF1 0x03U //Lower
+#define VCNL4040_PS_CONF2 0x03U //Upper
+#define VCNL4040_PS_CONF3 0x04U //Lower
+#define VCNL4040_PS_MS 0x04U //Upper
+#define VCNL4040_PS_DATA 0x08U
 
 /* Mode for LM75B. */
 #define NORMAL_MODE 0U
 
 // Proximity sensor configuration register values
 static uint8_t ps_conf1_data =	(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (1 << 3) | (1 << 2) | (1 << 1) | (0 << 0);
-static uint8_t ps_conf2_data =	(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (1 << 2) | (0 << 1) | (0 << 0);
+static uint8_t ps_conf2_data =	(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (1 << 3) | (0 << 2) | (0 << 1) | (0 << 0);
 static uint8_t ps_conf3_data =	(0 << 7) | (0 << 6) | (0 << 5) | (1 << 4) | (0 << 3) | (0 << 2) | (0 << 1) | (0 << 0);
 static uint8_t ps_ms_data =		(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (1 << 2) | (1 << 1) | (1 << 0);
+//static uint8_t blank =		    (0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (0 << 2) | (0 << 1) | (0 << 0);
  
 /* Indicates if operation on I2C has ended. */
 static volatile bool m_xfer_done = false;
@@ -42,6 +43,8 @@ static volatile bool m_xfer_done = false;
 static const nrf_drv_twi_t vcnl_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 /* Buffer for samples read from temperature sensor. */
+static uint8_t m_sample_lsb;
+static uint8_t m_sample_msb;
 static uint16_t m_sample;
 
 /**
@@ -49,16 +52,16 @@ static uint16_t m_sample;
  */
 void vcnl_config(void)
 {
-    ret_code_t err_code;
+    //ret_code_t err_code;
 	
 	uint8_t reg1[3] = {VCNL4040_PS_CONF3, ps_conf3_data, ps_ms_data};
-    err_code = nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
-    APP_ERROR_CHECK(err_code);
+    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
+    //APP_ERROR_CHECK(err_code);
     while (m_xfer_done == false);
 	
     uint8_t reg2[3] = {VCNL4040_PS_CONF1, ps_conf1_data, ps_conf2_data};
-    err_code = nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
-    APP_ERROR_CHECK(err_code);
+    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
+    //APP_ERROR_CHECK(err_code);
     while (m_xfer_done == false);
 }
 
@@ -101,7 +104,7 @@ void twi_init (void)
     const nrf_drv_twi_config_t twi_lm75b_config = {
        .scl                = I2C_SCL,
        .sda                = I2C_SDA,
-       .frequency          = NRF_DRV_TWI_FREQ_400K,
+       .frequency          = NRF_DRV_TWI_FREQ_100K,
        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
        .clear_bus_init     = false
     };
@@ -115,14 +118,33 @@ void twi_init (void)
 /**
  * @brief Function for reading data from temperature sensor.
  */
-// static void read_sensor_data()
-// {
-//     m_xfer_done = false;
+static void read_sensor_data()
+{
+    //ret_code_t err_code;
+    //bool check;
+    m_xfer_done = false;
 
-//     // Read 2 byte from the specified address
-//     ret_code_t err_code = nrf_drv_twi_rx(&vcnl_twi, LM75B_ADDR, &m_sample, sizeof(m_sample));
-//     APP_ERROR_CHECK(err_code);
-// }
+    uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
+    uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
+    nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, reg4};
+    nrf_drv_twi_xfer(&vcnl_twi, &vcnl_desc, false);
+    while(nrf_drv_twi_is_busy(&vcnl_twi) == true);
+
+    // uint8_t reg3[2] = {VCNL4040_PS_CONF1, VCNL4040_ADDR};
+    // nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg3, sizeof(reg3), false);
+    // //APP_ERROR_CHECK(err_code);
+    // while (m_xfer_done == false);
+    // //while(nrf_drv_twi_is_busy(&vcnl_twi) == true);
+
+    // // Read 2 byte from the specified address
+    // nrf_drv_twi_rx(&vcnl_twi, VCNL4040_ADDR, &m_sample_lsb, sizeof(m_sample_lsb));
+    // //APP_ERROR_CHECK(err_code);
+
+    // nrf_drv_twi_rx(&vcnl_twi, VCNL4040_ADDR, &m_sample_msb, sizeof(m_sample_msb));
+    // //APP_ERROR_CHECK(err_code);
+
+    m_sample = ((m_sample_msb << 8) | (m_sample_lsb));
+}
 
 /**
  * @brief Function for main application entry.
@@ -135,11 +157,10 @@ int main(void)
     NRF_LOG_INFO("\r\nTWI sensor example started.");
     NRF_LOG_FLUSH();
     twi_init();
-	
-	while(1){
-		vcnl_config();
-		nrf_delay_ms(1000);
-	}
+    nrf_delay_ms(1000);
+	vcnl_config();
+    //while(1);
+    nrf_delay_ms(1000);
 
     while (true)
     {
@@ -150,7 +171,7 @@ int main(void)
             __WFE();
         }while (m_xfer_done == false);
 
-        //read_sensor_data();
+        read_sensor_data();
         NRF_LOG_FLUSH();
     }
 }

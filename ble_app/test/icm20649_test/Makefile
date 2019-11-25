@@ -1,4 +1,4 @@
-PROJECT_NAME     := vcnl_4040_test_nrf52832_mdk_s132
+PROJECT_NAME     := icm20649_test_nrf52832_mdk_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
@@ -11,10 +11,10 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 
 # Source files common to all targets
 SRC_FILES += \
-  vcnl_4040.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twi.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c \
+  icm20649_test.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
+  $(APP_DIR)/drivers/spi/spi_driver.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
@@ -60,7 +60,8 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
-  $(APP_DIR)/test/vcnl4040_test \
+  $(APP_DIR)/test/icm20649_test \
+  $(APP_DIR)/drivers/spi \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/modules/nrfx/hal \
@@ -130,6 +131,7 @@ LIB_FILES += \
 OPT = -O3 -g3
 # Uncomment the line below to enable link time optimization
 #OPT += -flto
+#OPT = -Og
 
 # C flags common to all targets
 CFLAGS += $(OPT)
@@ -242,7 +244,7 @@ release:
 	@echo Generating hex file...
 	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(APP_DIR)/hex/$(PROJECT_NAME).hex
 
-SDK_CONFIG_FILE := sdk_config.h
+SDK_CONFIG_FILE := $(APP_DIR)/config/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
