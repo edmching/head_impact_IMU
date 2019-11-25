@@ -36,13 +36,12 @@ void spi_init (void)
         .sck_pin      = SPI_SCK_PIN,
         .irq_priority = SPI_IRQ_PRIORITY,
         .orc          = 0xFF,
-        .frequency    = NRF_DRV_SPI_FREQ_8M,
+        .frequency    = NRF_DRV_SPI_FREQ_1M, //due to poor wiring must use slower SCK
         .mode         = NRF_DRV_SPI_MODE_0,
         .bit_order    = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST,
     };
     ret_code_t err_code = nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL);
     APP_ERROR_CHECK(err_code);
-    NRF_LOG_INFO("SPI INITIALIZED.");
 }
 
 int8_t spi_write_and_read ( uint8_t* tx_msg, uint8_t tx_length, uint8_t* rx_msg, uint8_t rx_length)

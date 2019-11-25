@@ -12,6 +12,7 @@ void adxl372_init (void)
 
     //initialize device settings
     /* set up measurement mode */
+    adxl372_reset();
     adxl372_set_op_mode(STAND_BY);
     adxl372_set_hpf_disable(true);
     adxl372_set_lpf_disable(true);
@@ -34,7 +35,7 @@ int8_t adxl372_read_reg( uint8_t reg_addr, uint8_t *reg_data)
     uint8_t buf[2]; //first byte is 0x00 and second byte is reg value
     int8_t ret;
 
-    read_addr = ((reg_addr & 0xFF) << 1 | 0x01); //set R bit to 1
+    read_addr = ((reg_addr & 0xFF) << 1) | 0x01; //set R bit to 1
 
     ret = spi_write_and_read(&read_addr, 1, buf, 2);
     if (ret < 0)
@@ -71,16 +72,16 @@ int8_t adxl372_write_reg(uint8_t reg_addr, uint8_t reg_data)
 int8_t adxl372_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes) 
 {
     uint8_t read_addr;
-    uint8_t rx_buf[256]; 
+    uint8_t rx_buf[257]; 
     int8_t ret;
     
     if(num_bytes > 256)
         return -1;
 
-    read_addr = ((reg_addr & 0xFF) << 1 | 0x01); //set R bit to 1
-    memset(rx_buf, 0x00, num_bytes);
+    read_addr = ((reg_addr & 0xFF) << 1) | 0x01; //set R bit to 1
+    memset(&rx_buf[1], 0x00, num_bytes);
 
-    ret = spi_write_and_read(&read_addr, 1, rx_buf, num_bytes);
+    ret = spi_write_and_read(&read_addr, 1, rx_buf, num_bytes + 1 );
     if (ret < 0)
         return ret;
     
@@ -248,13 +249,13 @@ void adxl372_get_highest_peak_accel_data(adxl372_accel_data_t* max_peak)
     adxl372_multibyte_read_reg(ADI_ADXL372_X_MAXPEAK_H, buf, 6);
 
     // shift the MSB by 8 bits to make space for LSB (12bit left justified)
-    max_peak->x = (buf[0] << 8) | (buf[1]); 
-    max_peak->y = (buf[2] << 8) | (buf[3]);
-    max_peak->z = (buf[4] << 8) | (buf[5]);
+    max_peak->x = (buf[0] << 8) | buf[1]; 
+    max_peak->y = (buf[2] << 8) | buf[3];
+    max_peak->z = (buf[4] << 8) | buf[5];
 
-    max_peak->x = (max_peak->x >> 4) *100;
-    max_peak->y = (max_peak->y >> 4) *100;
-    max_peak->z = (max_peak->z >> 4) *100;
+    max_peak->x = (max_peak->x /16) *100;
+    max_peak->y = (max_peak->y /16) *100;
+    max_peak->z = (max_peak->z /16) *100;
 
 }
 
@@ -271,14 +272,14 @@ void adxl372_get_accel_data(adxl372_accel_data_t *accel_data)
     adxl372_multibyte_read_reg(ADI_ADXL372_X_DATA_H, buf, 6);
 
     // shift the MSB by 8 bits to make space for LSB (12bit left justified)
-    accel_data->x = (buf[0] << 8) | buf[1]; 
-    accel_data->y = (buf[2] << 8) | buf[3];
-    accel_data->z = (buf[4] << 8) | buf[5];
+    accel_data->x = (buf[0] << 8) | (buf[1] & 0xF0); 
+    accel_data->y = (buf[2] << 8) | (buf[3] & 0xF0);
+    accel_data->z = (buf[4] << 8) | (buf[5] & 0xF0);
 
-    //convert from 12 bit to 16bit and
-    accel_data->x = (accel_data->x >> 4) *100;
-    accel_data->y = (accel_data->y >> 4) *100;
-    accel_data->z = (accel_data->z >> 4) *100;
+    //convert from 12 bit to 16bit and to mG
+    accel_data->x = (accel_data->x /16) * 100;
+    accel_data->y = (accel_data->y /16) * 100;
+    accel_data->z = (accel_data->z /16) * 100;
 }
 
 void adxl372_reset(void)
