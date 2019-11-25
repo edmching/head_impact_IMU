@@ -34,7 +34,6 @@ static uint8_t ps_conf1_data =	(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (1 <<
 static uint8_t ps_conf2_data =	(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (1 << 3) | (0 << 2) | (0 << 1) | (0 << 0);
 static uint8_t ps_conf3_data =	(0 << 7) | (0 << 6) | (0 << 5) | (1 << 4) | (0 << 3) | (0 << 2) | (0 << 1) | (0 << 0);
 static uint8_t ps_ms_data =		(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (1 << 2) | (1 << 1) | (1 << 0);
-//static uint8_t blank =		    (0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (0 << 2) | (0 << 1) | (0 << 0);
  
 /* Indicates if operation on I2C has ended. */
 static volatile bool m_xfer_done = false;
@@ -51,17 +50,13 @@ static uint16_t m_sample;
  * @brief Function for setting active mode on VCNL4040 proximity sensor
  */
 void vcnl_config(void)
-{
-    //ret_code_t err_code;
-	
+{	
 	uint8_t reg1[3] = {VCNL4040_PS_CONF3, ps_conf3_data, ps_ms_data};
     nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
-    //APP_ERROR_CHECK(err_code);
     while (m_xfer_done == false);
 	
     uint8_t reg2[3] = {VCNL4040_PS_CONF1, ps_conf1_data, ps_conf2_data};
     nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
-    //APP_ERROR_CHECK(err_code);
     while (m_xfer_done == false);
 }
 
@@ -120,30 +115,21 @@ void twi_init (void)
  */
 static void read_sensor_data()
 {
-    //ret_code_t err_code;
-    //bool check;
     m_xfer_done = false;
 
     uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
     uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
-    nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, reg4};
+    uint8_t *p_ret = reg4;
+    nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, p_ret};
     nrf_drv_twi_xfer(&vcnl_twi, &vcnl_desc, false);
     while(nrf_drv_twi_is_busy(&vcnl_twi) == true);
 
-    // uint8_t reg3[2] = {VCNL4040_PS_CONF1, VCNL4040_ADDR};
-    // nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg3, sizeof(reg3), false);
-    // //APP_ERROR_CHECK(err_code);
-    // while (m_xfer_done == false);
-    // //while(nrf_drv_twi_is_busy(&vcnl_twi) == true);
+    m_sample_lsb = *p_ret;
+    p_ret++;
+    m_sample_msb = *p_ret;
 
-    // // Read 2 byte from the specified address
-    // nrf_drv_twi_rx(&vcnl_twi, VCNL4040_ADDR, &m_sample_lsb, sizeof(m_sample_lsb));
-    // //APP_ERROR_CHECK(err_code);
-
-    // nrf_drv_twi_rx(&vcnl_twi, VCNL4040_ADDR, &m_sample_msb, sizeof(m_sample_msb));
-    // //APP_ERROR_CHECK(err_code);
-
-    m_sample = ((m_sample_msb << 8) | (m_sample_lsb));
+    m_sample = (((m_sample_msb) << 8) | (m_sample_lsb));
+    NRF_LOG_INFO("Proximity: %d", m_sample);
 }
 
 /**
@@ -159,12 +145,11 @@ int main(void)
     twi_init();
     nrf_delay_ms(1000);
 	vcnl_config();
-    //while(1);
     nrf_delay_ms(1000);
 
     while (true)
     {
-        nrf_delay_ms(500);
+        nrf_delay_ms(10);
 
         do
         {
