@@ -19,10 +19,6 @@
 //for error logging
 #include "app_error.h"
 
-#define ADXL_Z_AXIS_0G_OFFSET 4000
-#define ADXL_Y_AXIS_0G_OFFSET 1000
-#define ADXL_X_AXIS_0G_OFFSET 0
-
 static void log_init(void);
 
 int main (void)
