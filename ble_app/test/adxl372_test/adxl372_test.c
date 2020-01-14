@@ -19,6 +19,10 @@
 //for error logging
 #include "app_error.h"
 
+#define ADXL_Z_AXIS_0G_OFFSET 4000
+#define ADXL_Y_AXIS_0G_OFFSET 1000
+#define ADXL_X_AXIS_0G_OFFSET 0
+
 static void log_init(void);
 
 int main (void)
@@ -96,8 +100,8 @@ int main (void)
     {
         adxl372_get_accel_data(&accel_data);
         accel_data.x = accel_data.x;
-        accel_data.y = accel_data.y + 2000;
-        accel_data.z = accel_data.z + 3000;
+        accel_data.y = accel_data.y;
+        accel_data.z = accel_data.z;
 
         NRF_LOG_INFO("X accel = %d mG, Y accel = %d mG, Z accel = %d mG", accel_data.x, accel_data.y, accel_data.z);
     

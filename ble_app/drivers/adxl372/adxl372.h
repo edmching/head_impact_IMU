@@ -245,7 +245,6 @@ typedef enum {
     FILTER_SETTLE_16
 } adxl372_filter_settle_t;
 
-
 typedef struct {
     int16_t x; 
     int16_t y;
@@ -312,6 +311,10 @@ uint8_t adxl372_get_activity_status_reg(void);
 void adxl372_get_highest_peak_accel_data(adxl372_accel_data_t* max_peak);
 
 void adxl372_get_accel_data(adxl372_accel_data_t* accel_data);
+
+void adxl372_set_x_offset(uint8_t offset);
+void adxl372_set_y_offset(uint8_t offset);
+void adxl372_set_z_offset(uint8_t offset);
 
 
 #endif /* ADXL372_H_ */

@@ -14,12 +14,18 @@ void adxl372_init (void)
     /* set up measurement mode */
     adxl372_reset();
     adxl372_set_op_mode(STAND_BY);
+    //Please refer to figure 36 User offset trim profile for more info
+    //For ADXL372 Vs=3.3V, x_offset = 0, y_offset=2, z_offset=5 
+    adxl372_set_x_offset(0);
+    adxl372_set_y_offset(2); //+10 LSB
+    adxl372_set_z_offset(5); //+35 LSB
     adxl372_set_hpf_disable(true);
     adxl372_set_lpf_disable(true);
     adxl372_set_bandwidth(BW_3200HZ);
     adxl372_set_odr(ODR_6400HZ);
     adxl372_set_filter_settle(FILTER_SETTLE_16);
     adxl372_set_op_mode(FULL_BW_MEASUREMENT);
+
 }
 
 
@@ -276,10 +282,28 @@ void adxl372_get_accel_data(adxl372_accel_data_t *accel_data)
     accel_data->y = (buf[2] << 8) | (buf[3] & 0xF0);
     accel_data->z = (buf[4] << 8) | (buf[5] & 0xF0);
 
-    //convert from 12 bit to 16bit and to mG
+    //convert from 12 bit to 16bit and then to mg
     accel_data->x = (accel_data->x /16) *100;
     accel_data->y = (accel_data->y /16) *100;
     accel_data->z = (accel_data->z /16) *100;
+}
+
+//Please refer to figure 36 User offset trim profile for more info
+void adxl372_set_x_offset(uint8_t offset)
+{
+    adxl372_write_reg(ADI_ADXL372_OFFSET_X, offset);
+}
+
+//Please refer to figure 36 User offset trim profile for more info
+void adxl372_set_y_offset(uint8_t offset)
+{
+    adxl372_write_reg(ADI_ADXL372_OFFSET_Y, offset);
+}
+
+//Please refer to figure 36 User offset trim profile for more info
+void adxl372_set_z_offset(uint8_t offset)
+{
+    adxl372_write_reg(ADI_ADXL372_OFFSET_Z, offset);
 }
 
 void adxl372_reset(void)

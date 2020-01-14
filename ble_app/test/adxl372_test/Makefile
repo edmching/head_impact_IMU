@@ -61,6 +61,8 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
+  $(PROJ_DIR)/config \
+  $(APP_DIR)/test/adxl372_test \
   $(APP_DIR)/drivers/adxl372 \
   $(APP_DIR)/drivers/spi \
   $(SDK_ROOT)/integration/nrfx/legacy \
@@ -94,8 +96,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/cli \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/libraries/util \
-  $(PROJ_DIR)/config \
-  $(APP_DIR)/test/adxl372_test \
   $(SDK_ROOT)/components/libraries/csense \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ecc \
