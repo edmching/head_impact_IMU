@@ -89,7 +89,7 @@ int main (void)
     // ============================
 
     // Measurement TEST
-    adxl372_init();
+    //adxl372_init();
     adxl372_accel_data_t accel_data;
 
     while(1)
