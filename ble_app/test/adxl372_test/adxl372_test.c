@@ -19,6 +19,14 @@
 //for error logging
 #include "app_error.h"
 
+#define NUM_SAMPLES 127
+
+#define READ_DONE 0
+#define NOT_READ  -1
+
+#define TEST_FIFO
+//#define TEST_REGULAR
+
 static void log_init(void);
 
 int main (void)
@@ -32,9 +40,13 @@ int main (void)
     uint8_t mst_devid;
     uint8_t devid;
 
+    NRF_LOG_INFO("-----------------------------");
     NRF_LOG_INFO("adxl372 test measurement mode");
+    nrf_delay_ms(100);
 
-    // READ TEST
+    adxl372_reset();
+
+    //--------------------READ TEST---------------------//
     device_id = adxl372_get_dev_ID();
     ret |= adxl372_read_reg( ADI_ADXL372_MST_DEVID, &mst_devid);
     ret |= adxl372_read_reg(ADI_ADXL372_DEVID, &devid);
@@ -43,12 +55,21 @@ int main (void)
         NRF_LOG_ERROR("SPI WRITE READ FAIL");
         while(1);
     }
-    NRF_LOG_INFO("adi device id = 0x%x \r", device_id);
-    NRF_LOG_INFO("mst device id2 = 0x%x \r", devid)
-    NRF_LOG_INFO("mems id = 0x%x \r", mst_devid);
-    if(device_id != ADI_ADXL372_ADI_DEVID_VAL ||
-        mst_devid != ADI_ADXL372_MST_DEVID_VAL ||
-        devid != ADI_ADXL372_DEVID_VAL)
+
+    NRF_LOG_INFO("adi device id = 0x%x (0xAD)", device_id);
+    if(device_id != ADI_ADXL372_ADI_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1);
+    }
+    NRF_LOG_INFO("mst device id2 = 0x%x (0x1D)", mst_devid);
+    if(mst_devid != ADI_ADXL372_MST_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1);
+    }
+    NRF_LOG_INFO("mems id = 0x%x (0xFA)(372 octal)", devid);
+    if(devid != ADI_ADXL372_DEVID_VAL)
     {
         NRF_LOG_ERROR("ADXL READ TEST FAIL");
         while(1);
@@ -75,9 +96,9 @@ int main (void)
     lpf_val = (p_reg >> PWRCTRL_LPF_DISABLE_POS) & 0x1;
     hpf_val = (p_reg >> PWRCTRL_HPF_DISABLE_POS) & 0x1;
     op_val = (p_reg >> PWRCTRL_OPMODE_POS) & 0x3;
-    NRF_LOG_INFO("lpf val = %d", lpf_val);
-    NRF_LOG_INFO("hpf val = %d", hpf_val);
-    NRF_LOG_INFO("op val = %d", op_val);
+    NRF_LOG_INFO("lpf val = %d (expected: 1)", lpf_val);
+    NRF_LOG_INFO("hpf val = %d (expected: 1)", hpf_val);
+    NRF_LOG_INFO("op val = %d (expected: 0)", op_val);
     if(lpf_val != 1 || hpf_val != 1 || op_val !=0)
     {
         NRF_LOG_ERROR("ADXL WRITE TEST FAIL");
@@ -89,21 +110,40 @@ int main (void)
     // ============================
 
     // Measurement TEST
-    //adxl372_init();
-    adxl372_accel_data_t accel_data;
+#ifdef TEST_REGULAR
+    adxl372_init();
+#endif
+#ifdef TEST_FIFO
+    struct adxl372_device dev;
+    adxl372_init_instant_on_mode(&dev, NUM_SAMPLES);
+    adxl372_accel_data_t sample_set[NUM_SAMPLES/3];
+    int8_t read_fifo_done = NOT_READ;
 
     while(1)
     {
-        adxl372_get_accel_data(&accel_data);
-        accel_data.x = accel_data.x;
-        accel_data.y = accel_data.y;
-        accel_data.z = accel_data.z;
+        read_fifo_done = adxl372_get_fifo_data(&dev, sample_set);
 
-        NRF_LOG_INFO("X accel = %d mG, Y accel = %d mG, Z accel = %d mG", accel_data.x, accel_data.y, accel_data.z);
+        if(read_fifo_done == READ_DONE)
+        {
+            for(int i = 0; i < NUM_SAMPLES/3; ++i)
+                NRF_LOG_INFO("sample: %d, X accel = %d mG, Y accel = %d mG, Z accel = %d mG", i,
+                            sample_set[i].x, sample_set[i].y, sample_set[i].z);
+            adxl372_reset();
+            while(1);
+        }
     
+    }
+#endif
+#ifdef TEST_REGULAR
+    adxl372_accel_data_t accel_data;
+    while (1)
+    {
+        adxl372_get_accel_data(&accel_data);
+        NRF_LOG_INFO("X accel = %d mG, Y accel = %d mG, Z accel = %d mG",
+                        accel_data.x, accel_data.y, accel_data.z);
         nrf_delay_ms(1000);
     }
-
+#endif
     return 0;
 }
 
