@@ -67,9 +67,10 @@ make: *** No targets specified and no makefile found.  Stop.
 * Requires Python 2.7.9 or later, or Python 3.6.0 or later.
 
 * **Workaround for libusb error on Python 3.7 on Windows: Use Python 3.8**
+
 Download and install Python 3.8 from https://www.python.org/. For Windows user, please check the "Add to PATH" box when installing.
 
-We will use pip to install pyOCD. 
+Use pip to install pyOCD. 
 
 ``` sh
  $ pip install --pre -U pyocd
