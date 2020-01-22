@@ -118,6 +118,8 @@
 #define MEASURE_BANDWIDTH_POS       0
 #define MEASURE_ACTPROC_MASK		0xCF
 #define MEASURE_ACTPROC_POS		    4
+#define MEASURE_LOW_NOISE_MASK      0xF7
+#define MEASURE_LOW_NOISE_POS       3
 
 /* ADXL372_TIMING */
 #define TIMING_ODR_MASK			    0x1F
@@ -139,9 +141,9 @@
 #define INSTAON_THRESH_POS		    5
 
 /* ADXL372_FIFO_CTL */
-#define FIFO_CRL_SAMP8_POS		    0
-#define FIFO_CRL_MODE_POS		    1
-#define FIFO_CRL_FORMAT_POS		    3
+#define FIFO_CTL_SAMP8_POS		    0
+#define FIFO_CTL_MODE_POS		    1
+#define FIFO_CTL_FORMAT_POS		    3
 
 
 #define DATA_RDY	  1
@@ -164,10 +166,8 @@
 
 #define INACT_TIMER        1     /* Inactivity timer value in multiples of 26ms */
 
-#define ADXL_INT1_PIN     7 //not used currently
-#define ADXL_INT2_PIN     5 //not used currently
-
-typedef nrf_drv_spi_t  adxl372_spi_handle_t; //not used
+#define ADXL_INT1_PIN     7     //not used currently
+#define ADXL_INT2_PIN     5     //not used currently
 
 typedef enum {
     STAND_BY = 0,
@@ -245,6 +245,11 @@ typedef enum {
     FILTER_SETTLE_16
 } adxl372_filter_settle_t;
 
+typedef enum {
+    NORMAL_NOISE = 0,
+    LOW_NOISE
+}adxl372_low_noise_t;
+
 typedef struct {
     int16_t x; 
     int16_t y;
@@ -253,7 +258,6 @@ typedef struct {
 
 
 struct adxl372_device {
-    adxl372_spi_handle_t *spi; // not used
     fifo_config_t fifo_config;
 };
 
@@ -269,6 +273,8 @@ int8_t adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t
 //==================================================================================
 
 void adxl372_init (void);
+
+void adxl372_init_instant_on_mode(struct adxl372_device *dev, uint16_t num_samples);
 
 void adxl372_reset(void);
 
@@ -313,9 +319,14 @@ void adxl372_get_highest_peak_accel_data(adxl372_accel_data_t* max_peak);
 void adxl372_get_accel_data(adxl372_accel_data_t* accel_data);
 
 void adxl372_set_x_offset(uint8_t offset);
+
 void adxl372_set_y_offset(uint8_t offset);
+
 void adxl372_set_z_offset(uint8_t offset);
 
+int32_t adxl372_configure_fifo (struct adxl372_device *dev, uint16_t fifo_samples, adxl372_fifo_mode_t fifo_mode, adxl372_fifo_format_t fifo_format);
+
+int8_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *fifo_data);
 
 #endif /* ADXL372_H_ */
 

@@ -36,7 +36,7 @@ void spi_init (void)
         .sck_pin      = SPI_SCK_PIN,
         .irq_priority = SPI_IRQ_PRIORITY,
         .orc          = 0xFF,
-        .frequency    = NRF_DRV_SPI_FREQ_1M, //due to poor wiring must use slower SCK
+        .frequency    = NRF_DRV_SPI_FREQ_1M,
         .mode         = NRF_DRV_SPI_MODE_0,
         .bit_order    = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST,
     };
@@ -50,7 +50,7 @@ void spi_init (void)
     nrf_gpio_cfg_output(SPI_ICM20649_CS_PIN);
 }
 
-int8_t spi_write_and_read ( uint8_t cs_pin, uint8_t* tx_msg, uint8_t tx_length, uint8_t* rx_msg, uint8_t rx_length)
+int8_t spi_write_and_read (uint8_t cs_pin, uint8_t* tx_msg, uint8_t tx_length, uint8_t* rx_msg, uint8_t rx_length)
 {
     m_transfer_completed = false;
 
