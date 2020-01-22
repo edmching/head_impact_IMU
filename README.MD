@@ -8,7 +8,7 @@ Requirements:
 
 ## Getting Started
 
-### For Windows Users Only
+### Downloading Git (For Windows Users Only)
 Download Git for Windows https://git-scm.com/downloads to clone this repository. We will use Git Bash terminal for building this project. 
 
 Clone this repo by using:
@@ -66,7 +66,7 @@ make: *** No targets specified and no makefile found.  Stop.
 
 * Requires Python 2.7.9 or later, or Python 3.6.0 or later.
 
-* Use Python 3.8 since Python 3.7 gives libusb error
+** Workaround for libusb error on Python 3.7 on Windows: Use Python 3.8  **
 Download and install Python 3.8 from https://www.python.org/. For Windows user, please check the "Add to PATH" box when installing.
 
 We will use pip to install pyOCD. 
