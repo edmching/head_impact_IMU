@@ -36,6 +36,8 @@ extern "C" {
 #define RX_PIN_NUMBER  24
 #define TX_PIN_NUMBER  23
 
+#define USE_IMU_PCB_REV1
+
 #ifdef __cplusplus
 }
 #endif

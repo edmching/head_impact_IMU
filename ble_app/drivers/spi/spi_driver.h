@@ -7,7 +7,6 @@
 #include "app_error.h"
 #include "sdk_errors.h"
 
-#define USE_IMU_PCB_REV1
 
 #ifndef USE_IMU_PCB_REV1
 #define SPI_ICM20649_CS_PIN     29
