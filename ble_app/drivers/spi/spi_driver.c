@@ -44,10 +44,13 @@ void spi_init (void)
     APP_ERROR_CHECK(err_code);
     nrf_gpio_pin_clear(SPI_ADXL372_CS_PIN);
     nrf_gpio_pin_clear(SPI_ICM20649_CS_PIN);
+    nrf_gpio_pin_clear(SPI_MT25QL256ABA_CS_PIN);
     nrf_gpio_pin_set(SPI_ADXL372_CS_PIN);
     nrf_gpio_pin_set(SPI_ICM20649_CS_PIN);
+    nrf_gpio_pin_set(SPI_MT25QL256ABA_CS_PIN);
     nrf_gpio_cfg_output(SPI_ADXL372_CS_PIN);
     nrf_gpio_cfg_output(SPI_ICM20649_CS_PIN);
+    nrf_gpio_cfg_output(SPI_MT25QL256ABA_CS_PIN);
 }
 
 int8_t spi_write_and_read (uint8_t cs_pin, uint8_t* tx_msg, uint8_t tx_length, uint8_t* rx_msg, uint8_t rx_length)

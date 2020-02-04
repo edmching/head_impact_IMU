@@ -1,0 +1,178 @@
+2020-Feb-03 16:02:28  --------------------------------------------------------------------------------
+2020-Feb-03 16:02:28  nrfjprog -f nrf52 --eraseall --log 
+2020-Feb-03 16:02:28  nrfjprog version 10.6.0 
+2020-Feb-03 16:02:28  --------------------------------------------------------------------------------
+2020-Feb-03 16:02:28  nRF_logger_open
+2020-Feb-03 16:02:28  nRF_logger_open:	nRFJProg logger opened to callback at address 0X55EECD150580
+2020-Feb-03 16:02:28  nRF_open_dll
+2020-Feb-03 16:02:28  nRF_open_dll:	Load library at "/opt/nrfjprog/libjlinkarm_nrf52_nrfjprogdll.so".
+
+2020-Feb-03 16:02:28  . nRF52_logger_open
+2020-Feb-03 16:02:28  . nRF52_logger_open:	nRFJProg logger opened to callback at address 0X7FFBA421FEE0
+2020-Feb-03 16:02:28  . nRF52_open_dll
+2020-Feb-03 16:02:28  . . Segger_logger_open
+2020-Feb-03 16:02:28  . . Segger_logger_open:	nRFJProg logger opened to callback at address 0X7FFBA3E7D820
+2020-Feb-03 16:02:28  . . Segger_open_dll
+2020-Feb-03 16:02:28  . . Segger_open_dll:	Load library at "/opt/SEGGER/JLink/libjlinkarm.so.6".
+
+2020-Feb-03 16:02:28  . . . Segger_dll_version
+2020-Feb-03 16:02:28  . . Segger_set_core_data
+2020-Feb-03 16:02:28  nRF_enum_emu_snr
+2020-Feb-03 16:02:28  . nRF52_enum_emu_snr
+2020-Feb-03 16:02:28  . . Segger_enum_emu_snr
+2020-Feb-03 16:02:28  . . . Segger_enum_emu_snr
+2020-Feb-03 16:02:28  . . . . Segger_get_num_emus
+2020-Feb-03 16:02:28  nRF_connect_to_emu_with_snr
+2020-Feb-03 16:02:28  . nRF52_connect_to_emu_with_snr
+2020-Feb-03 16:02:28  . . Segger_connect_to_emu_with_snr
+2020-Feb-03 16:02:28  . . . Segger_is_connected_to_emu
+2020-Feb-03 16:02:28  . . . Segger_enum_emu_snr
+2020-Feb-03 16:02:28  . . . . Segger_get_num_emus
+2020-Feb-03 16:02:29  . . . Segger_connect_to_emu_with_snr
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	Segger logging enabled with callback at 0x140718763398496.
+
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:339.492   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	Firmware: J-Link EDU Mini V1 compiled Jan  7 2020 16:53:19
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:340.582   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	Decompressing FW timestamp took 769 us
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:354.100   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	Hardware: V1.00
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:354.353   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	S/N: 801011674
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:354.486   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	OEM: SEGGER
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:354.622   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	Feature(s): FlashBP, GDB
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:358.242   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TELNET listener socket opened on port 19021
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:358.777   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	WEBSRV Starting webserver
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:359.119   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	WEBSRV Webserver running on local port 19080
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:359.284 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 181.646ms returns O.K.  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:359.474 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	JLINK_GetHWStatus(...)  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:359.807 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 0.430ms returns 0x00  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:359.996 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	JLINK_ExecCommand("SetRestartOnClose = 0", ...).   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:360.166 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 0.091ms returns 0x01  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:360.333 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	JLINK_ExecCommand("DisableFlashDL", ...).   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:360.504 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 0.096ms returns 0x00  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:360.656 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	JLINK_ExecCommand("ExcludeFlashCacheRange 0x0-0xFFFFFFFF", ...).   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:360.805 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 0.076ms returns 0x00  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:361.015   
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	JLINK_SetHookUnsecureDialog(...)
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:361.168 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 0.221ms returns 0  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:361.313 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	JLINK_TIF_Select(JLINKARM_TIF_SWD)  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:362.052 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 1.055ms returns 0x00  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:362.517 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	JLINK_SetSpeed(2000)  
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	TA4528740 002:362.838 
+2020-Feb-03 16:02:30  . . . . Segger_connect_to_emu_without_snr:	JLink INFO	- 0.470ms  
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	TA4528740 002:363.201 
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	JLINK_ExecCommand("CORESIGHT_SetIndexAHBAPToUse = 0", ...).   
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	TA4528740 002:363.384 
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	- 0.079ms returns 0x00  
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	TA4528740 002:363.537 
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	JLINK_ExecCommand("device = nRF52832_xxAA", ...).   
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	TA4528740 002:385.519   
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	XML file found at: /opt/SEGGER/JLink/JLinkDevices.xml 
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	TA4528740 002:388.855   
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	/opt/SEGGER/JLink/JLinkDevices.xml evaluated successfully. 
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	TA4528740 002:412.721   
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	Device "NRF52832_XXAA" selected.
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	TA4528740 002:413.244 
+2020-Feb-03 16:02:30  . . . . . Segger_load_core_data:	JLink INFO	- 49.670ms returns 0x00  
+2020-Feb-03 16:02:30  nRF_read_device_version
+2020-Feb-03 16:02:30  . nRF52_read_device_version
+2020-Feb-03 16:02:30  . . nRF52_readback_status
+2020-Feb-03 16:02:30  . . . nRF52_is_ctrl_ap_available
+2020-Feb-03 16:02:30  . . . . Segger_read_access_port_register
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_emu
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_emu:	JLink INFO	TA4528740 002:413.821 
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_emu:	JLink INFO	JLINK_IsOpen()  
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_emu:	JLink INFO	TA4528740 002:413.936 
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_emu:	JLink INFO	- 0.173ms returns 0x01  
+2020-Feb-03 16:02:30  . . . . . Segger_read_access_port_register
+2020-Feb-03 16:02:30  . . . . . Segger_read_access_port_register:	JLink INFO	TA4528740 002:414.124 
+2020-Feb-03 16:02:30  . . . . . Segger_read_access_port_register:	JLink INFO	JLINK_Lock()  
+2020-Feb-03 16:02:30  . . . . . . Segger_coresight_configure
+2020-Feb-03 16:02:30  . . . . . . Segger_coresight_configure:	JLink INFO	TA4528740 002:414.292   
+2020-Feb-03 16:02:30  . . . . . . Segger_coresight_configure:	JLink INFO	JLINK_CORESIGHT_Configure()  
+2020-Feb-03 16:02:30  . . . . . . Segger_coresight_configure:	JLink INFO	TA4528740 002:514.988   
+2020-Feb-03 16:02:30  . . . . . . Segger_coresight_configure:	JLink INFO	- 100.846ms returns 0  
+2020-Feb-03 16:02:30  . . . . . . Segger_is_debug_region_powered
+2020-Feb-03 16:02:30  . . . . . . . Segger_read_debug_port_register
+2020-Feb-03 16:02:30  . . . . . . . . Segger_write_debug_port_register
+2020-Feb-03 16:02:30  . . . . . . . . Segger_write_debug_port_register:	JLink INFO	TA4528740 002:515.319   
+2020-Feb-03 16:02:30  . . . . . . . . Segger_write_debug_port_register:	JLink INFO	JLINK_CORESIGHT_WriteAPDPReg(DP reg 0x02, 0x00000000)  
+2020-Feb-03 16:02:30  . . . . . . . . Segger_write_debug_port_register:	JLink INFO	TA4528740 002:515.926   
+2020-Feb-03 16:02:30  . . . . . . . . Segger_write_debug_port_register:	JLink INFO	- 0.729ms returns -1  
+2020-Feb-03 16:02:30  . . . . . . . . Segger_write_debug_port_register:	JLinkARM.dll CORESIGHT_WriteAPDPReg returned error -1.
+
+2020-Feb-03 16:02:30  . . . . . . . . . Segger_abort_debug_action
+2020-Feb-03 16:02:30  . . . . . . . . . Segger_abort_debug_action:	Attempting to clear any configuration errors in debug port before closing connection. 
+
+2020-Feb-03 16:02:30  . . . . . . . . . Segger_abort_debug_action:	JLink INFO	TA4528740 002:516.289   
+2020-Feb-03 16:02:30  . . . . . . . . . Segger_abort_debug_action:	JLink INFO	JLINK_CORESIGHT_WriteAPDPReg(DP reg 0x00, 0x0000001F)  
+2020-Feb-03 16:02:30  . . . . . . . . . Segger_abort_debug_action:	JLink INFO	TA4528740 002:516.955   
+2020-Feb-03 16:02:30  . . . . . . . . . Segger_abort_debug_action:	JLink INFO	- 0.772ms returns -1  
+2020-Feb-03 16:02:30  . . . . . . . . . Segger_abort_debug_action:	JLinkARM.dll CORESIGHT_WriteAPDPReg returned error -1.
+
+2020-Feb-03 16:02:30  . . . . . Segger_read_access_port_register:	JLink INFO	TA4528740 002:517.184 
+2020-Feb-03 16:02:30  . . . . . Segger_read_access_port_register:	JLink INFO	JLINK_Unlock()  
+2020-Feb-03 16:02:30  nRF_close_dll
+2020-Feb-03 16:02:30  . nRF52_close_dll
+2020-Feb-03 16:02:30  . . Segger_close
+2020-Feb-03 16:02:30  . . . Segger_disconnect_from_emu
+2020-Feb-03 16:02:30  . . . . Segger_is_connected_to_emu
+2020-Feb-03 16:02:30  . . . . Segger_is_connected_to_emu:	JLink INFO	TA4528740 002:517.544 
+2020-Feb-03 16:02:30  . . . . Segger_is_connected_to_emu:	JLink INFO	JLINK_IsOpen()  
+2020-Feb-03 16:02:30  . . . . Segger_is_connected_to_emu:	JLink INFO	TA4528740 002:517.626 
+2020-Feb-03 16:02:30  . . . . Segger_is_connected_to_emu:	JLink INFO	- 0.131ms returns 0x01  
+2020-Feb-03 16:02:30  . . . . Segger_disconnect_from_emu
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_device
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_device:	JLink INFO	TA4528740 002:517.888 
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_device:	JLink INFO	JLINK_IsConnected()  
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_device:	JLink INFO	TA4528740 002:517.993 
+2020-Feb-03 16:02:30  . . . . . Segger_is_connected_to_device:	JLink INFO	- 0.145ms returns FALSE  
+2020-Feb-03 16:02:30  . . . . . Segger_is_debug_region_powered
+2020-Feb-03 16:02:30  . . . . . . Segger_read_debug_port_register
+2020-Feb-03 16:02:30  . . . . . . Segger_read_debug_port_register:	JLink INFO	TA4528740 002:518.153 
+2020-Feb-03 16:02:30  . . . . . . Segger_read_debug_port_register:	JLink INFO	JLINK_Lock()  
+2020-Feb-03 16:02:30  . . . . . . . Segger_write_debug_port_register
+2020-Feb-03 16:02:30  . . . . . . . Segger_write_debug_port_register:	JLink INFO	TA4528740 002:518.272   
+2020-Feb-03 16:02:30  . . . . . . . Segger_write_debug_port_register:	JLink INFO	JLINK_CORESIGHT_WriteAPDPReg(DP reg 0x02, 0x00000000)  
+2020-Feb-03 16:02:30  . . . . . . . Segger_write_debug_port_register:	JLink INFO	TA4528740 002:518.905   
+2020-Feb-03 16:02:30  . . . . . . . Segger_write_debug_port_register:	JLink INFO	- 0.739ms returns -1  
+2020-Feb-03 16:02:30  . . . . . . . Segger_write_debug_port_register:	JLinkARM.dll CORESIGHT_WriteAPDPReg returned error -1.
+
+2020-Feb-03 16:02:30  . . . . . . . . Segger_abort_debug_action
+2020-Feb-03 16:02:30  . . . . . . . . Segger_abort_debug_action:	Attempting to clear any configuration errors in debug port before closing connection. 
+
+2020-Feb-03 16:02:30  . . . . . . . . Segger_abort_debug_action:	JLink INFO	TA4528740 002:519.189   
+2020-Feb-03 16:02:30  . . . . . . . . Segger_abort_debug_action:	JLink INFO	JLINK_CORESIGHT_WriteAPDPReg(DP reg 0x00, 0x0000001F)  
+2020-Feb-03 16:02:30  . . . . . . . . Segger_abort_debug_action:	JLink INFO	TA4528740 002:519.832   
+2020-Feb-03 16:02:30  . . . . . . . . Segger_abort_debug_action:	JLink INFO	- 0.756ms returns -1  
+2020-Feb-03 16:02:30  . . . . . . . . Segger_abort_debug_action:	JLinkARM.dll CORESIGHT_WriteAPDPReg returned error -1.
+
+2020-Feb-03 16:02:30  . . . . . . Segger_read_debug_port_register:	JLink INFO	TA4528740 002:520.051 
+2020-Feb-03 16:02:30  . . . . . . Segger_read_debug_port_register:	JLink INFO	JLINK_Unlock()  
+2020-Feb-03 16:02:30  . . . . Segger_disconnect_from_emu:	JLink INFO	TA4528740 002:523.231 
+2020-Feb-03 16:02:30  . . . . Segger_disconnect_from_emu:	JLink INFO	JLINK_Close()  
+2020-Feb-03 16:02:30  . . Segger_close:	Freeing Library.
+
+2020-Feb-03 16:02:30  nRF_close_dll:	Freeing Library.
+

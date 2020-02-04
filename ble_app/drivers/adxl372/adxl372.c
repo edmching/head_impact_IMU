@@ -371,6 +371,7 @@ int8_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *s
     uint8_t fifo_status;
     uint8_t buf[1024];
     fifo_status = adxl372_get_status_reg();
+    int8_t ret;
    
     //checks fifo overun status
     if(fifo_status & FIFO_OVR)
@@ -384,7 +385,9 @@ int8_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *s
             // Each sample is 2 bytes
             // TODO: if fifo sample is 512 we must do multibyte 4 times since max num_byte is 255
             //for(int i = 0; i < dev->fifo_config.samples*2; i+=255)
-            adxl372_multibyte_read_reg(ADI_ADXL372_FIFO_DATA, buf, dev->fifo_config.samples*2);
+            ret = adxl372_multibyte_read_reg(ADI_ADXL372_FIFO_DATA, buf, dev->fifo_config.samples*2);
+            if (ret < 0)
+                return ret;
         
             for (int i = 0; i< dev->fifo_config.samples*2; i +=6)
             {

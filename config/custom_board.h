@@ -46,6 +46,8 @@ extern "C" {
 
 #if defined NRF52832_MDK
 #include "nrf52832_mdk.h"
+#elif defined NRF52832_IMU_PCB_REV1
+#include "imu_pcb_rev1.h"
 #else
 #error "Board is not defined"
 #endif
