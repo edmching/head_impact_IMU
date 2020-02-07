@@ -103,10 +103,10 @@ int8_t adxl372_write_reg(uint8_t reg_addr, uint8_t reg_data)
 int8_t adxl372_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes) 
 {
     uint8_t read_addr;
-    uint8_t rx_buf[257]; 
+    uint8_t rx_buf[256]; 
     int8_t ret;
     
-    if(num_bytes > 256)
+    if(num_bytes > 255)
         return -1;
 
     read_addr = (reg_addr << 1) | 0x01; //set R bit to 1
