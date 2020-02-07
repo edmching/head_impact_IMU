@@ -1,9 +1,14 @@
 #include "spi_driver.h"
 #include "nrf_drv_spi.h"
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
 #include "nrf_gpio.h"
+#include "sdk_errors.h"
+
+//currently unused 
+//#include "nrf_delay.h"
+//#include "app_error.h"
+//#include "nrf_log.h"
+//#include "nrf_log_ctrl.h"
+//#include "nrf_log_default_backends.h"
 
 #define SPI_INSTANCE  0 /**< SPI instance index. */
 static const nrf_drv_spi_t spi = NRF_DRV_SPI_INSTANCE(SPI_INSTANCE);  /* could set this up in main (?) */

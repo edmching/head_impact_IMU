@@ -36,7 +36,14 @@ extern "C" {
 #define RX_PIN_NUMBER  24
 #define TX_PIN_NUMBER  23
 
-#define USE_IMU_PCB_REV1
+//===================SPI PINOUT========================//
+#define SPI_SCK_PIN             12
+#define SPI_MISO_PIN            13
+#define SPI_MOSI_PIN            14
+#define SPI_ICM20649_CS_PIN     5
+#define SPI_MT25QL256ABA_CS_PIN 8
+#define SPI_ADXL372_CS_PIN      30
+
 
 #ifdef __cplusplus
 }
