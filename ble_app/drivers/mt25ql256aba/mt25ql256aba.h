@@ -43,7 +43,9 @@
 #define MT25QL256ABA_BULK_ERASE                          0xC7 // or 0x60
 
 
-int8_t mt25ql256aba_read(uint8_t command_code, uint8_t* address, uint8_t* reg_data, uint8_t num_bytes);
-int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t address);
+int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* reg_data, uint8_t rx_num_bytes);
+int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* data, uint8_t data_size);
+int8_t mt25ql256aba_write_disable(void);
+int8_t mt25ql256aba_write_enable(void);
 
 #endif //MT25QL256ABA_H

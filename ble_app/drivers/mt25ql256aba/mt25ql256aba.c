@@ -1,37 +1,96 @@
 #include "mt25ql256aba.h"
 #include "spi_driver.h"
 
-int8_t mt25ql256aba_read(uint8_t command_code, uint8_t* address, uint8_t* reg_data, uint8_t num_bytes) 
+/*
+ * Write to an mt25ql256aba register
+ * @param command_code  - command specifies the register
+ * @param address       - pointer to the flash address 
+ * @param address_size  - the size of the address in bytes (either 
+ *                          0 for no address or
+ *                          3 or 4 bytes address mode)
+ * @param reg_data      - a pointer to store the register data
+ * @return 0            - if success otherwise -1
+ */
+int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* reg_data, uint8_t rx_num_bytes) 
 {
-    uint8_t DQ0[4];
+    uint8_t DQ0[5];
     uint8_t DQ1[257]; //first byte is 0x00 and second byte is reg value
-    int8_t ret;
+    int8_t ret = 0;
 
-    if(num_bytes > 255)
+    if(rx_num_bytes > 255)
         return -1;
+    if(address_size == 0 || address_size == 3 || address_size == 4)
+    {
 
-    DQ0[0] = command_code & 0xFF;
-    DQ0[1] = address[0] & 0xFF;
-    DQ0[2] = address[1] & 0xFF;
-    DQ0[3] = address[2] & 0xFF;
+        DQ0[0] = command_code;
+        memcpy(DQ0 + 1, address, address_size);
 
-    memset(DQ1, 0x00, num_bytes + 1);
+        memset(DQ1, 0x00, rx_num_bytes + 1);
 
-    ret = spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0, 4, DQ1, num_bytes + 1);
-    if (ret < 0)
-        return ret;
+        //Include a starting byte while DQ0 to transfers to slave 
+        ret = spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0, 1 + address_size, DQ1, rx_num_bytes + 1 + address_size);
+        if (ret < 0)
+            return ret;
     
-    memcpy( reg_data, &DQ1[1], num_bytes);
+        memcpy(reg_data, DQ1 + 1 + address_size, rx_num_bytes);
+    }
+    else
+    {
+        return -2;
+    }
+
     return ret;
 }
 
-int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t address)
+/*
+ * Write to an mt25ql256aba register
+ * @param command_code  - command specifies the register
+ * @param address       - pointer to the flash address 
+ * @param address_size  - the size of the address in bytes (either 
+ *                          0 for no address or
+ *                          3 or 4 bytes address mode)
+ * @param data          - pointer to the data         
+ * @param data_size     - the size of data in bytes (MAX 251 bytes 
+ *                         for 3 byte address mode or MAX 250 
+ *                         bytes for 4)
+ * @return 0            - if success otherwise -1
+ */
+int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* data, uint8_t data_size)
 {
-    //uint8_t tx_msg[2];
-    //uint8_t rx_buf[2];
-    //tx_msg[0] = command_code;
-    //tx_msg[1] = address;
+    uint8_t DQ0[256];
+    int8_t ret = 0;
+    //uint8_t DQ1; //output contains no valuable data
 
-    //return spi_write_and_read(, tx_msg, 2, rx_buf, 2 ); // send 2 bytes
-    return -1; //TODO
+    if((1 + address_size + data_size) > 255)
+        return -1;
+    if(address_size == 0 || address_size == 3 || address_size == 4)
+    {
+        DQ0[0] = command_code;
+        memcpy(DQ0 + 1, address, address_size);
+        memcpy(DQ0 + 1 + address_size, data, data_size);
+
+        ret = spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0,
+                 1 + address_size + data_size, NULL, 0);
+    }   
+    else{
+        return -2;
+    }
+
+    return ret; 
+}
+
+int8_t mt25ql256aba_write_enable(void)
+{
+    int8_t ret;
+    ret =  mt25ql256aba_write_op(MT25QL256ABA_WRITE_ENABLE, NULL, 0, NULL, 0);
+
+    return ret;
+}
+
+int8_t mt25ql256aba_write_disable(void)
+{
+    int8_t ret;
+    ret =  mt25ql256aba_write_op(MT25QL256ABA_WRITE_DISABLE, NULL, 0, NULL, 0);
+
+    return ret;
 }
