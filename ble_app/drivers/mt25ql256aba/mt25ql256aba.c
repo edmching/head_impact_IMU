@@ -2,7 +2,7 @@
 #include "spi_driver.h"
 
 /*
- * Write to an mt25ql256aba register
+ * Read to an mt25ql256aba register
  * @param command_code  - command specifies the register
  * @param address       - pointer to the flash address 
  * @param address_size  - the size of the address in bytes (either 
@@ -49,7 +49,7 @@ int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t addr
  * @param address_size  - the size of the address in bytes (either 
  *                          0 for no address or
  *                          3 or 4 bytes address mode)
- * @param data          - pointer to the data         
+ * @param data          - pointer to data to write to
  * @param data_size     - the size of data in bytes (MAX 251 bytes 
  *                         for 3 byte address mode or MAX 250 
  *                         bytes for 4)
