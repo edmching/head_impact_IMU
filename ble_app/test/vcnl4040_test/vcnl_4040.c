@@ -4,14 +4,11 @@
 #include "app_error.h"
 #include "nrf_drv_twi.h"	//I2C driver library
 #include "nrf_delay.h"
+#include "nrf52832_mdk.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
-
-// I2C pin assignment
-#define I2C_SDA 17
-#define I2C_SCL 18
 
 // TWI instance ID
 #define TWI_INSTANCE_ID     0
@@ -97,8 +94,8 @@ void twi_init (void)
     ret_code_t err_code;
 
     const nrf_drv_twi_config_t twi_lm75b_config = {
-       .scl                = I2C_SCL,
-       .sda                = I2C_SDA,
+       .scl                = VCNL4040_SCL,
+       .sda                = VCNL4040_SDA,
        .frequency          = NRF_DRV_TWI_FREQ_100K,
        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
        .clear_bus_init     = false

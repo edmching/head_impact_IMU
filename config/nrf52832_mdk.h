@@ -85,6 +85,14 @@ extern "C" {
 #define SPI_MISO_PIN            28
 #define SPI_SCK_PIN             3
 
+//===================I2C PINOUT========================//
+// I2C pin assignment
+#define DS1388_SDA 				15
+#define DS1388_SCL 				16
+#define VCNL4040_SDA 			17
+#define VCNL4040_SCL 			18
+
+
 #ifdef __cplusplus
 }
 #endif
