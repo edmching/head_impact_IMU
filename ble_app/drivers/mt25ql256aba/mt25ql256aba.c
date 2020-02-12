@@ -94,3 +94,11 @@ int8_t mt25ql256aba_write_disable(void)
 
     return ret;
 }
+
+int8_t mt25ql256aba_read_page (void)
+    uint8_t full_page_data[255];
+    ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), full_page_data, sizeof(full_page_data));
+    spi_ret_check(ret);
+    for(int i = 0; i<sizeof(full_page_data); ++i){
+        NRF_LOG_INFO("Data: 0x%x", full_page_data[i]);
+    }

@@ -12,12 +12,15 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   sensor_integration.c \
+  $(APP_DIR)/drivers/adxl372/adxl372.c \
+  $(APP_DIR)/drivers/spi/spi_driver.c \
+  $(SDK_ROOT)/components/libraries/timer/app_timer.c \
+  $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
-  $(APP_DIR)/drivers/spi/spi_driver.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
@@ -65,6 +68,8 @@ SRC_FILES += \
 INC_FOLDERS += \
   $(APP_DIR)/test/sensors_integration \
   $(APP_DIR)/drivers/spi \
+  $(APP_DIR)/drivers/adxl372/ \
+  $(SDK_ROOT)/components/libraries/timer/ \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/modules/nrfx/hal \

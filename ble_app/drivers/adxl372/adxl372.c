@@ -2,7 +2,7 @@
 #include "spi_driver.h"
 #include "nrf_delay.h"
 
-void adxl372_init (void)
+void adxl372_default_init (void)
 {
     /*
     GPIO for INT1 pin and INT2 pin,
@@ -28,7 +28,8 @@ void adxl372_init (void)
 
 }
 
-void adxl372_init_instant_on_mode(struct adxl372_device *dev, uint16_t num_samples)
+
+void adxl372_default_init_fifo_mode(struct adxl372_device *dev, uint16_t num_samples)
 {
     //initialize device settings
 

@@ -64,6 +64,8 @@ void vcnl_config(void);
 __STATIC_INLINE void data_handler(uint16_t prox);
 void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context);
 void twi_init (void);
-static void read_sensor_data();
+void read_sensor_data();
+
+void adxl372_init(void);
 
 #endif //SENSOR_INTEGRATION_H

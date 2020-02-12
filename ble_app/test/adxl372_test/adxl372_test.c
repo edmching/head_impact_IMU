@@ -111,11 +111,11 @@ int main (void)
 
     // Measurement TEST
 #ifdef TEST_REGULAR
-    adxl372_init();
+    adxl372_default_init();
 #endif
 #ifdef TEST_FIFO
     struct adxl372_device dev;
-    adxl372_init_instant_on_mode(&dev, NUM_SAMPLES);
+    adxl372_default_init_fifo_mode(&dev, NUM_SAMPLES);
     adxl372_accel_data_t sample_set[NUM_SAMPLES/3];
     int8_t read_fifo_done = NOT_READ;
 

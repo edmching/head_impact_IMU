@@ -1,3 +1,4 @@
+//standard variable types
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h>
@@ -22,43 +23,181 @@
 
 #include "sensors_integration.h"
 
-uint16_t prox_val;
+//adxl372 driver
+#include "adxl372.h"
+
+//app_timer
+#include "app_timer.h"
+#include "nrf_drv_clock.h"
 
 #define PROX_THRESHOLD 10000
+#define IMPACT_DURATION 100 //in milliseconds
+#define IMPACT_G_THRESHOLD 30000 //in mili-g's
+
+uint16_t prox_val;
+adxl372_accel_data_t g_high_G_buf[1024];
+icm20649_data_t g_low_G_buf[1024];
+uint32_t g_buf_index = 0;
+
+bool g_measurement_done = false;
+APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer 
+                                         used for the impact duration */ 
+
+static void lfclk_request(void);
+static void create_timers();
+void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data);
+void impact_data_output (void);
+
+/**@brief Timeout handler for the measurement timer.
+ */
+static void measurement_timer_handler(void * p_context)
+{
+    g_measurement_done = true;
+}
 
 int main (void)
 {
     // Initialize.
     log_init();
     spi_init();
+#ifdef USE_PROX
     twi_init();
+#endif
 
-    NRF_LOG_INFO(" Sensor test");
-    nrf_delay_ms(100);
+    //for app_timer
+    lfclk_request();
+
+    NRF_LOG_INFO("Sensor test");
 
     icm20649_read_test();
     icm20649_write_test();
+
+    //init sensors
     icm20649_init();
-
+    adxl372_init();
+#ifdef USE_PROX
     vcnl_config();
+#endif
 
+    app_timer_init();
+    create_timers();
+    icm20649_data_t low_g_gyro_data;
+    adxl372_accel_data_t high_g_data;
 
-    icm20649_data_t data;
     while(1)
     {   
-        nrf_delay_ms(1000);
+#ifdef USE_PROX
         read_sensor_data();
         if(prox_val >= PROX_THRESHOLD)
         {
-            icm20649_read_gyro_accel_data(&data);
-            icm20649_convert_data(&data);
+#endif
+            adxl372_get_accel_data(&high_g_data);
 
-            NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
-            data.accel_x, data.accel_y, data.accel_z, data.gyro_x, data.gyro_y, data.gyro_z );
+            if(high_g_data.x >= IMPACT_G_THRESHOLD|| high_g_data.y >= IMPACT_G_THRESHOLD
+                    || high_g_data.z >= IMPACT_G_THRESHOLD)
+            {
+                app_timer_start(m_measurement_timer_id,
+                                 APP_TIMER_TICKS(IMPACT_DURATION),
+                                 measurement_timer_handler);
+                while(g_measurement_done == false)
+                {
+                    record_impact_data(&high_g_data, &low_g_gyro_data);
+                }
+                app_timer_stop(m_measurement_timer_id);
+                //reset for next impact
+                g_measurement_done = false;
+                impact_data_output();
+            }
+#ifdef USE_PROX
         }
+#endif
     }
 
     return 0;
+}
+
+/**@brief Function starting the internal LFCLK oscillator.
+ *
+ * @details This is needed by RTC1 which is used by the Application Timer
+ *          (When SoftDevice is enabled the LFCLK is always running and this is not needed).
+ */
+static void lfclk_request(void)
+{
+    ret_code_t err_code = nrf_drv_clock_init();
+    APP_ERROR_CHECK(err_code);
+    nrf_drv_clock_lfclk_request(NULL);
+}
+
+/**@brief Create timers.
+ */
+static void create_timers()
+{
+    ret_code_t err_code;
+
+    // Create timers
+    err_code = app_timer_create(&m_measurement_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT, 
+                                measurement_timer_handler);
+    APP_ERROR_CHECK(err_code);
+}
+
+void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data)
+{
+    adxl372_get_accel_data(high_g_data);
+    icm20649_read_gyro_accel_data(low_g_gyro_data);
+    icm20649_convert_data(low_g_gyro_data);
+    if (g_buf_index < 1024)
+    {
+        g_high_G_buf[g_buf_index] = *high_g_data;
+        g_low_G_buf[g_buf_index] = *low_g_gyro_data;
+        g_buf_index++;
+    }
+}
+
+void impact_data_output (void)
+{
+    NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
+    for (int i = 0; i < g_buf_index; ++i)
+    {
+    NRF_LOG_INFO("id=%d, X accel = %d, Y accel = %d,  Z accel = %d mG",
+                    i, g_high_G_buf[i].x, g_high_G_buf[i].y, g_high_G_buf[i].z);
+    NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
+                    g_low_G_buf[i].accel_x, g_low_G_buf[i].accel_y, g_low_G_buf[i].accel_z,
+                    g_low_G_buf[i].gyro_x, g_low_G_buf[i].gyro_y, g_low_G_buf[i].gyro_z);
+    }
+    g_buf_index = 0; //reset buf index
+    memset(g_high_G_buf, 0x00, sizeof(g_high_G_buf));
+    memset(g_low_G_buf, 0x00, sizeof(g_low_G_buf));
+    NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
+    // TRANSFER DATA
+    // after 100ms exit and check if perform a page read
+}
+
+void adxl372_init(void)
+{
+    /*
+    GPIO for INT1 pin and INT2 pin,
+    gpio_init();
+    */
+
+    //initialize device settings
+    /* set up measurement mode */
+    adxl372_reset();
+    adxl372_set_op_mode(STAND_BY);
+    //Please refer to figure 36 User offset trim profile for more info
+    //For ADXL372 Vs=3.3V, x_offset = 0, y_offset=2, z_offset=5 
+    adxl372_set_x_offset(0);
+    adxl372_set_y_offset(2); //+10 LSB
+    adxl372_set_z_offset(5); //+35 LSB
+    adxl372_set_hpf_disable(true);
+    adxl372_set_lpf_disable(true);
+    adxl372_set_bandwidth(BW_3200HZ);
+    adxl372_set_odr(ODR_6400HZ);
+    adxl372_set_filter_settle(FILTER_SETTLE_16);
+    adxl372_set_instaon_threshold(ADXL_INSTAON_HIGH_THRESH); //sets to 30g
+    adxl372_write_mask(ADI_ADXL372_MEASURE, MEASURE_LOW_NOISE_MASK, MEASURE_LOW_NOISE_POS, LOW_NOISE);
+    adxl372_set_op_mode(INSTANT_ON);
+
 }
 
 /********************ICM FUNCTIONS***************************/
@@ -288,7 +427,7 @@ void twi_init (void)
 /**
  * @brief Function for reading data from temperature sensor.
  */
-static void read_sensor_data()
+void read_sensor_data()
 {
     do
     {

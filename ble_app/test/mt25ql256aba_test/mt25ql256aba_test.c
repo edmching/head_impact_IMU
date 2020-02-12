@@ -26,18 +26,19 @@ static void spi_ret_check(int8_t ret);
 
 int main (void)
 {
+    //test
     // Initial
     spi_init();
     log_init();
 
     uint8_t addr[3] = {0x00, 0x00, 0x00};
-    uint8_t data[8] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11};
+    //uint8_t data[8] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11};
     int8_t ret;
 
     NRF_LOG_INFO("\r\n");
 
     NRF_LOG_INFO("mt25ql256aba flash test");
-
+    /*
     //========NON-VOLATILE TEST===================//
     nrf_delay_ms(100);
     uint8_t startup_data[8];
@@ -53,7 +54,26 @@ int main (void)
         }
     }
     //==========================================//
+    */
 
+    /*
+    ret = mt25ql256aba_write_enable();
+    spi_ret_check(ret);
+    ret = mt25ql256aba_write_op(MT25QL256ABA_ERASE_4KB_SUBSECTOR, addr, sizeof(addr), NULL, 0);
+    spi_ret_check(ret);
+
+    //TODO: CHECK FOR READY FLAG DURING A PROGRAM OR ERASE CMD
+    nrf_delay_ms(1000);
+    */
+
+    //========= READ FULL PAGE ================//
+    uint8_t full_page_data[255];
+    ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), full_page_data, sizeof(full_page_data));
+    spi_ret_check(ret);
+    for(int i = 0; i<sizeof(full_page_data); ++i){
+        NRF_LOG_INFO("Data: 0x%x", full_page_data[i]);
+    }
+    //========================================//
 
     //=================READ TEST=================//
     uint8_t val[3];
@@ -102,10 +122,15 @@ int main (void)
         while(1);
     }
     else{
-        NRF_LOG_ERROR("FLASH WRITE ENABLE TEST PASS");
+        NRF_LOG_INFO("FLASH WRITE ENABLE TEST PASS");
     }
     //==========================================//
-
+    //uint32_t addr1 = 0x0000000; 
+    //TODO CHANGE ADDRESS from uint8_t to uint32_t 
+    //Increment the address by number of bytes sent
+    //if the address is greater than the max value
+    //set the address to 0 and overwrite the oldest data
+    //
     /*
     //================PAGE WRITE TEST==============//
     uint8_t addr1[3] = {0x00, 0x00, 0x00};

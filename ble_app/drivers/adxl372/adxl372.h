@@ -272,9 +272,9 @@ int8_t adxl372_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t 
 int8_t adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t val);
 //==================================================================================
 
-void adxl372_init (void);
+void adxl372_default_init (void);
 
-void adxl372_init_instant_on_mode(struct adxl372_device *dev, uint16_t num_samples);
+void adxl372_default_init_fifo_mode(struct adxl372_device *dev, uint16_t num_samples);
 
 void adxl372_reset(void);
 
