@@ -5,6 +5,7 @@
 #include "nrf_drv_twi.h"	//I2C driver library
 #include "nrf_delay.h"
 #include "nrf52832_mdk.h"
+#include "ds1388.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -13,42 +14,22 @@
 // TWI instance ID
 #define TWI_INSTANCE_ID     0
 
-//Slave addresses
-#define DS1388_ADDRESS         0x68  //b1101000, for RTC and WD
-#define EEPROM_ADDRESS_1    0x69  //b1101001, EEPROM block 1
-#define EEPROM_ADDRESS_2    0x6A  //b1101010, EEPROM block 2
+typedef struct{
+    uint8_t year;
+    uint8_t month;
+    uint8_t date;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint8_t hundreth;
+} ds1388_data_t;
 
-//Registers
-#define HUNDRED_SEC_REG     0x00  //hundredth of seconds
-#define SEC_REG             0x01  //seconds
-#define MIN_REG             0x02  //minutes
-#define HOUR_REG            0x03  //hour
-#define DAY_REG             0x04  //day
-#define DATE_REG            0x05  //date
-#define MONTH_REG           0x06  //month
-#define YEAR_REG            0x07  //year
-#define WD_HUNDRED_SEC_REG  0x08  //watchdog hundredth seconds
-#define WD_SEC_REG          0x09  //watchdog seconds
-#define TRICKLE_CHG_REG     0x0A  //trickle charger
-#define FLAG_REG            0x0B  //flags
-#define CONTROL_REG         0x0C  //control
-
-//Control Register
-#define EN_OSCILLATOR       0x00  
-#define DIS_OSCILLATOR      0x80
-#define EN_WD_COUNTER       0x02
-#define DIS_WD_COUNTER      0x00    
-#define WD_RST              0x01  //trigger reset if WD counter is enable and counter reach 0
-
-//Time format
-#define HOUR_MODE_12        0x40
-#define HOUR_MODE_24        0x00
-#define AM                  0x00
-#define PM                  0x20
-
-static uint8_t date[8];
+//static uint8_t date[8];
+ds1388_data_t date;
 static uint8_t byte;
 static uint8_t time_format =  HOUR_MODE_24; //select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
+
 static uint8_t init_time[8] = {20, 2, 11, 2, 7, 26, 10, 0};
 //init_time[0] = 20; (year)
 //init_time[1] = 2;  (month)
@@ -60,7 +41,7 @@ static uint8_t init_time[8] = {20, 2, 11, 2, 7, 26, 10, 0};
 //init_time[7] = 0;  (hundredth of second)
  
 /* Indicates if operation on I2C has ended. */
-static volatile bool m_xfer_done = false;
+static volatile bool m_xfer_done_ds = false;
 
 /* TWI instance. */
 static const nrf_drv_twi_t ds_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
@@ -88,7 +69,7 @@ void ds_config(void)
 {	
 	uint8_t reg0[2] = {CONTROL_REG, (EN_OSCILLATOR | DIS_WD_COUNTER)};
     nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg0, sizeof(reg0), false);
-    while (m_xfer_done == false);
+    while (m_xfer_done_ds == false);
     
     uint8_t reg1[9] = {HUNDRED_SEC_REG,
                         dec2hex(init_time[7]),
@@ -102,7 +83,7 @@ void ds_config(void)
     };
 
     nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg1, sizeof(reg1), false);
-    while (m_xfer_done == false);
+    while (m_xfer_done_ds == false);
 }
 
 /**
@@ -110,40 +91,40 @@ void ds_config(void)
  *
  * @param[in]  Real-time data
  */
-__STATIC_INLINE void data_handler(uint8_t rtc_data[8])
+__STATIC_INLINE void data_handler(ds1388_data_t rtc_data)
 {
-    NRF_LOG_INFO("Year:   20%d", rtc_data[0]);
-    NRF_LOG_INFO("Month:  %d", rtc_data[1]);
-    NRF_LOG_INFO("Date:   %d", rtc_data[2]);
-    NRF_LOG_INFO("Day:    %d", rtc_data[3]);
-    NRF_LOG_INFO("Hour:   %d", rtc_data[4]);
-    NRF_LOG_INFO("Minute: %d", rtc_data[5]);
-    NRF_LOG_INFO("Second: %d\n", rtc_data[6]);
+    NRF_LOG_INFO("Year:   20%d", rtc_data.year);
+    NRF_LOG_INFO("Month:  %d", rtc_data.month);
+    NRF_LOG_INFO("Date:   %d", rtc_data.date);
+    NRF_LOG_INFO("Day:    %d", rtc_data.day);
+    NRF_LOG_INFO("Hour:   %d", rtc_data.hour);
+    NRF_LOG_INFO("Minute: %d", rtc_data.minute);
+    NRF_LOG_INFO("Second: %d\n", rtc_data.second);
     //NRF_LOG_INFO("Hundreth of a Second: %d", rtc_data[7]);
 }
 
 /**
  * @brief TWI events handler.
  */
-void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
+void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context)
 {
     switch (p_event->type)
     {
         case NRF_DRV_TWI_EVT_DONE:
-            m_xfer_done = true;
+            m_xfer_done_ds = true;
             break;
         case NRF_DRV_TWI_EVT_DATA_NACK:
-            //m_xfer_done = true;
+            //m_xfer_done_ds = true;
             NRF_LOG_INFO("\r\nDATA NACK ERROR");
             NRF_LOG_FLUSH();
             break;
         case NRF_DRV_TWI_EVT_ADDRESS_NACK:
-            //m_xfer_done = true;
+            //m_xfer_done_ds = true;
             NRF_LOG_INFO("\r\nADDRESS NACK ERROR");
             NRF_LOG_FLUSH();
             break;
         default:
-            //m_xfer_done = true
+            //m_xfer_done_ds = true
             break;
     }
 }
@@ -163,7 +144,7 @@ void twi_init (void)
        .clear_bus_init     = false
     };
 
-    err_code = nrf_drv_twi_init(&ds_twi, &twi_lm75b_config, twi_handler, NULL);
+    err_code = nrf_drv_twi_init(&ds_twi, &twi_lm75b_config, twi_handler_ds, NULL);
     APP_ERROR_CHECK(err_code);
 
     nrf_drv_twi_enable(&ds_twi);
@@ -174,9 +155,9 @@ uint8_t readRegister(uint8_t reg_addr)
     do
         {
             __WFE();
-        }while (m_xfer_done == false);
+        }while (m_xfer_done_ds == false);
 
-    m_xfer_done = false;
+    m_xfer_done_ds = false;
 
     nrf_drv_twi_xfer_desc_t const ds_desc = {NRFX_TWI_XFER_TXRX, DS1388_ADDRESS, sizeof(reg_addr), sizeof(byte), &reg_addr, &byte};
 
@@ -191,34 +172,34 @@ uint8_t get_time()
 {
   uint8_t ret;
   
-  date[0] = readRegister(YEAR_REG);
-  date[1] = readRegister(MONTH_REG);
-  date[2] = readRegister(DATE_REG);
-  date[3] = readRegister(DAY_REG);
-  date[4] = readRegister(HOUR_REG);
-  date[5] = readRegister(MIN_REG);
-  date[6] = readRegister(SEC_REG);
-  date[7] = readRegister(HUNDRED_SEC_REG);
+  date.year = readRegister(YEAR_REG);
+  date.month = readRegister(MONTH_REG);
+  date.date = readRegister(DATE_REG);
+  date.day = readRegister(DAY_REG);
+  date.hour = readRegister(HOUR_REG);
+  date.minute = readRegister(MIN_REG);
+  date.second = readRegister(SEC_REG);
+  date.hundreth = readRegister(HUNDRED_SEC_REG);
   
   //Time processing 
-  date[0] = hex2dec(date[0]);
-  date[1] = hex2dec(date[1]);
-  date[2] = hex2dec(date[2]);
-  date[5] = hex2dec(date[5]);
-  date[6] = hex2dec(date[6]);
-  date[7] = hex2dec(date[7]);
+  date.year = hex2dec(date.year);
+  date.month = hex2dec(date.month);
+  date.date = hex2dec(date.date);
+  date.minute = hex2dec(date.minute);
+  date.second = hex2dec(date.second);
+  date.hundreth = hex2dec(date.hundreth);
 
   
-  if ((date[4] & 0x40) == HOUR_MODE_24)
+  if ((date.hour & 0x40) == HOUR_MODE_24)
   {
-    date[4] = hex2dec(date[4]);
+    date.hour = hex2dec(date.hour);
     ret = 2;
     return ret;
   }
   else
   { 
-    ret = (date[4] & 0x20 )>> 5;
-    date[4] = hex2dec(date[4] & 0x1F);
+    ret = (date.hour & 0x20 )>> 5;
+    date.hour = hex2dec(date.hour & 0x1F);
     return ret;
   }
 }

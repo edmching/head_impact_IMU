@@ -37,6 +37,7 @@
 uint16_t prox_val;
 adxl372_accel_data_t g_high_G_buf[1024];
 icm20649_data_t g_low_G_buf[1024];
+ds1388_data_t g_rtc_buf[1024];
 uint32_t g_buf_index = 0;
 
 bool g_measurement_done = false;
@@ -45,7 +46,7 @@ APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer
 
 static void lfclk_request(void);
 static void create_timers();
-void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data);
+void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_g_data);
 void impact_data_output (void);
 
 /**@brief Timeout handler for the measurement timer.
@@ -61,7 +62,7 @@ int main (void)
     log_init();
     spi_init();
 #ifdef USE_PROX
-    twi_init();
+    twi_init_vcnl_4040();
 #endif
 
     //for app_timer
@@ -83,6 +84,7 @@ int main (void)
     create_timers();
     icm20649_data_t low_g_gyro_data;
     adxl372_accel_data_t high_g_data;
+    ds1388_data_t rtc_g_data;
 
     while(1)
     {   
@@ -101,7 +103,7 @@ int main (void)
                                  measurement_timer_handler);
                 while(g_measurement_done == false)
                 {
-                    record_impact_data(&high_g_data, &low_g_gyro_data);
+                    record_impact_data(&high_g_data, &low_g_gyro_data, &rtc_g_data);
                 }
                 app_timer_stop(m_measurement_timer_id);
                 //reset for next impact
@@ -141,15 +143,17 @@ static void create_timers()
     APP_ERROR_CHECK(err_code);
 }
 
-void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data)
+void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_g_data)
 {
     adxl372_get_accel_data(high_g_data);
     icm20649_read_gyro_accel_data(low_g_gyro_data);
     icm20649_convert_data(low_g_gyro_data);
+    get_time(rtc_g_data);
     if (g_buf_index < 1024)
     {
         g_high_G_buf[g_buf_index] = *high_g_data;
         g_low_G_buf[g_buf_index] = *low_g_gyro_data;
+        g_rtc_buf[g_buf_index] = *rtc_g_data;
         g_buf_index++;
     }
 }
@@ -367,11 +371,11 @@ void vcnl_config(void)
 {	
 	uint8_t reg1[3] = {VCNL4040_PS_CONF3, ps_conf3_data, ps_ms_data};
     nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
-    while (m_xfer_done == false);
+    while (m_xfer_done_vc == false);
 	
     uint8_t reg2[3] = {VCNL4040_PS_CONF1, ps_conf1_data, ps_conf2_data};
     nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
-    while (m_xfer_done == false);
+    while (m_xfer_done_vc == false);
 }
 
 /**
@@ -387,7 +391,7 @@ __STATIC_INLINE void data_handler(uint16_t prox)
 /**
  * @brief TWI events handler.
  */
-void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
+void twi_handler_vcnl(nrf_drv_twi_evt_t const * p_event, void * p_context)
 {
     switch (p_event->type)
     {
@@ -396,7 +400,7 @@ void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
             {
                 prox_val = m_sample;
             }
-            m_xfer_done = true;
+            m_xfer_done_vc = true;
             break;
         default:
             break;
@@ -406,35 +410,35 @@ void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
 /**
  * @brief UART initialization.
  */
-void twi_init (void)
+void twi_init_vcnl_4040 (void)
 {
     ret_code_t err_code;
 
     const nrf_drv_twi_config_t twi_lm75b_config = {
-       .scl                = I2C_SCL,
-       .sda                = I2C_SDA,
+       .scl                = VCNL4040_SCL,
+       .sda                = VCNL4040_SDA,
        .frequency          = NRF_DRV_TWI_FREQ_100K,
        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
        .clear_bus_init     = false
     };
 
-    err_code = nrf_drv_twi_init(&vcnl_twi, &twi_lm75b_config, twi_handler, NULL);
+    err_code = nrf_drv_twi_init(&vcnl_twi, &twi_lm75b_config, twi_handler_vcnl, NULL);
     APP_ERROR_CHECK(err_code);
 
     nrf_drv_twi_enable(&vcnl_twi);
 }
 
 /**
- * @brief Function for reading data from temperature sensor.
+ * @brief Function for reading data from VCNL4040 sensor.
  */
 void read_sensor_data()
 {
     do
     {
         __WFE();
-    }while (m_xfer_done == false);
+    }while (m_xfer_done_vc == false);
     
-    m_xfer_done = false;
+    m_xfer_done_vc = false;
 
     uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
     uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
@@ -450,4 +454,147 @@ void read_sensor_data()
     m_sample = (((m_sample_msb) << 8) | (m_sample_lsb));
     prox_val = m_sample;
     NRF_LOG_INFO("Proximity: %d", m_sample);
+}
+
+/************************DS1388 FUNCTIONS ****************************/
+
+/**
+ * @brief Function for converting from dec to hex
+ */
+uint8_t dec2hex(uint8_t val) {
+  val = val + 6 * (val / 10);
+  return val;
+}
+
+/**
+ * @brief Function for converting from hex to dec
+ */
+uint8_t hex2dec(uint8_t val) {
+  val = val - 6 * (val >> 4);
+  return val;
+}
+
+/**
+ * @brief Function for setting active mode on DS1388 RTC
+ */
+void ds_config(void)
+{	
+	uint8_t reg0[2] = {CONTROL_REG, (EN_OSCILLATOR | DIS_WD_COUNTER)};
+    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg0, sizeof(reg0), false);
+    while (m_xfer_done_ds == false);
+    
+    uint8_t reg1[9] = {HUNDRED_SEC_REG,
+                        dec2hex(init_time[7]),
+                        dec2hex(init_time[6]),
+                        dec2hex(init_time[5]),
+                        (dec2hex(init_time[4]) | time_format),
+                        dec2hex(init_time[3]),
+                        dec2hex(init_time[2]),
+                        dec2hex(init_time[1]),
+                        dec2hex(init_time[0])
+    };
+
+    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg1, sizeof(reg1), false);
+    while (m_xfer_done_ds == false);
+}
+
+/**
+ * @brief TWI events handler.
+ */
+void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context)
+{
+    switch (p_event->type)
+    {
+        case NRF_DRV_TWI_EVT_DONE:
+            m_xfer_done_ds = true;
+            break;
+        case NRF_DRV_TWI_EVT_DATA_NACK:
+            //m_xfer_done_ds = true;
+            NRF_LOG_INFO("\r\nDATA NACK ERROR");
+            NRF_LOG_FLUSH();
+            break;
+        case NRF_DRV_TWI_EVT_ADDRESS_NACK:
+            //m_xfer_done_ds = true;
+            NRF_LOG_INFO("\r\nADDRESS NACK ERROR");
+            NRF_LOG_FLUSH();
+            break;
+        default:
+            //m_xfer_done_ds = true
+            break;
+    }
+}
+
+/**
+ * @brief UART initialization.
+ */
+void twi_init (void)
+{
+    ret_code_t err_code;
+
+    const nrf_drv_twi_config_t twi_lm75b_config = {
+       .scl                = DS1388_SCL,
+       .sda                = DS1388_SDA,
+       .frequency          = NRF_DRV_TWI_FREQ_400K,
+       .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
+       .clear_bus_init     = false
+    };
+
+    err_code = nrf_drv_twi_init(&ds_twi, &twi_lm75b_config, twi_handler_ds, NULL);
+    APP_ERROR_CHECK(err_code);
+
+    nrf_drv_twi_enable(&ds_twi);
+}
+
+uint8_t readRegister(uint8_t reg_addr)
+{
+    do
+        {
+            __WFE();
+        }while (m_xfer_done_ds == false);
+
+    m_xfer_done_ds = false;
+
+    nrf_drv_twi_xfer_desc_t const ds_desc = {NRFX_TWI_XFER_TXRX, DS1388_ADDRESS, sizeof(reg_addr), sizeof(byte), &reg_addr, &byte};
+
+    nrf_drv_twi_xfer(&ds_twi, &ds_desc, false);
+    
+    while(nrf_drv_twi_is_busy(&ds_twi) == true);
+
+    return byte;
+}
+
+uint8_t get_time(ds1388_data_t* date)
+{
+  uint8_t ret;
+  
+  date->year = readRegister(YEAR_REG);
+  date->month = readRegister(MONTH_REG);
+  date->date = readRegister(DATE_REG);
+  date->day = readRegister(DAY_REG);
+  date->hour = readRegister(HOUR_REG);
+  date->minute = readRegister(MIN_REG);
+  date->second = readRegister(SEC_REG);
+  date->hundreth = readRegister(HUNDRED_SEC_REG);
+  
+  //Time processing 
+  date->year = hex2dec(date->year);
+  date->month = hex2dec(date->month);
+  date->date = hex2dec(date->date);
+  date->minute = hex2dec(date->minute);
+  date->second = hex2dec(date->second);
+  date->hundreth = hex2dec(date->hundreth);
+
+  
+  if ((date->hour & 0x40) == HOUR_MODE_24)
+  {
+    date->hour = hex2dec(date->hour);
+    ret = 2;
+    return ret;
+  }
+  else
+  { 
+    ret = (date->hour & 0x20 )>> 5;
+    date->hour = hex2dec(date->hour & 0x1F);
+    return ret;
+  }
 }
