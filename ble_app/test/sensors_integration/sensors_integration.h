@@ -91,12 +91,17 @@ void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data);
 
 void vcnl_config(void);
 __STATIC_INLINE void data_handler(uint16_t prox);
-void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context);
-void twi_init (void);
+void twi_handler_vcnl(nrf_drv_twi_evt_t const * p_event, void * p_context);
+void twi_init_vcnl_4040 (void);
 void read_sensor_data();
 
 void adxl372_init(void);
 
+
 uint8_t get_time(ds1388_data_t* date);
+uint8_t readRegister(uint8_t reg_addr);
+void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context);
+void twi_init (void);
+void ds_config(void);
 
 #endif //SENSOR_INTEGRATION_H

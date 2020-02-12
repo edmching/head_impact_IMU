@@ -76,6 +76,9 @@ int main (void)
     //init sensors
     icm20649_init();
     adxl372_init();
+    twi_init();
+    ds_config();
+
 #ifdef USE_PROX
     vcnl_config();
 #endif
@@ -168,10 +171,15 @@ void impact_data_output (void)
     NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
                     g_low_G_buf[i].accel_x, g_low_G_buf[i].accel_y, g_low_G_buf[i].accel_z,
                     g_low_G_buf[i].gyro_x, g_low_G_buf[i].gyro_y, g_low_G_buf[i].gyro_z);
+    NRF_LOG_INFO("Date: %d, Day:    %d, Hour:   %d, Minute: %d, Second: %d, Hundreth: %d",
+                    g_rtc_buf[i].date, g_rtc_buf[i].day,
+                    g_rtc_buf[i].hour, g_rtc_buf[i].minute, g_rtc_buf[i].second, g_rtc_buf[i].hundreth);       
     }
+    NRF_LOG_INFO("")
     g_buf_index = 0; //reset buf index
     memset(g_high_G_buf, 0x00, sizeof(g_high_G_buf));
     memset(g_low_G_buf, 0x00, sizeof(g_low_G_buf));
+    memset(g_rtc_buf, 0x00, sizeof(g_rtc_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
     // TRANSFER DATA
     // after 100ms exit and check if perform a page read
