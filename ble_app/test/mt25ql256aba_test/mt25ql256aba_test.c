@@ -106,7 +106,6 @@ void bulk_erase(void)
     mt25ql256aba_write_enable();
     mt25ql256aba_write_op(MT25QL256ABA_BULK_ERASE, NULL, 0, NULL, 0);
     read_flag();
-    nrf_delay_ms(100);
 }
 
 void page_write(void)
@@ -184,7 +183,7 @@ void page_verify(void)
 void full_page_read(void)
 {
     uint8_t addr[3] = {0x00, 0x00, 0x00};
-    uint8_t full_page_data[251];
+    uint8_t full_page_data[250];
     int8_t ret;
 
     NRF_LOG_INFO("");
@@ -196,7 +195,6 @@ void full_page_read(void)
     }
 }
 
-
 void reset_device(void)
 {
     NRF_LOG_INFO("");
@@ -205,21 +203,30 @@ void reset_device(void)
     mt25ql256aba_read_op(MT25QL256ABA_RESET_MEMORY, NULL, 0, NULL, 0);
 }
 
+void exit_4byte_mode(void)
+{
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("EXIT 4byte....");
+    mt25ql256aba_read_op(0xE9, NULL, 0, NULL, 0);
+}
+
 int main (void)
 {
     //initialize
-    spi_init();
+    flash_spi_init();
     log_init();
 
     NRF_LOG_INFO("");
     NRF_LOG_INFO("mt25ql256aba flash test");
 
-
     read_test();
     write_test();
-    page_write();
-    page_verify();
+
     full_page_read();
+
+    page_write();
+    nrf_delay_ms(100);
+    page_verify();
 
 
     NRF_LOG_INFO("FLASH TEST COMPLETE ALL TEST PASS");

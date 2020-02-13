@@ -29,7 +29,7 @@ int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t addr
         memset(DQ1, 0x00, rx_num_bytes + 1);
 
         //Include a starting byte while DQ0 to transfers to slave 
-        ret = spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0, 1 + address_size, DQ1, rx_num_bytes + 1 + address_size);
+        ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0, 1 + address_size, DQ1, rx_num_bytes + 1 + address_size);
         if (ret < 0)
             return ret;
     
@@ -70,7 +70,7 @@ int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t add
         memcpy(DQ0 + 1, address, address_size);
         memcpy(DQ0 + 1 + address_size, data, data_size);
 
-        ret = spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0,
+        ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0,
                  1 + address_size + data_size, NULL, 0);
     }   
     else{

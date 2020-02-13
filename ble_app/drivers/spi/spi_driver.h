@@ -18,7 +18,9 @@
 #define SPI_IRQ_PRIORITY 6
 
 void spi_init (void);
+void flash_spi_init(void);
 int8_t spi_write_and_read ( uint8_t cs_pin, uint8_t* tx_msg, uint8_t tx_length, uint8_t* rx_msg, uint8_t rx_length);
+int8_t flash_spi_write_and_read (uint8_t cs_pin, uint8_t* tx_msg, uint8_t tx_length, uint8_t* rx_msg, uint8_t rx_length);
 
 
 #endif //SPI_DRIVER_H

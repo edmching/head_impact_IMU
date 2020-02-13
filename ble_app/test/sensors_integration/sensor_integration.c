@@ -9,6 +9,8 @@ static void spi_ret_check(int8_t ret);
 void adxl372_startup_test(void);
 void mt25ql256aba_erase(void);
 void mt25ql256aba_check_ready_flag(void);
+void bulk_erase(void);
+void full_page_read(void);
 /**@brief Timeout handler for the measurement timer.
  */
 static void measurement_timer_handler(void * p_context)
@@ -21,6 +23,7 @@ int main (void)
     // Initialize.
     log_init();
     spi_init();
+    flash_spi_init();
 #ifdef USE_PROX
     twi_init();
 #endif
@@ -28,7 +31,7 @@ int main (void)
     //for app_timer
     lfclk_request();
 
-    NRF_LOG_INFO("===============");
+    NRF_LOG_INFO("");
     NRF_LOG_INFO("Sensors test");
 
     mt25ql256aba_startup_test();
@@ -38,16 +41,10 @@ int main (void)
     //init sensors
     icm20649_init();
     adxl372_init();
+    full_page_read();
 #ifdef USE_PROX
     vcnl_config();
 #endif
-
-    uint8_t addr[3] = {0x00, 0x00, 0x00};
-    uint8_t full_page_data[255];
-    mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), full_page_data, sizeof(full_page_data));
-    for(int i = 0; i<sizeof(full_page_data); ++i){
-        NRF_LOG_INFO("Data: 0x%x", full_page_data[i]);
-    }
 
     app_timer_init();
     create_timers();
@@ -79,8 +76,10 @@ int main (void)
                 //reset for next impact
                 g_measurement_done = false;
                 mt25ql256aba_store_samples((uint8_t*)&flash_addr);
-                mt25ql256aba_retrieve_samples();
-                serial_output_flash_data();
+                full_page_read();
+                //mt25ql256aba_retrieve_samples();
+                //serial_output_flash_data();
+                adxl372_init();
             }
 #ifdef USE_PROX
         }
@@ -99,6 +98,8 @@ void adxl372_startup_test(void)
     ret |= adxl372_read_reg( ADI_ADXL372_MST_DEVID, &mst_devid);
     ret |= adxl372_read_reg(ADI_ADXL372_DEVID, &devid);
 
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING ADXL TEST....");
     NRF_LOG_INFO("1: adi device id = 0x%x (0xAD)", device_id);
     if(device_id != ADI_ADXL372_ADI_DEVID_VAL)
     {
@@ -117,7 +118,7 @@ void adxl372_startup_test(void)
         NRF_LOG_INFO("ADXL READ TEST FAIL");
         while(1)
         {
-            nrf_delay_ms(100);
+            __WFE();
         }
     }
     else{
@@ -126,30 +127,62 @@ void adxl372_startup_test(void)
     // ==========================================
 }
 
+void full_page_read(void)
+{
+    uint8_t addr[3] = {0x00, 0x00, 0x00};
+    uint8_t full_page_data[250];
+    int8_t ret;
+
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING FULL PAGE READ....")
+    ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), full_page_data, sizeof(full_page_data));
+    spi_ret_check(ret);
+    for(int i = 0; i<sizeof(full_page_data); ++i){
+        NRF_LOG_INFO("Data: 0x%x", full_page_data[i]);
+    }
+}
+
+
 void mt25ql256aba_startup_test(void)
 {
     uint8_t val[3];
     int8_t ret;
 
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING FLASH TEST....");
     ret = mt25ql256aba_read_op(MT25QL256ABA_READ_ID, NULL, 0, val, sizeof(val));
     spi_ret_check(ret);
-    
+
     NRF_LOG_INFO("1: device id = 0x%x (0x20)", val[0]);
     if(val[0] != 0x20)
     {
         NRF_LOG_INFO("FLASH READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
     }
 
+    nrf_delay_ms(100);
     NRF_LOG_INFO("2:memory type = 0x%x (0xBA)", val[1]);
     if(val[1] != 0xBA)
     {
         NRF_LOG_INFO("FLASH READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
     }
 
+    nrf_delay_ms(100);
     NRF_LOG_INFO("3:memory capacity = 0x%x (0x19)", val[2]);
     if(val[2]!= 0x19)
     {
         NRF_LOG_INFO("FLASH READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
     }
 }
 
@@ -166,6 +199,13 @@ void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low
         g_sample_set_buf[g_buf_index].icm_data = *low_g_gyro_data;
         g_buf_index++;
     }
+}
+void bulk_erase(void)
+{
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING BULK ERASE");
+    mt25ql256aba_write_enable();
+    mt25ql256aba_write_op(MT25QL256ABA_BULK_ERASE, NULL, 0, NULL, 0);
 }
 
 void mt25ql256aba_check_ready_flag(void)
@@ -308,7 +348,8 @@ void adxl372_init(void)
 /********************ICM FUNCTIONS***************************/
 void icm20649_read_test(void)
 {
-     /*********TEST READ******************/
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING ICM READ TEST....");
     uint8_t who_am_i = 0x0;
     icm20649_read_reg(0x0, &who_am_i);
     NRF_LOG_INFO("1:who_am_i = 0x%x (0xE1)", who_am_i );
@@ -319,6 +360,10 @@ void icm20649_read_test(void)
     else
     {
         NRF_LOG_INFO("VAL ERROR: CHECK WIRING!"); 
+        while(1)
+        {
+            __WFE();
+        }
     }
 
     /********************************************/
@@ -326,8 +371,8 @@ void icm20649_read_test(void)
 
 void icm20649_write_test(void)
 {
-    /*********TEST WRITE******************/
-
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING ICM WRITE TEST....");
     uint8_t write_read;
     //PWR_MGMT 1 select best clk and disable everything else
     icm20649_write_reg(0x06, 0x1);
@@ -342,6 +387,10 @@ void icm20649_write_test(void)
     else
     {
         NRF_LOG_INFO("VAL ERROR: CHECK WIRING!"); 
+        while(1)
+        {
+            __WFE();
+        }
     }
 
     /********************************************/
