@@ -42,6 +42,11 @@
 #define MT25QL256ABA_SECTOR_ERASE                        0xD8
 #define MT25QL256ABA_BULK_ERASE                          0xC7 // or 0x60
 
+#define MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START    0x00000000
+#define MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_END      0x00FFFFFF
+#define MT25QL256ABA_HIGH_128MBIT_SEGMENT_ADDRESS_START   0x01000000
+#define MT25QL256ABA_HIGH_128MBIT_SEGMENT_ADDRESS_END     0x01FFFFFF
+
 
 int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* reg_data, uint8_t rx_num_bytes);
 int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* data, uint8_t data_size);

@@ -3,6 +3,47 @@
 
 //ds1388 definitions
 #include "ds1388.h"
+//standard variable types
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h>
+
+//general nrf
+#include "nrf.h"
+#include "nordic_common.h"
+#include "boards.h"
+
+#include "spi_driver.h"
+
+//for NRF_LOG()
+#include "nrf_log.h"
+#include "nrf_log_ctrl.h"
+#include "nrf_log_default_backends.h"
+
+//for error logging
+#include "app_error.h"
+
+//I2C driver library
+#include "nrf_drv_twi.h"
+
+//adxl372 driver
+#include "adxl372.h"
+
+//app_timer
+#include "app_timer.h"
+#include "nrf_drv_clock.h"
+
+//flash driver
+#include "mt25ql256aba.h"
+
+#define PROX_THRESHOLD 10000
+#define IMPACT_DURATION 100 //in milliseconds
+#define IMPACT_G_THRESHOLD 30000 //in mili-g's
+#define MAX_SAMPLE_BUF_LENGTH 500
+
+// I2C pin assignment
+#define I2C_SDA 17
+#define I2C_SCL 18
 
 // TWI instance ID
 #define TWI_INSTANCE_ID     1
@@ -79,7 +120,23 @@ typedef struct{
     int16_t gyro_z;
 } icm20649_data_t;
 
-static void log_init(void);
+typedef struct{
+    icm20649_data_t icm_data;
+    adxl372_accel_data_t adxl_data;
+    ds1388_data_t ds_data;
+}impact_sample_set_t;
+
+uint16_t prox_val;
+//adxl372_accel_data_t g_high_G_buf[MAX_SAMPLE_BUF_LENGTH];
+//icm20649_data_t g_low_G_buf[MAX_SAMPLE_BUF_LENGTH];
+impact_sample_set_t g_sample_set_buf[MAX_SAMPLE_BUF_LENGTH];
+impact_sample_set_t g_flash_output_buf[MAX_SAMPLE_BUF_LENGTH];
+uint32_t g_buf_index = 0;
+
+bool g_measurement_done = false;
+APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer 
+                                         used for the impact duration */ 
+
 void icm20649_read_test(void);
 void icm20649_write_test(void);
 void icm20649_convert_data(icm20649_data_t * data);
@@ -88,6 +145,12 @@ int8_t icm20649_write_reg(uint8_t address, uint8_t data);
 int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data);
 int8_t icm20649_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes);
 void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data);
+
+void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
+void serial_output_impact_data(void);
+void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr);
+void mt25ql256aba_retrieve_samples(void);
+void serial_output_flash_data(void);
 
 void vcnl_config(void);
 __STATIC_INLINE void data_handler(uint16_t prox);

@@ -1,54 +1,18 @@
-//standard variable types
-#include <stdbool.h>
-#include <stdint.h>
-#include <string.h>
-
-//general nrf
-#include "nrf.h"
-#include "nordic_common.h"
-#include "boards.h"
-
-#include "spi_driver.h"
-
-//for NRF_LOG()
-#include "nrf_log.h"
-#include "nrf_log_ctrl.h"
-#include "nrf_log_default_backends.h"
-
-//for error logging
-#include "app_error.h"
-
-//I2C driver library
-#include "nrf_drv_twi.h"
-
 #include "sensors_integration.h"
+#include "nrf_delay.h"
 
-//adxl372 driver
-#include "adxl372.h"
+#define NUM_SAMPLES 8
 
-//app_timer
-#include "app_timer.h"
-#include "nrf_drv_clock.h"
-
-#define PROX_THRESHOLD 10000
-#define IMPACT_DURATION 100 //in milliseconds
-#define IMPACT_G_THRESHOLD 30000 //in mili-g's
-
-uint16_t prox_val;
-adxl372_accel_data_t g_high_G_buf[1024];
-icm20649_data_t g_low_G_buf[1024];
-ds1388_data_t g_rtc_buf[1024];
-uint32_t g_buf_index = 0;
-
-bool g_measurement_done = false;
-APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer 
-                                         used for the impact duration */ 
-
+static void log_init(void);
 static void lfclk_request(void);
-static void create_timers();
-void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_g_data);
-void impact_data_output (void);
-
+static void create_timers(void);
+void mt25ql256aba_startup_test(void);
+static void spi_ret_check(int8_t ret);
+void adxl372_startup_test(void);
+void mt25ql256aba_erase(void);
+void mt25ql256aba_check_ready_flag(void);
+void bulk_erase(void);
+void full_page_read(void);
 /**@brief Timeout handler for the measurement timer.
  */
 static void measurement_timer_handler(void * p_context)
@@ -56,11 +20,21 @@ static void measurement_timer_handler(void * p_context)
     g_measurement_done = true;
 }
 
+void reset_device(void)
+{
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("RESETING DEVICE....");
+    mt25ql256aba_check_ready_flag();
+    mt25ql256aba_read_op(MT25QL256ABA_RESET_ENABLE, NULL, 0, NULL, 0);
+    mt25ql256aba_read_op(MT25QL256ABA_RESET_MEMORY, NULL, 0, NULL, 0);
+}
+
 int main (void)
 {
     // Initialize.
     log_init();
     spi_init();
+    flash_spi_init();
 #ifdef USE_PROX
     twi_init_vcnl_4040();
 #endif
@@ -68,17 +42,24 @@ int main (void)
     //for app_timer
     lfclk_request();
 
-    NRF_LOG_INFO("Sensor test");
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("Sensors test");
 
+    mt25ql256aba_startup_test();
     icm20649_read_test();
     icm20649_write_test();
-
+    adxl372_startup_test();
     //init sensors
     icm20649_init();
     adxl372_init();
     twi_init();
     ds_config();
 
+
+    bulk_erase();
+    reset_device();
+    
+    full_page_read();
 #ifdef USE_PROX
     vcnl_config();
 #endif
@@ -87,7 +68,9 @@ int main (void)
     create_timers();
     icm20649_data_t low_g_gyro_data;
     adxl372_accel_data_t high_g_data;
-    ds1388_data_t rtc_g_data;
+    ds1388_data_t rtc_data;
+    uint32_t flash_addr = MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START;
+    //uint32_t flash_addr = 0x00000001;
 
     while(1)
     {   
@@ -106,12 +89,16 @@ int main (void)
                                  measurement_timer_handler);
                 while(g_measurement_done == false)
                 {
-                    record_impact_data(&high_g_data, &low_g_gyro_data, &rtc_g_data);
+                    sample_impact_data(&high_g_data, &low_g_gyro_data, &rtc_data);
                 }
                 app_timer_stop(m_measurement_timer_id);
                 //reset for next impact
                 g_measurement_done = false;
-                impact_data_output();
+                mt25ql256aba_store_samples((uint8_t*)&flash_addr);
+                //full_page_read();
+                mt25ql256aba_retrieve_samples();
+                serial_output_flash_data();
+                adxl372_init();
             }
 #ifdef USE_PROX
         }
@@ -121,54 +108,233 @@ int main (void)
     return 0;
 }
 
-/**@brief Function starting the internal LFCLK oscillator.
- *
- * @details This is needed by RTC1 which is used by the Application Timer
- *          (When SoftDevice is enabled the LFCLK is always running and this is not needed).
- */
-static void lfclk_request(void)
-{
-    ret_code_t err_code = nrf_drv_clock_init();
-    APP_ERROR_CHECK(err_code);
-    nrf_drv_clock_lfclk_request(NULL);
-}
 
-/**@brief Create timers.
- */
-static void create_timers()
+void adxl372_startup_test(void)
 {
-    ret_code_t err_code;
+    int8_t ret =0;
+    uint8_t device_id, mst_devid, devid;
+    device_id = adxl372_get_dev_ID();
+    ret |= adxl372_read_reg( ADI_ADXL372_MST_DEVID, &mst_devid);
+    ret |= adxl372_read_reg(ADI_ADXL372_DEVID, &devid);
 
-    // Create timers
-    err_code = app_timer_create(&m_measurement_timer_id,
-                                APP_TIMER_MODE_SINGLE_SHOT, 
-                                measurement_timer_handler);
-    APP_ERROR_CHECK(err_code);
-}
-
-void record_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_g_data)
-{
-    adxl372_get_accel_data(high_g_data);
-    icm20649_read_gyro_accel_data(low_g_gyro_data);
-    icm20649_convert_data(low_g_gyro_data);
-    get_time(rtc_g_data);
-    if (g_buf_index < 1024)
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING ADXL TEST....");
+    NRF_LOG_INFO("1: adi device id = 0x%x (0xAD)", device_id);
+    if(device_id != ADI_ADXL372_ADI_DEVID_VAL)
     {
-        g_high_G_buf[g_buf_index] = *high_g_data;
-        g_low_G_buf[g_buf_index] = *low_g_gyro_data;
-        g_rtc_buf[g_buf_index] = *rtc_g_data;
-        g_buf_index++;
+        NRF_LOG_INFO("ADXL READ TEST FAIL");
+       
+    }
+    NRF_LOG_INFO("2:mst device id2 = 0x%x (0x1D)", mst_devid);
+    if(mst_devid != ADI_ADXL372_MST_DEVID_VAL)
+    {
+        NRF_LOG_INFO("ADXL READ TEST FAIL");
+   
+    }
+    NRF_LOG_INFO("3:mems id = 0x%x (0xFA)(372 octal)", devid);
+    if(devid != ADI_ADXL372_DEVID_VAL)
+    {
+        NRF_LOG_INFO("ADXL READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    else{
+        NRF_LOG_INFO("ADXL READ TEST PASS");
+    }
+    // ==========================================
+}
+
+void full_page_read(void)
+{
+    uint8_t addr[3] = {0x00, 0x00, 0x00};
+    uint8_t full_page_data[250];
+    int8_t ret;
+
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING FULL PAGE READ....")
+    ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), full_page_data, sizeof(full_page_data));
+    spi_ret_check(ret);
+    for(int i = 0; i<sizeof(full_page_data); ++i){
+        NRF_LOG_INFO("Data: 0x%x", full_page_data[i]);
     }
 }
 
-void impact_data_output (void)
+
+void mt25ql256aba_startup_test(void)
+{
+    uint8_t val[3];
+    int8_t ret;
+
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING FLASH TEST....");
+    ret = mt25ql256aba_read_op(MT25QL256ABA_READ_ID, NULL, 0, val, sizeof(val));
+    spi_ret_check(ret);
+
+    NRF_LOG_INFO("1: device id = 0x%x (0x20)", val[0]);
+    if(val[0] != 0x20)
+    {
+        NRF_LOG_INFO("FLASH READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+
+    nrf_delay_ms(100);
+    NRF_LOG_INFO("2:memory type = 0x%x (0xBA)", val[1]);
+    if(val[1] != 0xBA)
+    {
+        NRF_LOG_INFO("FLASH READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+
+    nrf_delay_ms(100);
+    NRF_LOG_INFO("3:memory capacity = 0x%x (0x19)", val[2]);
+    if(val[2]!= 0x19)
+    {
+        NRF_LOG_INFO("FLASH READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+}
+
+
+void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data)
+{
+    //todo get only the raw values and process them later
+    adxl372_get_accel_data(high_g_data);
+    icm20649_read_gyro_accel_data(low_g_gyro_data);
+    icm20649_convert_data(low_g_gyro_data);
+    get_time(rtc_data);
+    if (g_buf_index < MAX_SAMPLE_BUF_LENGTH)
+    {
+        g_sample_set_buf[g_buf_index].adxl_data = *high_g_data;
+        g_sample_set_buf[g_buf_index].icm_data = *low_g_gyro_data;
+        g_sample_set_buf[g_buf_index].ds_data = *rtc_data;
+        g_buf_index++;
+    }
+}
+void bulk_erase(void)
+{
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING BULK ERASE");
+    mt25ql256aba_write_enable();
+    mt25ql256aba_write_op(MT25QL256ABA_BULK_ERASE, NULL, 0, NULL, 0);
+}
+
+void mt25ql256aba_check_ready_flag(void)
+{
+    uint8_t flash_ready; 
+
+    do{
+       mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
+       flash_ready = flash_ready & 0x1;
+    }while(flash_ready == 1);
+}
+
+void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr)
+{
+    uint8_t flash_addr_buf[3]= {0};
+    uint32_t num = sizeof(impact_sample_set_t);
+
+    //uint8_t flash_ready = 0x0;
+    NRF_LOG_INFO("begin store samples");
+    //store one impact sample set to flash
+    for (int i = 0; i < NUM_SAMPLES; ++i)
+    {
+        mt25ql256aba_check_ready_flag();
+        NRF_LOG_INFO("INDEX: %d", i);
+        flash_addr_buf[0] = flash_addr_ptr[2];
+        flash_addr_buf[1] = flash_addr_ptr[1];
+        flash_addr_buf[2] = flash_addr_ptr[0];
+        mt25ql256aba_write_enable();
+        mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM, 
+                              flash_addr_buf, sizeof(flash_addr_buf), 
+                              (uint8_t*) &g_sample_set_buf[i],
+                              sizeof(impact_sample_set_t));
+        if(*flash_addr_ptr + num  + 1< MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_END)
+        {
+            *flash_addr_ptr = *flash_addr_ptr + num + 1;
+        }
+        else
+        {
+            *flash_addr_ptr = MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START;
+        }
+    }
+}
+
+void mt25ql256aba_retrieve_samples(void)
+{
+    uint32_t addr32 = 0x00000000;
+    uint8_t* addr_ptr = (uint8_t*)&addr32;
+    uint8_t addr[3] = {0};
+    //uint8_t flash_ready = 0x0;
+
+    NRF_LOG_INFO("BEGIN retrieve samples");
+    for(int i = 0; i < NUM_SAMPLES; ++i) 
+    {
+        mt25ql256aba_check_ready_flag();
+        addr[0] = addr_ptr[2];
+        addr[1] = addr_ptr[1];
+        addr[2] = addr_ptr[0];
+        mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), (uint8_t*)&g_flash_output_buf[i], sizeof(impact_sample_set_t));
+        NRF_LOG_INFO("INDEX: %d OUTPUT: %d", i, g_flash_output_buf[i].adxl_data.x);
+        addr32 = addr32 + sizeof(impact_sample_set_t) + 1;
+    }
+}
+
+void mt25ql256aba_erase(void)
+{
+    uint8_t addr[3] = {0x00, 0x00, 0x00};
+
+    mt25ql256aba_check_ready_flag();
+    mt25ql256aba_write_enable();
+    mt25ql256aba_write_op(MT25QL256ABA_ERASE_4KB_SUBSECTOR, addr, sizeof(addr), NULL, 0);
+    mt25ql256aba_write_disable();
+}
+
+
+void serial_output_flash_data(void)
+{
+    NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
+    for (int i = 0; i < NUM_SAMPLES; ++i)
+    {
+    NRF_LOG_INFO("id=%d, accel x= %d, accel y = %d,  accel z= %d mG's",
+                    i, g_flash_output_buf[i].adxl_data.x,
+                     g_flash_output_buf[i].adxl_data.y,
+                     g_flash_output_buf[i].adxl_data.z);
+    NRF_LOG_INFO("      accel x = %d, accel y = %d, accel z = %d mG's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
+                        g_flash_output_buf[i].icm_data.accel_x,
+                        g_flash_output_buf[i].icm_data.accel_y,
+                        g_flash_output_buf[i].icm_data.accel_z,
+                        g_flash_output_buf[i].icm_data.gyro_x, 
+                        g_flash_output_buf[i].icm_data.gyro_y, 
+                        g_flash_output_buf[i].icm_data.gyro_z);
+    NRF_LOG_INFO("      Date: %d, Day:    %d, Hour:   %d, Minute: %d, Second: %d, Hundreth: %d",
+                    g_flash_output_buf[i].ds_data.date, g_flash_output_buf[i].ds_data.day,
+                    g_flash_output_buf[i].ds_data.hour, g_flash_output_buf[i].ds_data.minute,
+                    g_flash_output_buf[i].ds_data.second, g_flash_output_buf[i].ds_data.hundreth); 
+    }
+    g_buf_index = 0; //reset buf index
+    memset(g_flash_output_buf, 0x00, sizeof(g_flash_output_buf));
+    NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
+}
+/*
+void serial_output_impact_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
     for (int i = 0; i < g_buf_index; ++i)
     {
-    NRF_LOG_INFO("id=%d, X accel = %d, Y accel = %d,  Z accel = %d mG",
+    NRF_LOG_INFO("id=%d, accel x= %d, accel y = %d,  accel z= %d mG's",
                     i, g_high_G_buf[i].x, g_high_G_buf[i].y, g_high_G_buf[i].z);
-    NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
+    NRF_LOG_INFO("      accel x = %d, accel y = %d, accel z = %d mG's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
                     g_low_G_buf[i].accel_x, g_low_G_buf[i].accel_y, g_low_G_buf[i].accel_z,
                     g_low_G_buf[i].gyro_x, g_low_G_buf[i].gyro_y, g_low_G_buf[i].gyro_z);
     NRF_LOG_INFO("Date: %d, Day:    %d, Hour:   %d, Minute: %d, Second: %d, Hundreth: %d",
@@ -181,9 +347,8 @@ void impact_data_output (void)
     memset(g_low_G_buf, 0x00, sizeof(g_low_G_buf));
     memset(g_rtc_buf, 0x00, sizeof(g_rtc_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
-    // TRANSFER DATA
-    // after 100ms exit and check if perform a page read
 }
+*/
 
 void adxl372_init(void)
 {
@@ -215,18 +380,22 @@ void adxl372_init(void)
 /********************ICM FUNCTIONS***************************/
 void icm20649_read_test(void)
 {
-     /*********TEST READ******************/
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING ICM READ TEST....");
     uint8_t who_am_i = 0x0;
     icm20649_read_reg(0x0, &who_am_i);
-    NRF_LOG_INFO("who_am_i = 0x%x (0xE1)", who_am_i );
+    NRF_LOG_INFO("1:who_am_i = 0x%x (0xE1)", who_am_i );
     if(who_am_i == 0xE1)
     {
         NRF_LOG_INFO("READ SUCCESSFUL");
     }
     else
     {
-        NRF_LOG_INFO("VAL ERROR"); 
-       // while(1);
+        NRF_LOG_INFO("VAL ERROR: CHECK WIRING!"); 
+        while(1)
+        {
+            __WFE();
+        }
     }
 
     /********************************************/
@@ -234,23 +403,26 @@ void icm20649_read_test(void)
 
 void icm20649_write_test(void)
 {
-    /*********TEST WRITE******************/
-
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING ICM WRITE TEST....");
     uint8_t write_read;
     //PWR_MGMT 1 select best clk and disable everything else
     icm20649_write_reg(0x06, 0x1);
 
     icm20649_read_reg(0x06, &write_read);
 
-    NRF_LOG_INFO("write_read = 0x%x (0x1)", write_read );
+    NRF_LOG_INFO("2:write_read = 0x%x (0x1)", write_read );
     if(write_read == 0x1)
     {
         NRF_LOG_INFO("WRITE SUCCESSFUL");
     }
     else
     {
-        NRF_LOG_INFO("VAL ERROR"); 
-       // while(1);
+        NRF_LOG_INFO("VAL ERROR: CHECK WIRING!"); 
+        while(1)
+        {
+            __WFE();
+        }
     }
 
     /********************************************/
@@ -462,6 +634,39 @@ void read_sensor_data()
     m_sample = (((m_sample_msb) << 8) | (m_sample_lsb));
     prox_val = m_sample;
     NRF_LOG_INFO("Proximity: %d", m_sample);
+
+}
+
+/**@brief Function starting the internal LFCLK oscillator.
+ *
+ * @details This is needed by RTC1 which is used by the Application Timer
+ *          (When SoftDevice is enabled the LFCLK is always running and this is not needed).
+ */
+static void lfclk_request(void)
+{
+    ret_code_t err_code = nrf_drv_clock_init();
+    APP_ERROR_CHECK(err_code);
+    nrf_drv_clock_lfclk_request(NULL);
+}
+
+/**@brief Create timers.
+ */
+static void create_timers(void)
+{
+    ret_code_t err_code;
+
+    // Create timers
+    err_code = app_timer_create(&m_measurement_timer_id,
+                                APP_TIMER_MODE_SINGLE_SHOT, 
+                                measurement_timer_handler);
+    APP_ERROR_CHECK(err_code);
+}
+
+static void spi_ret_check(int8_t ret)
+{
+    if (ret < 0){
+        NRF_LOG_INFO("SPI WRITE READ FAIL");
+    }
 }
 
 /************************DS1388 FUNCTIONS ****************************/

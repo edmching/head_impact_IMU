@@ -9,6 +9,8 @@
  *                          0 for no address or
  *                          3 or 4 bytes address mode)
  * @param reg_data      - a pointer to store the register data
+ * @param rx_num_bytes  - max number is 251 for 3 byte address mode
+ *                          or 250 for 4 byte address mode
  * @return 0            - if success otherwise -1
  */
 int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* reg_data, uint8_t rx_num_bytes) 
@@ -17,18 +19,17 @@ int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t addr
     uint8_t DQ1[257]; //first byte is 0x00 and second byte is reg value
     int8_t ret = 0;
 
-    if(rx_num_bytes > 255)
+    if(1 + address_size + rx_num_bytes > 255)
         return -1;
     if(address_size == 0 || address_size == 3 || address_size == 4)
     {
-
         DQ0[0] = command_code;
         memcpy(DQ0 + 1, address, address_size);
 
         memset(DQ1, 0x00, rx_num_bytes + 1);
 
         //Include a starting byte while DQ0 to transfers to slave 
-        ret = spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0, 1 + address_size, DQ1, rx_num_bytes + 1 + address_size);
+        ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0, 1 + address_size, DQ1, rx_num_bytes + 1 + address_size);
         if (ret < 0)
             return ret;
     
@@ -69,7 +70,7 @@ int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t add
         memcpy(DQ0 + 1, address, address_size);
         memcpy(DQ0 + 1 + address_size, data, data_size);
 
-        ret = spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0,
+        ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0,
                  1 + address_size + data_size, NULL, 0);
     }   
     else{
@@ -94,11 +95,3 @@ int8_t mt25ql256aba_write_disable(void)
 
     return ret;
 }
-
-int8_t mt25ql256aba_read_page (void)
-    uint8_t full_page_data[255];
-    ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), full_page_data, sizeof(full_page_data));
-    spi_ret_check(ret);
-    for(int i = 0; i<sizeof(full_page_data); ++i){
-        NRF_LOG_INFO("Data: 0x%x", full_page_data[i]);
-    }

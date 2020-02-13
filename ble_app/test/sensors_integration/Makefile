@@ -13,6 +13,7 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 SRC_FILES += \
   sensor_integration.c \
   $(APP_DIR)/drivers/adxl372/adxl372.c \
+  $(APP_DIR)/drivers/mt25ql256aba/mt25ql256aba.c \
   $(APP_DIR)/drivers/spi/spi_driver.c \
   $(SDK_ROOT)/components/libraries/timer/app_timer.c \
   $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
@@ -66,6 +67,7 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
+  $(APP_DIR)/drivers/mt25ql256aba \
   $(APP_DIR)/test/sensors_integration \
   $(APP_DIR)/test/ds1388_test \
   $(APP_DIR)/drivers/spi \
