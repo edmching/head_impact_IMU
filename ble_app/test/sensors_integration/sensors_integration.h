@@ -42,8 +42,8 @@
 #define MAX_SAMPLE_BUF_LENGTH 500
 
 // I2C pin assignment
-#define I2C_SDA 17
-#define I2C_SCL 18
+//#define I2C_SDA 17
+//#define I2C_SCL 18
 
 // TWI instance ID
 #define TWI_INSTANCE_ID     1
@@ -159,7 +159,6 @@ void twi_init_vcnl_4040 (void);
 void read_sensor_data();
 
 void adxl372_init(void);
-
 
 uint8_t get_time(ds1388_data_t* date);
 uint8_t readRegister(uint8_t reg_addr);

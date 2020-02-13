@@ -13,6 +13,10 @@ void mt25ql256aba_erase(void);
 void mt25ql256aba_check_ready_flag(void);
 void bulk_erase(void);
 void full_page_read(void);
+
+
+#define USE_PROX
+
 /**@brief Timeout handler for the measurement timer.
  */
 static void measurement_timer_handler(void * p_context)
@@ -36,7 +40,7 @@ int main (void)
     spi_init();
     flash_spi_init();
 #ifdef USE_PROX
-    twi_init_vcnl_4040();
+    //twi_init_vcnl_4040();
 #endif
 
     //for app_timer
@@ -56,7 +60,8 @@ int main (void)
     ds_config();
 
 
-    bulk_erase();
+    //bulk_erase();
+    mt25ql256aba_erase();
     reset_device();
     
     full_page_read();
@@ -75,6 +80,7 @@ int main (void)
     while(1)
     {   
 #ifdef USE_PROX
+        nrf_delay_ms(100);
         read_sensor_data();
         if(prox_val >= PROX_THRESHOLD)
         {
@@ -98,6 +104,8 @@ int main (void)
                 //full_page_read();
                 mt25ql256aba_retrieve_samples();
                 serial_output_flash_data();
+                nrf_delay_ms(1000);
+                //serial_output_impact_data();
                 adxl372_init();
             }
 #ifdef USE_PROX
@@ -306,6 +314,7 @@ void serial_output_flash_data(void)
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
     for (int i = 0; i < NUM_SAMPLES; ++i)
     {
+    NRF_LOG_INFO("");
     NRF_LOG_INFO("id=%d, accel x= %d, accel y = %d,  accel z= %d mG's",
                     i, g_flash_output_buf[i].adxl_data.x,
                      g_flash_output_buf[i].adxl_data.y,
@@ -322,33 +331,33 @@ void serial_output_flash_data(void)
                     g_flash_output_buf[i].ds_data.hour, g_flash_output_buf[i].ds_data.minute,
                     g_flash_output_buf[i].ds_data.second, g_flash_output_buf[i].ds_data.hundreth); 
     }
-    g_buf_index = 0; //reset buf index
+    //g_buf_index = 0; //reset buf index
     memset(g_flash_output_buf, 0x00, sizeof(g_flash_output_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
-/*
+
 void serial_output_impact_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
     for (int i = 0; i < g_buf_index; ++i)
     {
+    NRF_LOG_INFO("");
     NRF_LOG_INFO("id=%d, accel x= %d, accel y = %d,  accel z= %d mG's",
-                    i, g_high_G_buf[i].x, g_high_G_buf[i].y, g_high_G_buf[i].z);
+                    i, g_sample_set_buf[i].adxl_data.x, g_sample_set_buf[i].adxl_data.y, g_sample_set_buf[i].adxl_data.z);
     NRF_LOG_INFO("      accel x = %d, accel y = %d, accel z = %d mG's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
-                    g_low_G_buf[i].accel_x, g_low_G_buf[i].accel_y, g_low_G_buf[i].accel_z,
-                    g_low_G_buf[i].gyro_x, g_low_G_buf[i].gyro_y, g_low_G_buf[i].gyro_z);
+                    g_sample_set_buf[i].icm_data.accel_x, g_sample_set_buf[i].icm_data.accel_y, g_sample_set_buf[i].icm_data.accel_z,
+                    g_sample_set_buf[i].icm_data.gyro_x, g_sample_set_buf[i].icm_data.gyro_y, g_sample_set_buf[i].icm_data.gyro_z);
     NRF_LOG_INFO("Date: %d, Day:    %d, Hour:   %d, Minute: %d, Second: %d, Hundreth: %d",
-                    g_rtc_buf[i].date, g_rtc_buf[i].day,
-                    g_rtc_buf[i].hour, g_rtc_buf[i].minute, g_rtc_buf[i].second, g_rtc_buf[i].hundreth);       
+                    g_sample_set_buf[i].ds_data.date, g_sample_set_buf[i].ds_data.day,
+                    g_sample_set_buf[i].ds_data.hour, g_sample_set_buf[i].ds_data.minute,
+                    g_sample_set_buf[i].ds_data.second, g_sample_set_buf[i].ds_data.hundreth);       
     }
     NRF_LOG_INFO("")
     g_buf_index = 0; //reset buf index
-    memset(g_high_G_buf, 0x00, sizeof(g_high_G_buf));
-    memset(g_low_G_buf, 0x00, sizeof(g_low_G_buf));
-    memset(g_rtc_buf, 0x00, sizeof(g_rtc_buf));
+    memset(g_sample_set_buf, 0x00, sizeof(g_sample_set_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
-*/
+
 
 void adxl372_init(void)
 {
@@ -550,12 +559,12 @@ static void log_init(void)
 void vcnl_config(void)
 {	
 	uint8_t reg1[3] = {VCNL4040_PS_CONF3, ps_conf3_data, ps_ms_data};
-    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
-    while (m_xfer_done_vc == false);
+    nrf_drv_twi_tx(&ds_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
+    while (m_xfer_done_ds == false);
 	
     uint8_t reg2[3] = {VCNL4040_PS_CONF1, ps_conf1_data, ps_conf2_data};
-    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
-    while (m_xfer_done_vc == false);
+    nrf_drv_twi_tx(&ds_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
+    while (m_xfer_done_ds == false);
 }
 
 /**
@@ -580,7 +589,7 @@ void twi_handler_vcnl(nrf_drv_twi_evt_t const * p_event, void * p_context)
             {
                 prox_val = m_sample;
             }
-            m_xfer_done_vc = true;
+            m_xfer_done_ds = true;
             break;
         default:
             break;
@@ -602,10 +611,10 @@ void twi_init_vcnl_4040 (void)
        .clear_bus_init     = false
     };
 
-    err_code = nrf_drv_twi_init(&vcnl_twi, &twi_lm75b_config, twi_handler_vcnl, NULL);
+    err_code = nrf_drv_twi_init(&ds_twi, &twi_lm75b_config, twi_handler_vcnl, NULL);
     APP_ERROR_CHECK(err_code);
 
-    nrf_drv_twi_enable(&vcnl_twi);
+    nrf_drv_twi_enable(&ds_twi);
 }
 
 /**
@@ -616,16 +625,16 @@ void read_sensor_data()
     do
     {
         __WFE();
-    }while (m_xfer_done_vc == false);
+    }while (m_xfer_done_ds == false);
     
-    m_xfer_done_vc = false;
+    m_xfer_done_ds = false;
 
     uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
     uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
     uint8_t *p_ret = reg4;
     nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, p_ret};
-    nrf_drv_twi_xfer(&vcnl_twi, &vcnl_desc, false);
-    while(nrf_drv_twi_is_busy(&vcnl_twi) == true);
+    nrf_drv_twi_xfer(&ds_twi, &vcnl_desc, false);
+    while(nrf_drv_twi_is_busy(&ds_twi) == true);
 
     m_sample_lsb = *p_ret;
     p_ret++;
@@ -721,6 +730,7 @@ void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context)
     switch (p_event->type)
     {
         case NRF_DRV_TWI_EVT_DONE:
+            prox_val = m_sample;
             m_xfer_done_ds = true;
             break;
         case NRF_DRV_TWI_EVT_DATA_NACK:
@@ -749,7 +759,7 @@ void twi_init (void)
     const nrf_drv_twi_config_t twi_lm75b_config = {
        .scl                = DS1388_SCL,
        .sda                = DS1388_SDA,
-       .frequency          = NRF_DRV_TWI_FREQ_400K,
+       .frequency          = NRF_DRV_TWI_FREQ_100K,
        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
        .clear_bus_init     = false
     };
