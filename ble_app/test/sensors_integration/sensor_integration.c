@@ -1,6 +1,8 @@
 #include "sensors_integration.h"
 #include "nrf_delay.h"
 
+#define NUM_SAMPLES 14
+
 static void log_init(void);
 static void lfclk_request(void);
 static void create_timers(void);
@@ -16,6 +18,15 @@ void full_page_read(void);
 static void measurement_timer_handler(void * p_context)
 {
     g_measurement_done = true;
+}
+
+void reset_device(void)
+{
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("RESETING DEVICE....");
+    mt25ql256aba_check_ready_flag();
+    mt25ql256aba_read_op(MT25QL256ABA_RESET_ENABLE, NULL, 0, NULL, 0);
+    mt25ql256aba_read_op(MT25QL256ABA_RESET_MEMORY, NULL, 0, NULL, 0);
 }
 
 int main (void)
@@ -41,6 +52,10 @@ int main (void)
     //init sensors
     icm20649_init();
     adxl372_init();
+
+    bulk_erase();
+    reset_device();
+    
     full_page_read();
 #ifdef USE_PROX
     vcnl_config();
@@ -76,9 +91,9 @@ int main (void)
                 //reset for next impact
                 g_measurement_done = false;
                 mt25ql256aba_store_samples((uint8_t*)&flash_addr);
-                full_page_read();
-                //mt25ql256aba_retrieve_samples();
-                //serial_output_flash_data();
+                //full_page_read();
+                mt25ql256aba_retrieve_samples();
+                serial_output_flash_data();
                 adxl372_init();
             }
 #ifdef USE_PROX
@@ -212,9 +227,10 @@ void mt25ql256aba_check_ready_flag(void)
 {
     uint8_t flash_ready; 
 
-    mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
-    flash_ready = flash_ready & 0x1;
-    while(flash_ready == 1);
+    do{
+       mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
+       flash_ready = flash_ready & 0x1;
+    }while(flash_ready == 1);
 }
 
 void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr)
@@ -225,7 +241,7 @@ void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr)
     //uint8_t flash_ready = 0x0;
     NRF_LOG_INFO("begin store samples");
     //store one impact sample set to flash
-    for (int i = 0; i < g_buf_index; ++i)
+    for (int i = 0; i < NUM_SAMPLES; ++i)
     {
         mt25ql256aba_check_ready_flag();
         NRF_LOG_INFO("INDEX: %d", i);
@@ -237,9 +253,9 @@ void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr)
                               flash_addr_buf, sizeof(flash_addr_buf), 
                               (uint8_t*) &g_sample_set_buf[i],
                               sizeof(impact_sample_set_t));
-        if(*flash_addr_ptr + num < MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_END)
+        if(*flash_addr_ptr + num  + 1< MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_END)
         {
-            *flash_addr_ptr = *flash_addr_ptr + num;
+            *flash_addr_ptr = *flash_addr_ptr + num + 1;
         }
         else
         {
@@ -256,7 +272,7 @@ void mt25ql256aba_retrieve_samples(void)
     //uint8_t flash_ready = 0x0;
 
     NRF_LOG_INFO("BEGIN retrieve samples");
-    for(int i = 0; i < g_buf_index; ++i) 
+    for(int i = 0; i < NUM_SAMPLES; ++i) 
     {
         mt25ql256aba_check_ready_flag();
         addr[0] = addr_ptr[2];
@@ -264,7 +280,7 @@ void mt25ql256aba_retrieve_samples(void)
         addr[2] = addr_ptr[0];
         mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), (uint8_t*)&g_flash_output_buf[i], sizeof(impact_sample_set_t));
         NRF_LOG_INFO("INDEX: %d OUTPUT: %d", i, g_flash_output_buf[i].adxl_data.x);
-        addr32 = addr32 + sizeof(impact_sample_set_t);
+        addr32 = addr32 + sizeof(impact_sample_set_t) + 1;
     }
 }
 
@@ -282,7 +298,7 @@ void mt25ql256aba_erase(void)
 void serial_output_flash_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
-    for (int i = 0; i < g_buf_index; ++i)
+    for (int i = 0; i < NUM_SAMPLES; ++i)
     {
     NRF_LOG_INFO("id=%d, accel x= %d, accel y = %d,  accel z= %d mG's",
                     i, g_flash_output_buf[i].adxl_data.x,
@@ -300,7 +316,7 @@ void serial_output_flash_data(void)
     memset(g_flash_output_buf, 0x00, sizeof(g_flash_output_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
-
+/*
 void serial_output_impact_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
@@ -317,6 +333,7 @@ void serial_output_impact_data(void)
     memset(g_low_G_buf, 0x00, sizeof(g_low_G_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
+*/
 
 void adxl372_init(void)
 {

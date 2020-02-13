@@ -15,8 +15,8 @@
  */
 int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* reg_data, uint8_t rx_num_bytes) 
 {
-    uint8_t DQ0[5] = {0};
-    uint8_t DQ1[257] = {0}; //first byte is 0x00 and second byte is reg value
+    uint8_t DQ0[5];
+    uint8_t DQ1[257]; //first byte is 0x00 and second byte is reg value
     int8_t ret = 0;
 
     if(1 + address_size + rx_num_bytes > 255)
@@ -58,7 +58,7 @@ int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t addr
  */
 int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* data, uint8_t data_size)
 {
-    uint8_t DQ0[256] = {0};
+    uint8_t DQ0[256];
     int8_t ret = 0;
     //uint8_t DQ1; //output contains no valuable data
 

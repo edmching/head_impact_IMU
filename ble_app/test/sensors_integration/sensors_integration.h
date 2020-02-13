@@ -93,8 +93,8 @@ typedef struct{
 }impact_sample_set_t;
 
 uint16_t prox_val;
-adxl372_accel_data_t g_high_G_buf[MAX_SAMPLE_BUF_LENGTH];
-icm20649_data_t g_low_G_buf[MAX_SAMPLE_BUF_LENGTH];
+//adxl372_accel_data_t g_high_G_buf[MAX_SAMPLE_BUF_LENGTH];
+//icm20649_data_t g_low_G_buf[MAX_SAMPLE_BUF_LENGTH];
 impact_sample_set_t g_sample_set_buf[MAX_SAMPLE_BUF_LENGTH];
 impact_sample_set_t g_flash_output_buf[MAX_SAMPLE_BUF_LENGTH];
 uint32_t g_buf_index = 0;
