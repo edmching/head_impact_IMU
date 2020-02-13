@@ -8,6 +8,7 @@ void mt25ql256aba_startup_test(void);
 static void spi_ret_check(int8_t ret);
 void adxl372_startup_test(void);
 void mt25ql256aba_erase(void);
+void mt25ql256aba_check_ready_flag(void);
 /**@brief Timeout handler for the measurement timer.
  */
 static void measurement_timer_handler(void * p_context)
@@ -167,6 +168,14 @@ void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low
     }
 }
 
+void mt25ql256aba_check_ready_flag(void)
+{
+    uint8_t flash_ready; 
+
+    mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
+    flash_ready = flash_ready & 0x1;
+    while(flash_ready == 1);
+}
 
 void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr)
 {
@@ -178,11 +187,8 @@ void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr)
     //store one impact sample set to flash
     for (int i = 0; i < g_buf_index; ++i)
     {
+        mt25ql256aba_check_ready_flag();
         NRF_LOG_INFO("INDEX: %d", i);
-        //mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
-        //flash_ready = flash_ready & 0x1;
-        //while(flash_ready == 1);
-        nrf_delay_ms(100);
         flash_addr_buf[0] = flash_addr_ptr[2];
         flash_addr_buf[1] = flash_addr_ptr[1];
         flash_addr_buf[2] = flash_addr_ptr[0];
@@ -212,15 +218,12 @@ void mt25ql256aba_retrieve_samples(void)
     NRF_LOG_INFO("BEGIN retrieve samples");
     for(int i = 0; i < g_buf_index; ++i) 
     {
-        //mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
-        //flash_ready = flash_ready & 0x1;
-        //while(flash_ready == 1); 
-        nrf_delay_ms(100);
+        mt25ql256aba_check_ready_flag();
         addr[0] = addr_ptr[2];
         addr[1] = addr_ptr[1];
         addr[2] = addr_ptr[0];
-        NRF_LOG_INFO("INDEX: %d", i);
         mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), (uint8_t*)&g_flash_output_buf[i], sizeof(impact_sample_set_t));
+        NRF_LOG_INFO("INDEX: %d OUTPUT: %d", i, g_flash_output_buf[i].adxl_data.x);
         addr32 = addr32 + sizeof(impact_sample_set_t);
     }
 }
@@ -229,6 +232,7 @@ void mt25ql256aba_erase(void)
 {
     uint8_t addr[3] = {0x00, 0x00, 0x00};
 
+    mt25ql256aba_check_ready_flag();
     mt25ql256aba_write_enable();
     mt25ql256aba_write_op(MT25QL256ABA_ERASE_4KB_SUBSECTOR, addr, sizeof(addr), NULL, 0);
     mt25ql256aba_write_disable();
