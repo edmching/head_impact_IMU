@@ -490,7 +490,7 @@ void ds_config(void)
 	uint8_t reg0[2] = {CONTROL_REG, (EN_OSCILLATOR | DIS_WD_COUNTER)};
     nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg0, sizeof(reg0), false);
     while (m_xfer_done_ds == false);
-    
+  
     uint8_t reg1[9] = {HUNDRED_SEC_REG,
                         dec2hex(init_time[7]),
                         dec2hex(init_time[6]),
@@ -504,6 +504,8 @@ void ds_config(void)
 
     nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg1, sizeof(reg1), false);
     while (m_xfer_done_ds == false);
+
+    NRF_LOG_INFO("RTC initialized");
 }
 
 /**

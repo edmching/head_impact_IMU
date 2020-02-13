@@ -53,7 +53,7 @@ typedef struct{
 /* RTC variables. */
 static uint8_t byte;
 static uint8_t time_format =  HOUR_MODE_24; //select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
-static uint8_t init_time[8] = {20, 2, 11, 2, 7, 26, 10, 0};
+static uint8_t init_time[8] = {20, 2, 12, 3, 4, 1, 0, 0};
 //init_time[0] = 20; (year)
 //init_time[1] = 2;  (month)
 //init_time[2] = 1;  (date)
@@ -103,5 +103,7 @@ uint8_t readRegister(uint8_t reg_addr);
 void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context);
 void twi_init (void);
 void ds_config(void);
+uint8_t dec2hex(uint8_t val);
+uint8_t hex2dec(uint8_t val);
 
 #endif //SENSOR_INTEGRATION_H
