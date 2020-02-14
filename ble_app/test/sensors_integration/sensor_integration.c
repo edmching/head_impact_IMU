@@ -56,7 +56,7 @@ int main (void)
     ds_config();
 
 
-    bulk_erase();
+    mt25ql256aba_erase();
     reset_device();
     
     full_page_read();
@@ -70,7 +70,6 @@ int main (void)
     adxl372_accel_data_t high_g_data;
     ds1388_data_t rtc_data;
     uint32_t flash_addr = MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START;
-    //uint32_t flash_addr = 0x00000001;
 
     while(1)
     {   
@@ -98,6 +97,7 @@ int main (void)
                 //full_page_read();
                 mt25ql256aba_retrieve_samples();
                 serial_output_flash_data();
+                serial_output_impact_data();
                 adxl372_init();
             }
 #ifdef USE_PROX
@@ -306,6 +306,7 @@ void serial_output_flash_data(void)
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
     for (int i = 0; i < NUM_SAMPLES; ++i)
     {
+    NRF_LOG_INFO("");
     NRF_LOG_INFO("id=%d, accel x= %d, accel y = %d,  accel z= %d mG's",
                     i, g_flash_output_buf[i].adxl_data.x,
                      g_flash_output_buf[i].adxl_data.y,
@@ -322,33 +323,34 @@ void serial_output_flash_data(void)
                     g_flash_output_buf[i].ds_data.hour, g_flash_output_buf[i].ds_data.minute,
                     g_flash_output_buf[i].ds_data.second, g_flash_output_buf[i].ds_data.hundreth); 
     }
-    g_buf_index = 0; //reset buf index
+    //g_buf_index = 0; //reset buf index
     memset(g_flash_output_buf, 0x00, sizeof(g_flash_output_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
-/*
+
 void serial_output_impact_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
     for (int i = 0; i < g_buf_index; ++i)
     {
+    NRF_LOG_INFO("");
     NRF_LOG_INFO("id=%d, accel x= %d, accel y = %d,  accel z= %d mG's",
-                    i, g_high_G_buf[i].x, g_high_G_buf[i].y, g_high_G_buf[i].z);
+                    i, g_sample_set_buf[i].adxl_data.x, g_sample_set_buf[i].adxl_data.y, g_sample_set_buf[i].adxl_data.z);
     NRF_LOG_INFO("      accel x = %d, accel y = %d, accel z = %d mG's, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
-                    g_low_G_buf[i].accel_x, g_low_G_buf[i].accel_y, g_low_G_buf[i].accel_z,
-                    g_low_G_buf[i].gyro_x, g_low_G_buf[i].gyro_y, g_low_G_buf[i].gyro_z);
-    NRF_LOG_INFO("Date: %d, Day:    %d, Hour:   %d, Minute: %d, Second: %d, Hundreth: %d",
-                    g_rtc_buf[i].date, g_rtc_buf[i].day,
-                    g_rtc_buf[i].hour, g_rtc_buf[i].minute, g_rtc_buf[i].second, g_rtc_buf[i].hundreth);       
+                    g_sample_set_buf[i].icm_data.accel_x, g_sample_set_buf[i].icm_data.accel_y, g_sample_set_buf[i].icm_data.accel_z,
+                    g_sample_set_buf[i].icm_data.gyro_x, g_sample_set_buf[i].icm_data.gyro_y, g_sample_set_buf[i].icm_data.gyro_z);
+    NRF_LOG_INFO("      Date: %d, Day:    %d, Hour:   %d, Minute: %d, Second: %d, Hundreth: %d",
+                    g_sample_set_buf[i].ds_data.date, g_sample_set_buf[i].ds_data.day,
+                    g_sample_set_buf[i].ds_data.hour, g_sample_set_buf[i].ds_data.minute,
+                    g_sample_set_buf[i].ds_data.second, g_sample_set_buf[i].ds_data.hundreth);       
     }
     NRF_LOG_INFO("")
     g_buf_index = 0; //reset buf index
-    memset(g_high_G_buf, 0x00, sizeof(g_high_G_buf));
-    memset(g_low_G_buf, 0x00, sizeof(g_low_G_buf));
-    memset(g_rtc_buf, 0x00, sizeof(g_rtc_buf));
+    memset(g_sample_set_buf, 0x00, sizeof(g_sample_set_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
-*/
+
+
 
 void adxl372_init(void)
 {
