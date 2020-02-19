@@ -121,8 +121,8 @@ typedef struct{
 } icm20649_data_t;
 
 typedef struct{
-    icm20649_data_t icm_data;
     adxl372_accel_data_t adxl_data;
+    icm20649_data_t icm_data;
     ds1388_data_t ds_data;
 }impact_sample_set_t;
 
@@ -148,7 +148,7 @@ void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data);
 
 void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
 void serial_output_impact_data(void);
-void mt25ql256aba_store_samples(uint8_t* flash_addr_ptr);
+void mt25ql256aba_store_samples(uint32_t* flash_addr);
 void mt25ql256aba_retrieve_samples(void);
 void serial_output_flash_data(void);
 
