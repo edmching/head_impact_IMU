@@ -38,7 +38,7 @@
 
 #define PROX_THRESHOLD 10000
 #define IMPACT_DURATION 100 //in milliseconds
-#define IMPACT_G_THRESHOLD 30000 //in mili-g's
+#define IMPACT_G_THRESHOLD 10000 //in mili-g's
 #define MAX_SAMPLE_BUF_LENGTH 500
 
 // I2C pin assignment

@@ -122,16 +122,30 @@ void bulk_erase(void)
 
 void page_write(void)
 {
-    uint8_t addr1[3] = {0x00, 0x00, 0x00};
-    uint8_t data1[8] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11};
+    uint32_t flash_addr = 0x00000000;
+    uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
+    uint8_t addr_buf[3] = {0};
+    //uint8_t data1[8] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11};
     int8_t ret = 0;
+
+    uint8_t test_data[512];
+
+    for (int i = 0; i <512; ++i)
+        test_data[i] = i;
 
     NRF_LOG_INFO("");
     NRF_LOG_INFO("PERFORMING PAGE WRITE...");
-    mt25ql256aba_check_ready_flag();
-    mt25ql256aba_write_enable();
-    ret = mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM, addr1, sizeof(addr1), data1, sizeof(data1));
-    spi_ret_check(ret);
+    for(int i = 0; i < 512; ++i)
+    {
+        mt25ql256aba_check_ready_flag();
+        addr_buf[0] = flash_addr_ptr[2];
+        addr_buf[1] = flash_addr_ptr[1];
+        addr_buf[2] = flash_addr_ptr[0];
+        mt25ql256aba_write_enable();
+        ret = mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM, addr_buf, sizeof(addr_buf), &test_data[i], sizeof(test_data[i]));
+        flash_addr++;
+        spi_ret_check(ret);
+    }
 }
 
 void nonvolatile_verify_test(void)
@@ -210,6 +224,31 @@ void full_page_read(void)
     }
 }
 
+void flash_read_bytes(void)
+{
+    uint32_t flash_addr = 0x00000000;
+    uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
+    uint8_t addr_buf[3] = {0};
+    uint8_t data[512];
+    int8_t ret;
+
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING FLASH READ BYTES...");
+    for(int i = 0; i < 510; ++i)
+    {
+        mt25ql256aba_check_ready_flag();
+        addr_buf[0] = flash_addr_ptr[2];
+        addr_buf[1] = flash_addr_ptr[1];
+        addr_buf[2] = flash_addr_ptr[0];
+        ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr_buf, sizeof(addr_buf), &data[i], sizeof(data[i]));
+        NRF_LOG_INFO("addr 0x%x, Data: 0x%x", flash_addr, data[i]);
+        flash_addr++;
+        spi_ret_check(ret);
+    }
+
+}
+
+
 void reset_device(void)
 {
     NRF_LOG_INFO("");
@@ -239,9 +278,13 @@ int main (void)
     read_test();
     write_test();
 
-    full_page_read();
-/*
+    erase_subsector();
+    //reset_device();
+
+    flash_read_bytes();
     page_write();
+    flash_read_bytes();
+/*
     nrf_delay_ms(100);
     page_verify();
     */

@@ -69,7 +69,6 @@ void spi_init (void)
     APP_ERROR_CHECK(err_code);
     nrf_gpio_pin_clear(SPI_ADXL372_CS_PIN);
     nrf_gpio_pin_clear(SPI_ICM20649_CS_PIN);
-    nrf_gpio_pin_clear(SPI_MT25QL256ABA_CS_PIN);
     nrf_gpio_pin_set(SPI_ADXL372_CS_PIN);
     nrf_gpio_pin_set(SPI_ICM20649_CS_PIN);
     nrf_gpio_cfg_output(SPI_ADXL372_CS_PIN);
