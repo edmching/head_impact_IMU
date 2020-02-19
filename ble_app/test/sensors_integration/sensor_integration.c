@@ -243,6 +243,7 @@ void full_page_read(void)
 
     NRF_LOG_INFO("");
     NRF_LOG_INFO("PERFORMING FULL PAGE READ....")
+    mt25ql256aba_check_ready_flag();
     ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), full_page_data, sizeof(full_page_data));
     spi_ret_check(ret);
     for(int i = 0; i<sizeof(full_page_data); ++i){
@@ -328,6 +329,12 @@ void mt25ql256aba_check_ready_flag(void)
     }while(flash_ready == 1);
 }
 
+/*
+ * Weird doubling bug that occurs randomly
+ * Data written to flash is correct, but on some samples
+ * when data is read, the values are doubled.
+ * 
+ */
 void mt25ql256aba_store_samples(uint32_t* flash_addr)
 {
     uint8_t flash_addr_buf[3]= {0};
@@ -370,9 +377,9 @@ void mt25ql256aba_store_samples(uint32_t* flash_addr)
 void convert_4byte_address_to_3byte_address(uint32_t* flash_addr, uint8_t* flash_addr_buf)
 {
     uint8_t* flash_addr_ptr = (uint8_t*)flash_addr;
-    flash_addr_buf[0] = flash_addr_ptr[2];
+    flash_addr_buf[0] = flash_addr_ptr[2]; //high address value
     flash_addr_buf[1] = flash_addr_ptr[1];
-    flash_addr_buf[2] = flash_addr_ptr[0];
+    flash_addr_buf[2] = flash_addr_ptr[0]; //low address value
 }
 
 void mt25ql256aba_retrieve_samples(void)
