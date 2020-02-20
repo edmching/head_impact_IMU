@@ -1,6 +1,27 @@
 # Head Impact IMU Firmware
 This is the base project folder for the IMU firmware. It includes the nRF5 SDK 15.2.0 source files and the nrf52832_mdk development board config files. 
 
+## TODO
+* Develop serial data logging application
+  * Frontend
+    * command line
+      * NRF CLI Library or app_uart
+    * Serial plotter
+  * Backend
+    * Flash sample storage
+      * store only high g accel (6 bytes) and gyroscope values(6 bytes) + inital rtc data (8 bytes)
+    * Integrate proximity sensor
+
+* Validation Testing
+  * Validate adxl accel values with icm accel values
+    * Tune adxl accel values
+  * Hardware Integration
+    * Develop test program for validating all sensors
+
+* Features to add later
+ * Bluetooth
+
+
 Requirements:
 * GNU Arm Embedded Toolchain
 * GNU make [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/) 
@@ -107,6 +128,7 @@ DONE nrf52832_xxaa
 ```
 
  If you want to flash to your development board run `make flash` and you should see:
+
 ```sh
  $ make flash
 DONE nrf52832_xxaa
