@@ -17,7 +17,6 @@ This is the base project folder for the IMU firmware. It includes the nRF5 SDK 1
     * Tune adxl accel values
   * Hardware Integration
     * Develop test program for validating all sensors
-
 * Features to add later
  * Bluetooth
 
