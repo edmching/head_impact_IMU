@@ -23,7 +23,7 @@ Requirements:
   * Hardware Integration
     * Develop test program for validating all sensors
 * Features to add later
- * Bluetooth
+  * Bluetooth
 ## Getting Started
 
 ### Downloading Git (For Windows Users Only)
