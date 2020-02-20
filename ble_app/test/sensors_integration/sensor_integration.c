@@ -1,8 +1,8 @@
 #include "sensors_integration.h"
 #include "nrf_delay.h"
 
-#define NUM_SAMPLES 8
-//#define USE_DEMO_APP
+#define NUM_SAMPLES 50
+#define USE_DEMO_APP
 
 static void log_init(void);
 static void lfclk_request(void);
@@ -16,7 +16,8 @@ void bulk_erase(void);
 void full_page_read(void);
 void flash_read_bytes(uint16_t num_bytes);
 void sample_test_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
-void convert_4byte_address_to_3byte_address(uint32_t* flash_addr, uint8_t* flash_addr_buf);
+void convert_4byte_address_to_3byte_address(uint32_t flash_addr, uint8_t* flash_addr_buf);
+void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr);
 
 /**@brief Timeout handler for the measurement timer.
  */
@@ -63,9 +64,10 @@ int main (void)
 
     mt25ql256aba_erase();
     //bulk_erase();
-    reset_device();
-    
-    full_page_read();
+    //reset_device();
+    //nrf_delay_ms(1000);
+
+    //full_page_read();
 #ifdef USE_PROX
     vcnl_config();
 #endif
@@ -83,10 +85,11 @@ int main (void)
         for(int i = 0; i <25; ++i)
             sample_test_impact_data(&high_g_data, &low_g_gyro_data, &rtc_data);
 
+        //prototype_mt25ql256aba_store_samples(&flash_addr);
         mt25ql256aba_store_samples(&flash_addr);
-        //mt25ql256aba_retrieve_samples();
+        mt25ql256aba_retrieve_samples();
         serial_output_flash_data();
-        //flash_read_bytes(400);
+        flash_read_bytes(801);
 
         while(1)
         {
@@ -123,14 +126,13 @@ int main (void)
                 app_timer_stop(m_measurement_timer_id);
                 //reset for next impact
                 g_measurement_done = false;
-                mt25ql256aba_store_samples(&flash_addr);
-                //flash_read_bytes();
-                
-                //mt25ql256aba_retrieve_samples();
+                prototype_mt25ql256aba_store_samples(&flash_addr);
+                mt25ql256aba_retrieve_samples();
                 serial_output_flash_data();
-                //serial_output_impact_data();
-                adxl372_init();
-                while(1);
+                while(1)
+                {
+                    __WFE();
+                }
 
             }
 #ifdef USE_PROX
@@ -176,9 +178,8 @@ void sample_test_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t
 void flash_read_bytes(uint16_t num_bytes)
 {
     uint32_t flash_addr = 0x00000000;
-    uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
     uint8_t addr_buf[3] = {0};
-    uint8_t data[512];
+    uint8_t data;
     int8_t ret;
 
     NRF_LOG_INFO("");
@@ -186,11 +187,13 @@ void flash_read_bytes(uint16_t num_bytes)
     for(int i = 0; i < num_bytes; ++i)
     {
         mt25ql256aba_check_ready_flag();
-        addr_buf[0] = flash_addr_ptr[2];
-        addr_buf[1] = flash_addr_ptr[1];
-        addr_buf[2] = flash_addr_ptr[0];
-        ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr_buf, sizeof(addr_buf), &data[i], sizeof(data[i]));
-        NRF_LOG_INFO("addr 0x%03x, Data: 0x%02x", flash_addr, data[i]);
+        convert_4byte_address_to_3byte_address(flash_addr, addr_buf);
+        ret = mt25ql256aba_read_op(MT25QL256ABA_READ,
+                                    addr_buf,
+                                    sizeof(addr_buf), 
+                                    &data, 
+                                    sizeof(data));
+        NRF_LOG_INFO("addr: %d, addr 0x%03x, Data: 0x%02x",flash_addr, flash_addr, data);
         flash_addr++;
         spi_ret_check(ret);
     }
@@ -302,7 +305,8 @@ void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low
     adxl372_get_accel_data(high_g_data);
     icm20649_read_gyro_accel_data(low_g_gyro_data);
     icm20649_convert_data(low_g_gyro_data);
-    get_time(rtc_data);
+    if(g_buf_index == 0)
+        get_time(rtc_data);
     if (g_buf_index < MAX_SAMPLE_BUF_LENGTH)
     {
         g_sample_set_buf[g_buf_index].adxl_data = *high_g_data;
@@ -329,12 +333,6 @@ void mt25ql256aba_check_ready_flag(void)
     }while(flash_ready == 1);
 }
 
-/*
- * Weird doubling bug that occurs randomly
- * Data written to flash is correct, but on some samples
- * when data is read, the values are doubled.
- * 
- */
 void mt25ql256aba_store_samples(uint32_t* flash_addr)
 {
     uint8_t flash_addr_buf[3]= {0};
@@ -351,14 +349,17 @@ void mt25ql256aba_store_samples(uint32_t* flash_addr)
         NRF_LOG_INFO("");
         NRF_LOG_INFO("WRITE: ID: %d, addr: 0x%03x", i, *flash_addr);
         mt25ql256aba_check_ready_flag();
-        memcpy(buf, &g_sample_set_buf[i], sizeof(g_sample_set_buf[i]));
-        convert_4byte_address_to_3byte_address(flash_addr, flash_addr_buf);
+        memset(buf, 0x00, sizeof(buf));
+        memset(out_buf, 0x00, sizeof(out_buf));
+        memcpy(buf, &g_sample_set_buf[i], sizeof(impact_sample_t));
+        convert_4byte_address_to_3byte_address(*flash_addr, flash_addr_buf);
         mt25ql256aba_write_enable();
         mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM, 
                               flash_addr_buf,
                               sizeof(flash_addr_buf), 
                               buf,
                               sizeof(buf));
+        mt25ql256aba_write_disable();
         mt25ql256aba_check_ready_flag();
         mt25ql256aba_read_op(MT25QL256ABA_READ, 
                             flash_addr_buf,
@@ -374,9 +375,39 @@ void mt25ql256aba_store_samples(uint32_t* flash_addr)
     }
 }
 
-void convert_4byte_address_to_3byte_address(uint32_t* flash_addr, uint8_t* flash_addr_buf)
+void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr)
 {
-    uint8_t* flash_addr_ptr = (uint8_t*)flash_addr;
+    uint8_t flash_addr_buf[3]= {0};
+    uint8_t sample_size_bytes = sizeof(impact_sample_t);
+    uint8_t *sample_byte_ptr;
+    int8_t ret;
+
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("BEGIN STORE SAMPLES...");
+    //store one impact sample set to flash
+    for (int i = 0; i < g_buf_index; ++i)
+    {
+        NRF_LOG_INFO("");
+        NRF_LOG_INFO("WRITE: ID: %d, addr: 0x%03x", i, *flash_addr);
+
+        mt25ql256aba_check_ready_flag();
+        convert_4byte_address_to_3byte_address(*flash_addr, flash_addr_buf);
+        sample_byte_ptr = (uint8_t*) &g_sample_set_buf[i];
+        mt25ql256aba_write_enable();
+        ret = mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM, 
+                              flash_addr_buf,
+                              sizeof(flash_addr_buf), 
+                              sample_byte_ptr,
+                              sample_size_bytes);
+        mt25ql256aba_write_disable();
+        *flash_addr = *flash_addr + sample_size_bytes; 
+        spi_ret_check(ret);
+    }
+}
+
+void convert_4byte_address_to_3byte_address(uint32_t flash_addr, uint8_t* flash_addr_buf)
+{
+    uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
     flash_addr_buf[0] = flash_addr_ptr[2]; //high address value
     flash_addr_buf[1] = flash_addr_ptr[1];
     flash_addr_buf[2] = flash_addr_ptr[0]; //low address value
@@ -386,16 +417,25 @@ void mt25ql256aba_retrieve_samples(void)
 {
     uint32_t addr32 = 0x00000000;
     uint8_t addr[3] = {0};
-    //uint8_t flash_ready = 0x0;
+    uint8_t sample_size_bytes = sizeof(impact_sample_t);
+    uint8_t *sample_byte_ptr;
+
     NRF_LOG_INFO("");
     NRF_LOG_INFO("BEGIN RETRIEVE SAMPLES");
     for(int i = 0; i < g_buf_index; ++i) 
     {
         mt25ql256aba_check_ready_flag();
-        convert_4byte_address_to_3byte_address(&addr32, addr);
-        mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), (uint8_t*)&g_flash_output_buf[i], sizeof(g_flash_output_buf[i]));
-        NRF_LOG_INFO("READ: ID: %d, addr: 0x%03x, OUTPUT: %d (%d)", i, addr32, g_flash_output_buf[i].adxl_data.x, g_sample_set_buf[i].adxl_data.x);
-        addr32 = addr32 + sizeof(impact_sample_set_t);
+        convert_4byte_address_to_3byte_address(addr32, addr);
+        sample_byte_ptr = (uint8_t*) &g_flash_output_buf[i];
+        mt25ql256aba_read_op(MT25QL256ABA_READ,
+                              addr,
+                              sizeof(addr),
+                              sample_byte_ptr,
+                              sample_size_bytes);
+        NRF_LOG_INFO("READ: ID: %d, addr: 0x%03x, OUTPUT: %d (%d)",
+                       i, addr32, g_flash_output_buf[i].adxl_data.x,
+                        g_sample_set_buf[i].adxl_data.x);
+        addr32 = addr32 + sample_size_bytes;
     }
 }
 
@@ -415,32 +455,69 @@ void serial_output_flash_data(void)
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
     for (int i = 0; i < g_buf_index; ++i)
     {
-    NRF_LOG_INFO("");
-    NRF_LOG_INFO("ID = %d", i);
-    NRF_LOG_INFO("accel x= %d (%d) accel y = %d (%d),  accel z= %d(%d) mG's",
-                     g_flash_output_buf[i].adxl_data.x, g_sample_set_buf[i].adxl_data.x, 
-                     g_flash_output_buf[i].adxl_data.y, g_sample_set_buf[i].adxl_data.y,
-                     g_flash_output_buf[i].adxl_data.z, g_sample_set_buf[i].adxl_data.z);
-    NRF_LOG_INFO("      accel x = %d (%d), accel y = %d (%d), accel z = %d (%d) mG's",
-                        g_flash_output_buf[i].icm_data.accel_x, g_sample_set_buf[i].icm_data.accel_x,
-                        g_flash_output_buf[i].icm_data.accel_y, g_sample_set_buf[i].icm_data.accel_y,
-                        g_flash_output_buf[i].icm_data.accel_z, g_sample_set_buf[i].icm_data.accel_z);
-    NRF_LOG_INFO("      gyro x = %d (%d), gyro y = %d (%d), gyro z = %d (%d) mrad/s", 
-                        g_flash_output_buf[i].icm_data.gyro_x, g_sample_set_buf[i].icm_data.gyro_x,
-                        g_flash_output_buf[i].icm_data.gyro_y, g_sample_set_buf[i].icm_data.gyro_y,
-                        g_flash_output_buf[i].icm_data.gyro_z, g_sample_set_buf[i].icm_data.gyro_z);
-    NRF_LOG_INFO("      Year: %d, Month: %d Date: %d, Day: %d",
-                    g_flash_output_buf[i].ds_data.date, g_flash_output_buf[i].ds_data.day,
-                    g_flash_output_buf[i].ds_data.year, g_flash_output_buf[i].ds_data.month);
-    NRF_LOG_INFO("      Hour: %d, Minute: %d, Second: %d, Hundreth: %d",
-                    g_flash_output_buf[i].ds_data.hour, g_flash_output_buf[i].ds_data.minute,
-                    g_flash_output_buf[i].ds_data.second, g_flash_output_buf[i].ds_data.hundreth); 
+        NRF_LOG_INFO("");
+        NRF_LOG_INFO("ID = %d", i);
+
+        if(g_flash_output_buf[i].adxl_data.x != g_sample_set_buf[i].adxl_data.x ||
+            g_flash_output_buf[i].adxl_data.y != g_sample_set_buf[i].adxl_data.y ||
+            g_flash_output_buf[i].adxl_data.z != g_sample_set_buf[i].adxl_data.z)
+        {
+            NRF_LOG_INFO("accel x= %d (%d) accel y = %d (%d),  accel z= %d(%d) mG's",
+                            g_flash_output_buf[i].adxl_data.x, g_sample_set_buf[i].adxl_data.x, 
+                            g_flash_output_buf[i].adxl_data.y, g_sample_set_buf[i].adxl_data.y,
+                            g_flash_output_buf[i].adxl_data.z, g_sample_set_buf[i].adxl_data.z);
+        }
+        if(g_flash_output_buf[i].icm_data.accel_x != g_sample_set_buf[i].icm_data.accel_x ||
+            g_flash_output_buf[i].icm_data.accel_y != g_sample_set_buf[i].icm_data.accel_y||
+            g_flash_output_buf[i].icm_data.accel_z != g_sample_set_buf[i].icm_data.accel_z)
+        {
+            NRF_LOG_INFO("      accel x = %d (%d), accel y = %d (%d), accel z = %d (%d) mG's",
+                                g_flash_output_buf[i].icm_data.accel_x, g_sample_set_buf[i].icm_data.accel_x,
+                                g_flash_output_buf[i].icm_data.accel_y, g_sample_set_buf[i].icm_data.accel_y,
+                                g_flash_output_buf[i].icm_data.accel_z, g_sample_set_buf[i].icm_data.accel_z);
+        }
+        if(g_flash_output_buf[i].icm_data.gyro_x != g_sample_set_buf[i].icm_data.gyro_x ||
+            g_flash_output_buf[i].icm_data.gyro_y != g_sample_set_buf[i].icm_data.gyro_y ||
+            g_flash_output_buf[i].icm_data.gyro_z != g_sample_set_buf[i].icm_data.gyro_z)
+        {
+            NRF_LOG_INFO("      gyro x = %d (%d), gyro y = %d (%d), gyro z = %d (%d) mrad/s", 
+                                g_flash_output_buf[i].icm_data.gyro_x, g_sample_set_buf[i].icm_data.gyro_x,
+                                g_flash_output_buf[i].icm_data.gyro_y, g_sample_set_buf[i].icm_data.gyro_y,
+                                g_flash_output_buf[i].icm_data.gyro_z, g_sample_set_buf[i].icm_data.gyro_z);
+        }
+
+        if(g_flash_output_buf[i].ds_data.date!= g_sample_set_buf[i].ds_data.date ||
+            g_flash_output_buf[i].ds_data.day != g_sample_set_buf[i].ds_data.day)
+        {
+            NRF_LOG_INFO("      date: %d (%d) day: %d(%d)",
+                            g_flash_output_buf[i].ds_data.date, g_sample_set_buf[i].ds_data.date,
+                            g_flash_output_buf[i].ds_data.day,  g_sample_set_buf[i].ds_data.day);
+        }
+        if(g_flash_output_buf[i].ds_data.year!= g_sample_set_buf[i].ds_data.year ||
+            g_flash_output_buf[i].ds_data.month != g_sample_set_buf[i].ds_data.month ||
+            g_flash_output_buf[i].ds_data.hour != g_sample_set_buf[i].ds_data.hour)
+        {
+            NRF_LOG_INFO("      Year: %d (%d) Month: %d(%d) Hour: %d(%d) ",
+                            g_flash_output_buf[i].ds_data.year, g_sample_set_buf[i].ds_data.year,
+                            g_flash_output_buf[i].ds_data.month, g_sample_set_buf[i].ds_data.month,
+                            g_flash_output_buf[i].ds_data.hour, g_sample_set_buf[i].ds_data.hour);
+        }
+        if(g_flash_output_buf[i].ds_data.minute != g_sample_set_buf[i].ds_data.minute||
+            g_flash_output_buf[i].ds_data.second != g_sample_set_buf[i].ds_data.second ||
+            g_flash_output_buf[i].ds_data.hundreth != g_sample_set_buf[i].ds_data.hundreth)
+        NRF_LOG_INFO("      Minute: %d (%d), Second: %d (%d), Hundreth: %d (%d)",
+                        g_flash_output_buf[i].ds_data.minute,g_sample_set_buf[i].ds_data.minute,
+                        g_flash_output_buf[i].ds_data.second, g_sample_set_buf[i].ds_data.second,
+                        g_flash_output_buf[i].ds_data.hundreth, g_sample_set_buf[i].ds_data.hundreth); 
     }
     //g_buf_index = 0; //reset buf index
     memset(g_flash_output_buf, 0x00, sizeof(g_flash_output_buf));
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
 
+/*
+ * Depreciated
+ */ 
 void serial_output_impact_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");

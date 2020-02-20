@@ -16,7 +16,7 @@
 int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* reg_data, uint8_t rx_num_bytes) 
 {
     uint8_t DQ0[5];
-    uint8_t DQ1[257]; //first byte is 0x00 and second byte is reg value
+    uint8_t DQ1[257]; 
     int8_t ret = 0;
 
     if(1 + address_size + rx_num_bytes > 255)
@@ -26,14 +26,19 @@ int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t addr
         DQ0[0] = command_code;
         memcpy(DQ0 + 1, address, address_size);
 
-        memset(DQ1, 0x00, rx_num_bytes + 1);
+        memset(DQ1, 0x00, rx_num_bytes + address_size + 1);
 
         //Include a starting byte while DQ0 to transfers to slave 
-        ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0, 1 + address_size, DQ1, rx_num_bytes + 1 + address_size);
+        ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN,
+                                       DQ0,
+                                       (1 + address_size),
+                                       DQ1,
+                                       (rx_num_bytes + 1 + address_size)
+                                       );
         if (ret < 0)
             return ret;
     
-        memcpy(reg_data, DQ1 + 1 + address_size, rx_num_bytes);
+        memcpy(reg_data, (DQ1 + 1 + address_size), rx_num_bytes);
     }
     else
     {
@@ -67,8 +72,8 @@ int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t add
     if(address_size == 0 || address_size == 3 || address_size == 4)
     {
         DQ0[0] = command_code;
-        memcpy(DQ0 + 1, address, address_size);
-        memcpy(DQ0 + 1 + address_size, data, data_size);
+        memcpy((DQ0 + 1), address, address_size);
+        memcpy((DQ0 + 1 + address_size), data, data_size);
 
         ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0,
                  1 + address_size + data_size, NULL, 0);

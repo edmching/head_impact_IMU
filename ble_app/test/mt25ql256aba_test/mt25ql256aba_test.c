@@ -24,6 +24,15 @@
 static void log_init(void);
 static void spi_ret_check(int8_t ret);
 
+typedef struct {
+    uint16_t x;
+    uint16_t y;
+    uint16_t z;
+    uint16_t xx;
+    uint16_t yy;
+    uint16_t zz;
+}data_t;
+
 void mt25ql256aba_check_ready_flag(void)
 {
     uint8_t flash_ready; 
@@ -120,12 +129,11 @@ void bulk_erase(void)
     mt25ql256aba_write_op(MT25QL256ABA_BULK_ERASE, NULL, 0, NULL, 0);
 }
 
-void page_write(void)
+void simple_page_write(void)
 {
     uint32_t flash_addr = 0x00000000;
     uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
     uint8_t addr_buf[3] = {0};
-    //uint8_t data1[8] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11};
     int8_t ret = 0;
 
     uint8_t test_data[512];
@@ -142,33 +150,49 @@ void page_write(void)
         addr_buf[1] = flash_addr_ptr[1];
         addr_buf[2] = flash_addr_ptr[0];
         mt25ql256aba_write_enable();
-        ret = mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM, addr_buf, sizeof(addr_buf), &test_data[i], sizeof(test_data[i]));
+        ret = mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM,
+                                    addr_buf, 
+                                    sizeof(addr_buf),
+                                    &test_data[i],
+                                    sizeof(test_data[i]));
         flash_addr++;
         spi_ret_check(ret);
     }
 }
 
-void nonvolatile_verify_test(void)
+
+int8_t page_verify(void)
 {
-    uint8_t addr[3] = {0x00, 0x00, 0x00};
-    uint8_t startup_data[8];
-    uint8_t data[8] = {0xAB, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11};
-    int8_t ret=0;
+    uint32_t flash_addr = 0x00000000;
+    uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
+    uint8_t addr_buf[3] = {0};
+    int8_t ret;
+    uint8_t test_data[512];
+    uint8_t out_data[512];
+
+    for (int i = 0; i <512; ++i)
+        test_data[i] = i;
 
     NRF_LOG_INFO("");
-    NRF_LOG_INFO("NONVOLATILE VERIFY...");
-    mt25ql256aba_check_ready_flag();
-    ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), startup_data, sizeof(startup_data));
-    spi_ret_check(ret);
-    for(int i = 0; i<8; ++i){
-        NRF_LOG_INFO("Data: 0x%x", startup_data[i]);
-        if(data[i] != startup_data[i])
-        {
-            NRF_LOG_INFO("Result = 0x%x (Expect: 0x%x)", startup_data[i], data[i]);
-            NRF_LOG_ERROR("FLASH PAGE WRITE TEST FAIL");
-            while(1);
-        }
+    NRF_LOG_INFO("PERFORMING PAGE VERIFY...");
+    for(int i = 0; i<512; ++i)
+    {
+        mt25ql256aba_check_ready_flag();
+        addr_buf[0] = flash_addr_ptr[2];
+        addr_buf[1] = flash_addr_ptr[1];
+        addr_buf[2] = flash_addr_ptr[0];
+        ret = mt25ql256aba_read_op(MT25QL256ABA_READ,
+                                    addr_buf, 
+                                    sizeof(addr_buf),
+                                    &out_data[i],
+                                    sizeof(out_data[i]));
+        if(out_data[i]!=test_data[i])
+            NRF_LOG_INFO("addr: 0x%03x, Result = 0x%x (Expect: 0x%x)", flash_addr, out_data[i], test_data[i]);
+        flash_addr++; 
+        spi_ret_check(ret);
     }
+
+    return ret;
 }
 
 void erase_subsector(void)
@@ -185,29 +209,6 @@ void erase_subsector(void)
     spi_ret_check(ret);
 }
 
-void page_verify(void)
-{
-    uint8_t addr[3] = {0x00, 0x00, 0x00};
-    uint8_t data1[8] = {0xAA, 0xBB, 0xCC, 0xDD, 0xEE, 0xFF, 0x00, 0x11};
-    uint8_t page_data[8];
-    int8_t ret=0;
-
-    NRF_LOG_INFO("");
-    NRF_LOG_INFO("VERFIYING PAGE....");
-    mt25ql256aba_check_ready_flag();
-    ret = mt25ql256aba_read_op(MT25QL256ABA_READ, addr, sizeof(addr), page_data, sizeof(page_data));
-    spi_ret_check(ret);
-    for(int i = 0; i<8; ++i){
-        NRF_LOG_INFO("Result = 0x%x (Expect: 0x%x)", page_data[i], data1[i]);
-        if(data1[i] != page_data[i])
-        {
-            NRF_LOG_ERROR("FLASH PAGE WRITE TEST FAIL");
-        }
-    }
-    //NRF_LOG_INFO("FLASH PAGE WRITE TEST PASS");
-    //===========================================//
-}
-    
 void full_page_read(void)
 {
     uint8_t addr[3] = {0x00, 0x00, 0x00};
@@ -224,7 +225,7 @@ void full_page_read(void)
     }
 }
 
-void flash_read_bytes(void)
+void flash_read_bytes(uint16_t num_bytes)
 {
     uint32_t flash_addr = 0x00000000;
     uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
@@ -234,7 +235,7 @@ void flash_read_bytes(void)
 
     NRF_LOG_INFO("");
     NRF_LOG_INFO("PERFORMING FLASH READ BYTES...");
-    for(int i = 0; i < 510; ++i)
+    for(int i = 0; i < num_bytes; ++i)
     {
         mt25ql256aba_check_ready_flag();
         addr_buf[0] = flash_addr_ptr[2];
@@ -266,6 +267,7 @@ void exit_4byte_mode(void)
     mt25ql256aba_write_op(0xE9, NULL, 0, NULL, 0);
 }
 
+
 int main (void)
 {
     //initialize
@@ -279,11 +281,10 @@ int main (void)
     write_test();
 
     erase_subsector();
-    //reset_device();
+    simple_page_write();
+    page_verify();
+    //flash_read_bytes(512);
 
-    flash_read_bytes();
-    page_write();
-    flash_read_bytes();
 /*
     nrf_delay_ms(100);
     page_verify();

@@ -124,13 +124,14 @@ typedef struct{
     adxl372_accel_data_t adxl_data;
     icm20649_data_t icm_data;
     ds1388_data_t ds_data;
-}impact_sample_set_t;
+    uint8_t padding[6]; //to align with 32byte
+}impact_sample_t;
 
 uint16_t prox_val;
 //adxl372_accel_data_t g_high_G_buf[MAX_SAMPLE_BUF_LENGTH];
 //icm20649_data_t g_low_G_buf[MAX_SAMPLE_BUF_LENGTH];
-impact_sample_set_t g_sample_set_buf[MAX_SAMPLE_BUF_LENGTH];
-impact_sample_set_t g_flash_output_buf[MAX_SAMPLE_BUF_LENGTH];
+impact_sample_t g_sample_set_buf[MAX_SAMPLE_BUF_LENGTH];
+impact_sample_t g_flash_output_buf[MAX_SAMPLE_BUF_LENGTH];
 uint32_t g_buf_index = 0;
 
 bool g_measurement_done = false;
