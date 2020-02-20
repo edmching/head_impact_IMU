@@ -124,7 +124,7 @@ typedef struct{
     adxl372_accel_data_t adxl_data;
     icm20649_data_t icm_data;
     ds1388_data_t ds_data;
-    uint8_t padding[6]; //to align with 32byte
+    //uint8_t padding[6]; //to align with 32byte
 }impact_sample_t;
 
 uint16_t prox_val;

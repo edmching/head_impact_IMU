@@ -2,7 +2,7 @@
 #include "nrf_delay.h"
 
 #define NUM_SAMPLES 50
-#define USE_DEMO_APP
+//#define USE_DEMO_APP
 
 static void log_init(void);
 static void lfclk_request(void);
@@ -82,14 +82,13 @@ int main (void)
 #ifndef USE_DEMO_APP
     while(1)
     {
-        for(int i = 0; i <25; ++i)
+        for(int i = 0; i <15; ++i)
             sample_test_impact_data(&high_g_data, &low_g_gyro_data, &rtc_data);
 
         //prototype_mt25ql256aba_store_samples(&flash_addr);
         mt25ql256aba_store_samples(&flash_addr);
-        mt25ql256aba_retrieve_samples();
+        //mt25ql256aba_retrieve_samples();
         serial_output_flash_data();
-        flash_read_bytes(801);
 
         while(1)
         {
@@ -126,7 +125,8 @@ int main (void)
                 app_timer_stop(m_measurement_timer_id);
                 //reset for next impact
                 g_measurement_done = false;
-                prototype_mt25ql256aba_store_samples(&flash_addr);
+                //prototype_mt25ql256aba_store_samples(&flash_addr);
+                mt25ql256aba_store_samples(&flash_addr);
                 mt25ql256aba_retrieve_samples();
                 serial_output_flash_data();
                 while(1)
@@ -305,8 +305,7 @@ void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low
     adxl372_get_accel_data(high_g_data);
     icm20649_read_gyro_accel_data(low_g_gyro_data);
     icm20649_convert_data(low_g_gyro_data);
-    if(g_buf_index == 0)
-        get_time(rtc_data);
+    get_time(rtc_data);
     if (g_buf_index < MAX_SAMPLE_BUF_LENGTH)
     {
         g_sample_set_buf[g_buf_index].adxl_data = *high_g_data;
@@ -336,11 +335,12 @@ void mt25ql256aba_check_ready_flag(void)
 void mt25ql256aba_store_samples(uint32_t* flash_addr)
 {
     uint8_t flash_addr_buf[3]= {0};
-    //uint32_t num = sizeof(g_sample_set_buf[i]);
     uint8_t buf[32] = {0};
     uint8_t out_buf[32] = {0};
+    uint8_t buf_size = sizeof(buf);
+    uint8_t sample_buf_size = sizeof(impact_sample_t);
+    uint8_t flash_addr_buf_size = sizeof(flash_addr_buf);
 
-    //uint8_t flash_ready = 0x0;
     NRF_LOG_INFO("");
     NRF_LOG_INFO("BEGIN STORE SAMPLES...");
     //store one impact sample set to flash
@@ -349,29 +349,27 @@ void mt25ql256aba_store_samples(uint32_t* flash_addr)
         NRF_LOG_INFO("");
         NRF_LOG_INFO("WRITE: ID: %d, addr: 0x%03x", i, *flash_addr);
         mt25ql256aba_check_ready_flag();
-        memset(buf, 0x00, sizeof(buf));
-        memset(out_buf, 0x00, sizeof(out_buf));
-        memcpy(buf, &g_sample_set_buf[i], sizeof(impact_sample_t));
+        memcpy(buf, &g_sample_set_buf[i], sample_buf_size);
         convert_4byte_address_to_3byte_address(*flash_addr, flash_addr_buf);
         mt25ql256aba_write_enable();
         mt25ql256aba_write_op(MT25QL256ABA_PAGE_PROGRAM, 
                               flash_addr_buf,
-                              sizeof(flash_addr_buf), 
+                              flash_addr_buf_size, 
                               buf,
-                              sizeof(buf));
+                              buf_size);
         mt25ql256aba_write_disable();
         mt25ql256aba_check_ready_flag();
         mt25ql256aba_read_op(MT25QL256ABA_READ, 
                             flash_addr_buf,
-                            sizeof(flash_addr_buf),
+                            flash_addr_buf_size,
                             out_buf,
-                            sizeof(out_buf));
-        memcpy(&g_flash_output_buf[i], out_buf, sizeof(out_buf));
+                            buf_size);
+        memcpy(&g_flash_output_buf[i], out_buf, sample_buf_size);
         NRF_LOG_INFO("READ:  ID: %d, addr: 0x%03x, OUTPUT: %d (%d)", i, *flash_addr,
                        g_flash_output_buf[i].adxl_data.x,
                         g_sample_set_buf[i].adxl_data.x);
         
-        *flash_addr = *flash_addr + sizeof(buf); 
+        *flash_addr = *flash_addr + buf_size; 
     }
 }
 
