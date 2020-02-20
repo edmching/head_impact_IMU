@@ -2,7 +2,7 @@
 #include "spi_driver.h"
 
 /*
- * Read to an mt25ql256aba register
+ * Read from an mt25ql256aba register
  * @param command_code  - command specifies the register
  * @param address       - pointer to the flash address 
  * @param address_size  - the size of the address in bytes (either 
