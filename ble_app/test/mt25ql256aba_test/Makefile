@@ -1,130 +1,129 @@
-#TO REUSE THIS: file YOU must change the project_name, main file and include folder
 PROJECT_NAME     := mt25ql256aba_test_nrf52832_mdk_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
-APP_DIR := ../..
-PROJ_DIR := $(APP_DIR)/..
-SDK_ROOT := $(PROJ_DIR)/nrf_sdk
+ROOT := ../..
+PROJ_DIR := $(ROOT)/..
+SDK_DIR:= $(PROJ_DIR)/nrf_sdk
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
-  LINKER_SCRIPT  := $(APP_DIR)/ble_app_blinky_gcc_nrf52.ld
+  LINKER_SCRIPT  := $(ROOT)/ble_app_blinky_gcc_nrf52.ld
 
 # Source files common to all targets
 SRC_FILES += \
   mt25ql256aba_test.c \
-  $(APP_DIR)/drivers/mt25ql256aba/mt25ql256aba.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
-  $(APP_DIR)/drivers/spi/spi_driver.c \
-  $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_uart.c \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_default_backends.c \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_frontend.c \
-  $(SDK_ROOT)/components/libraries/log/src/nrf_log_str_formatter.c \
-  $(SDK_ROOT)/components/libraries/button/app_button.c \
-  $(SDK_ROOT)/components/libraries/util/app_error.c \
-  $(SDK_ROOT)/components/libraries/util/app_error_handler_gcc.c \
-  $(SDK_ROOT)/components/libraries/util/app_error_weak.c \
-  $(SDK_ROOT)/components/libraries/scheduler/app_scheduler.c \
-  $(SDK_ROOT)/components/libraries/timer/app_timer.c \
-  $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
-  $(SDK_ROOT)/components/libraries/hardfault/hardfault_implementation.c \
-  $(SDK_ROOT)/components/libraries/util/nrf_assert.c \
-  $(SDK_ROOT)/components/libraries/atomic_fifo/nrf_atfifo.c \
-  $(SDK_ROOT)/components/libraries/atomic_flags/nrf_atflags.c \
-  $(SDK_ROOT)/components/libraries/atomic/nrf_atomic.c \
-  $(SDK_ROOT)/components/libraries/balloc/nrf_balloc.c \
-  $(SDK_ROOT)/external/fprintf/nrf_fprintf.c \
-  $(SDK_ROOT)/external/fprintf/nrf_fprintf_format.c \
-  $(SDK_ROOT)/components/libraries/memobj/nrf_memobj.c \
-  $(SDK_ROOT)/components/libraries/pwr_mgmt/nrf_pwr_mgmt.c \
-  $(SDK_ROOT)/components/libraries/ringbuf/nrf_ringbuf.c \
-  $(SDK_ROOT)/components/libraries/experimental_section_vars/nrf_section_iter.c \
-  $(SDK_ROOT)/components/libraries/strerror/nrf_strerror.c \
-  $(SDK_ROOT)/modules/nrfx/mdk/system_nrf52.c \
-  $(SDK_ROOT)/components/boards/boards.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_clock.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_uart.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_clock.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_gpiote.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_power_clock.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uart.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_uarte.c \
-  $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT.c \
-  $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
-  $(SDK_ROOT)/external/segger_rtt/SEGGER_RTT_printf.c \
-  $(SDK_ROOT)/external/utf_converter/utf.c \
+  $(ROOT)/drivers/mt25ql256aba/mt25ql256aba.c \
+  $(SDK_DIR)/integration/nrfx/legacy/nrf_drv_spi.c \
+  $(SDK_DIR)/modules/nrfx/drivers/src/nrfx_spim.c \
+  $(ROOT)/drivers/spi/spi_driver.c \
+  $(SDK_DIR)/modules/nrfx/mdk/gcc_startup_nrf52.S \
+  $(SDK_DIR)/components/libraries/log/src/nrf_log_backend_rtt.c \
+  $(SDK_DIR)/components/libraries/log/src/nrf_log_backend_serial.c \
+  $(SDK_DIR)/components/libraries/log/src/nrf_log_backend_uart.c \
+  $(SDK_DIR)/components/libraries/log/src/nrf_log_default_backends.c \
+  $(SDK_DIR)/components/libraries/log/src/nrf_log_frontend.c \
+  $(SDK_DIR)/components/libraries/log/src/nrf_log_str_formatter.c \
+  $(SDK_DIR)/components/libraries/button/app_button.c \
+  $(SDK_DIR)/components/libraries/util/app_error.c \
+  $(SDK_DIR)/components/libraries/util/app_error_handler_gcc.c \
+  $(SDK_DIR)/components/libraries/util/app_error_weak.c \
+  $(SDK_DIR)/components/libraries/scheduler/app_scheduler.c \
+  $(SDK_DIR)/components/libraries/timer/app_timer.c \
+  $(SDK_DIR)/components/libraries/util/app_util_platform.c \
+  $(SDK_DIR)/components/libraries/hardfault/hardfault_implementation.c \
+  $(SDK_DIR)/components/libraries/util/nrf_assert.c \
+  $(SDK_DIR)/components/libraries/atomic_fifo/nrf_atfifo.c \
+  $(SDK_DIR)/components/libraries/atomic_flags/nrf_atflags.c \
+  $(SDK_DIR)/components/libraries/atomic/nrf_atomic.c \
+  $(SDK_DIR)/components/libraries/balloc/nrf_balloc.c \
+  $(SDK_DIR)/external/fprintf/nrf_fprintf.c \
+  $(SDK_DIR)/external/fprintf/nrf_fprintf_format.c \
+  $(SDK_DIR)/components/libraries/memobj/nrf_memobj.c \
+  $(SDK_DIR)/components/libraries/pwr_mgmt/nrf_pwr_mgmt.c \
+  $(SDK_DIR)/components/libraries/ringbuf/nrf_ringbuf.c \
+  $(SDK_DIR)/components/libraries/experimental_section_vars/nrf_section_iter.c \
+  $(SDK_DIR)/components/libraries/strerror/nrf_strerror.c \
+  $(SDK_DIR)/modules/nrfx/mdk/system_nrf52.c \
+  $(SDK_DIR)/components/boards/boards.c \
+  $(SDK_DIR)/integration/nrfx/legacy/nrf_drv_clock.c \
+  $(SDK_DIR)/integration/nrfx/legacy/nrf_drv_uart.c \
+  $(SDK_DIR)/modules/nrfx/drivers/src/nrfx_clock.c \
+  $(SDK_DIR)/modules/nrfx/drivers/src/nrfx_gpiote.c \
+  $(SDK_DIR)/modules/nrfx/drivers/src/nrfx_power_clock.c \
+  $(SDK_DIR)/modules/nrfx/drivers/src/prs/nrfx_prs.c \
+  $(SDK_DIR)/modules/nrfx/drivers/src/nrfx_uart.c \
+  $(SDK_DIR)/modules/nrfx/drivers/src/nrfx_uarte.c \
+  $(SDK_DIR)/external/segger_rtt/SEGGER_RTT.c \
+  $(SDK_DIR)/external/segger_rtt/SEGGER_RTT_Syscalls_GCC.c \
+  $(SDK_DIR)/external/segger_rtt/SEGGER_RTT_printf.c \
+  $(SDK_DIR)/external/utf_converter/utf.c \
   
 
 # Include folders common to all targets
 INC_FOLDERS += \
-  $(APP_DIR)/test/mt25ql256aba_test \
-  $(APP_DIR)/drivers/mt25ql256aba\
-  $(APP_DIR)/drivers/spi \
-  $(SDK_ROOT)/integration/nrfx/legacy \
-  $(SDK_ROOT)/components/libraries/pwm \
-  $(SDK_ROOT)/modules/nrfx/hal \
-  $(SDK_ROOT)/components/libraries/log \
-  $(SDK_ROOT)/components/libraries/fstorage \
-  $(SDK_ROOT)/components/nfc/ndef/text \
-  $(SDK_ROOT)/components/libraries/mutex \
-  $(SDK_ROOT)/components/libraries/gpiote \
-  $(SDK_ROOT)/components/nfc/ndef/connection_handover/common \
-  $(SDK_ROOT)/components/boards \
-  $(SDK_ROOT)/external/utf_converter \
-  $(SDK_ROOT)/modules/nrfx/drivers/include \
-  $(SDK_ROOT)/components/libraries/experimental_task_manager \
-  $(SDK_ROOT)/components/libraries/queue \
-  $(SDK_ROOT)/components/libraries/pwr_mgmt \
-  $(SDK_ROOT)/components/toolchain/cmsis/include \
-  $(SDK_ROOT)/components/libraries/mpu \
-  $(SDK_ROOT)/components/libraries/experimental_section_vars \
-  $(SDK_ROOT)/components/libraries/slip \
-  $(SDK_ROOT)/components/libraries/delay \
-  $(SDK_ROOT)/components/libraries/mem_manager \
-  $(SDK_ROOT)/components/libraries/csense_drv \
-  $(SDK_ROOT)/components/libraries/memobj \
-  $(SDK_ROOT)/external/fprintf \
-  $(SDK_ROOT)/components/libraries/svc \
-  $(SDK_ROOT)/components/libraries/atomic \
-  $(SDK_ROOT)/components \
-  $(SDK_ROOT)/components/libraries/scheduler \
-  $(SDK_ROOT)/components/libraries/cli \
-  $(SDK_ROOT)/components/libraries/crc16 \
-  $(SDK_ROOT)/components/libraries/util \
+  $(ROOT)/test/mt25ql256aba_test \
+  $(ROOT)/drivers/mt25ql256aba\
+  $(ROOT)/drivers/spi \
+  $(SDK_DIR)/integration/nrfx/legacy \
+  $(SDK_DIR)/components/libraries/pwm \
+  $(SDK_DIR)/modules/nrfx/hal \
+  $(SDK_DIR)/components/libraries/log \
+  $(SDK_DIR)/components/libraries/fstorage \
+  $(SDK_DIR)/components/nfc/ndef/text \
+  $(SDK_DIR)/components/libraries/mutex \
+  $(SDK_DIR)/components/libraries/gpiote \
+  $(SDK_DIR)/components/nfc/ndef/connection_handover/common \
+  $(SDK_DIR)/components/boards \
+  $(SDK_DIR)/external/utf_converter \
+  $(SDK_DIR)/modules/nrfx/drivers/include \
+  $(SDK_DIR)/components/libraries/experimental_task_manager \
+  $(SDK_DIR)/components/libraries/queue \
+  $(SDK_DIR)/components/libraries/pwr_mgmt \
+  $(SDK_DIR)/components/toolchain/cmsis/include \
+  $(SDK_DIR)/components/libraries/mpu \
+  $(SDK_DIR)/components/libraries/experimental_section_vars \
+  $(SDK_DIR)/components/libraries/slip \
+  $(SDK_DIR)/components/libraries/delay \
+  $(SDK_DIR)/components/libraries/mem_manager \
+  $(SDK_DIR)/components/libraries/csense_drv \
+  $(SDK_DIR)/components/libraries/memobj \
+  $(SDK_DIR)/external/fprintf \
+  $(SDK_DIR)/components/libraries/svc \
+  $(SDK_DIR)/components/libraries/atomic \
+  $(SDK_DIR)/components \
+  $(SDK_DIR)/components/libraries/scheduler \
+  $(SDK_DIR)/components/libraries/cli \
+  $(SDK_DIR)/components/libraries/crc16 \
+  $(SDK_DIR)/components/libraries/util \
   $(PROJ_DIR)/config \
-  $(SDK_ROOT)/components/libraries/csense \
-  $(SDK_ROOT)/components/libraries/balloc \
-  $(SDK_ROOT)/components/libraries/ecc \
-  $(SDK_ROOT)/components/libraries/hardfault \
-  $(SDK_ROOT)/components/libraries/hci \
-  $(SDK_ROOT)/components/libraries/timer \
-  $(SDK_ROOT)/integration/nrfx \
-  $(SDK_ROOT)/components/libraries/sortlist \
-  $(SDK_ROOT)/components/libraries/spi_mngr \
-  $(SDK_ROOT)/components/libraries/led_softblink \
-  $(SDK_ROOT)/modules/nrfx/mdk \
-  $(SDK_ROOT)/components/libraries/twi_mngr \
-  $(SDK_ROOT)/components/libraries/strerror \
-  $(SDK_ROOT)/components/libraries/crc32 \
-  $(SDK_ROOT)/components/libraries/ringbuf \
-  $(SDK_ROOT)/components/nfc/ndef/parser/message \
-  $(SDK_ROOT)/components/libraries/gfx \
-  $(SDK_ROOT)/components/libraries/button \
-  $(SDK_ROOT)/modules/nrfx \
-  $(SDK_ROOT)/components/libraries/twi_sensor \
-  $(SDK_ROOT)/integration/nrfx/legacy \
-  $(SDK_ROOT)/external/segger_rtt \
-  $(SDK_ROOT)/components/libraries/atomic_fifo \
-  $(SDK_ROOT)/components/libraries/fds \
-  $(SDK_ROOT)/components/libraries/atomic_flags \
-  $(SDK_ROOT)/components/libraries/stack_guard \
-  $(SDK_ROOT)/components/libraries/log/src \
-  $(SDK_ROOT)/components/drivers_nrf/nrf_soc_nosd \
+  $(SDK_DIR)/components/libraries/csense \
+  $(SDK_DIR)/components/libraries/balloc \
+  $(SDK_DIR)/components/libraries/ecc \
+  $(SDK_DIR)/components/libraries/hardfault \
+  $(SDK_DIR)/components/libraries/hci \
+  $(SDK_DIR)/components/libraries/timer \
+  $(SDK_DIR)/integration/nrfx \
+  $(SDK_DIR)/components/libraries/sortlist \
+  $(SDK_DIR)/components/libraries/spi_mngr \
+  $(SDK_DIR)/components/libraries/led_softblink \
+  $(SDK_DIR)/modules/nrfx/mdk \
+  $(SDK_DIR)/components/libraries/twi_mngr \
+  $(SDK_DIR)/components/libraries/strerror \
+  $(SDK_DIR)/components/libraries/crc32 \
+  $(SDK_DIR)/components/libraries/ringbuf \
+  $(SDK_DIR)/components/nfc/ndef/parser/message \
+  $(SDK_DIR)/components/libraries/gfx \
+  $(SDK_DIR)/components/libraries/button \
+  $(SDK_DIR)/modules/nrfx \
+  $(SDK_DIR)/components/libraries/twi_sensor \
+  $(SDK_DIR)/integration/nrfx/legacy \
+  $(SDK_DIR)/external/segger_rtt \
+  $(SDK_DIR)/components/libraries/atomic_fifo \
+  $(SDK_DIR)/components/libraries/fds \
+  $(SDK_DIR)/components/libraries/atomic_flags \
+  $(SDK_DIR)/components/libraries/stack_guard \
+  $(SDK_DIR)/components/libraries/log/src \
+  $(SDK_DIR)/components/drivers_nrf/nrf_soc_nosd \
 
 # Libraries common to all targets
 LIB_FILES += \
@@ -132,8 +131,8 @@ LIB_FILES += \
 # Optimization flags
 OPT = -O3 -g3
 # Uncomment the line below to enable link time optimization
-#OPT += -flto
-#OPT = -Og
+OPT += -flto
+OPT = -Og
 
 # C flags common to all targets
 CFLAGS += $(OPT)
@@ -178,7 +177,7 @@ ASMFLAGS += -DSWI_DISABLE0
 
 # Linker flags
 LDFLAGS += $(OPT)
-LDFLAGS += -mthumb -mabi=aapcs -L$(SDK_ROOT)/modules/nrfx/mdk -T$(LINKER_SCRIPT)
+LDFLAGS += -mthumb -mabi=aapcs -L$(SDK_DIR)/modules/nrfx/mdk -T$(LINKER_SCRIPT)
 LDFLAGS += -mcpu=cortex-m4
 LDFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 # let linker dump unused sections
@@ -212,7 +211,7 @@ help:
 	@echo   erase      - erase the whole chip flash
 	@echo   release    - generate binary with softdevice
 
-TEMPLATE_PATH := $(SDK_ROOT)/components/toolchain/gcc
+TEMPLATE_PATH := $(SDK_DIR)/components/toolchain/gcc
 
 
 include $(TEMPLATE_PATH)/Makefile.common
@@ -229,11 +228,11 @@ flash: default
 # Flash softdevice
 flash_softdevice:
 	@echo Flashing: s132_nrf52_6.1.0_softdevice.hex
-	pyocd-flashtool -t nrf52 -se $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
+	pyocd-flashtool -t nrf52 -se $(SDK_DIR)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
 
 # Merge application and softdevice, then flash
 flash_all: default
-	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
+	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_DIR)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 	pyocd-flashtool -t nrf52 -ce $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 
@@ -244,9 +243,9 @@ erase:
 # Generate hex file
 release:
 	@echo Generating hex file...
-	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(APP_DIR)/hex/$(PROJECT_NAME).hex
+	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_DIR)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(ROOT)/hex/$(PROJECT_NAME).hex
 
-SDK_CONFIG_FILE := $(APP_DIR)/config/sdk_config.h
-CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
+SDK_CONFIG_FILE := $(ROOT)/config/sdk_config.h
+CMSIS_CONFIG_TOOL := $(SDK_DIR)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)

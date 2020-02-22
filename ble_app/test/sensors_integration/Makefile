@@ -1,4 +1,4 @@
-PROJECT_NAME     := sensor_integration_nrf52832_mdk_s132
+PROJECT_NAME     := sensors_integration_nrf52832_mdk_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
@@ -11,7 +11,7 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 
 # Source files common to all targets
 SRC_FILES += \
-  sensor_integration.c \
+  sensors_integration.c \
   $(APP_DIR)/drivers/adxl372/adxl372.c \
   $(APP_DIR)/drivers/mt25ql256aba/mt25ql256aba.c \
   $(APP_DIR)/drivers/spi/spi_driver.c \

@@ -47,10 +47,24 @@
 #define MT25QL256ABA_HIGH_128MBIT_SEGMENT_ADDRESS_START   0x01000000
 #define MT25QL256ABA_HIGH_128MBIT_SEGMENT_ADDRESS_END     0x01FFFFFF
 
+typedef struct{
+    uint8_t program_erase_controller;
+    uint8_t program;
+    uint8_t byte_addressing;
+    uint8_t erase;
+    uint8_t protection;
+}flag_reg_t;
+
 
 int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* reg_data, uint8_t rx_num_bytes);
 int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t address_size, uint8_t* data, uint8_t data_size);
 int8_t mt25ql256aba_write_disable(void);
 int8_t mt25ql256aba_write_enable(void);
+void mt25ql256aba_check_write_in_progress_flag(void);
+void convert_4byte_address_to_3byte_address(uint32_t address, uint8_t* address_tx_buffer);
+void mt25ql256aba_bulk_erase(void);
+void mt25ql256aba_reset_device(void);
+void mt25ql256aba_erase_subsector(uint32_t address);
+void mt25ql256aba_read_flag_reg(flag_reg_t *flag_reg);
 
 #endif //MT25QL256ABA_H

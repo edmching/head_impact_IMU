@@ -1,5 +1,6 @@
 #include "mt25ql256aba.h"
 #include "spi_driver.h"
+#include "nrf_log.h"
 
 /*
  * Read from an mt25ql256aba register
@@ -30,10 +31,8 @@ int8_t mt25ql256aba_read_op(uint8_t command_code, uint8_t* address, uint8_t addr
 
         //Include a starting byte while DQ0 to transfers to slave 
         ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN,
-                                       DQ0,
-                                       (1 + address_size),
-                                       DQ1,
-                                       (rx_num_bytes + 1 + address_size)
+                                       DQ0, (1 + address_size),
+                                       DQ1, (rx_num_bytes + 1 + address_size)
                                        );
         if (ret < 0)
             return ret;
@@ -76,7 +75,8 @@ int8_t mt25ql256aba_write_op(uint8_t command_code, uint8_t* address, uint8_t add
         memcpy((DQ0 + 1 + address_size), data, data_size);
 
         ret = flash_spi_write_and_read(SPI_MT25QL256ABA_CS_PIN, DQ0,
-                 1 + address_size + data_size, NULL, 0);
+                                       (1 + address_size + data_size),
+                                       NULL, 0);
     }   
     else{
         return -2;
@@ -99,4 +99,76 @@ int8_t mt25ql256aba_write_disable(void)
     ret =  mt25ql256aba_write_op(MT25QL256ABA_WRITE_DISABLE, NULL, 0, NULL, 0);
 
     return ret;
+}
+
+void mt25ql256aba_read_flag_reg(flag_reg_t *flag_reg)
+{
+    uint8_t flag_register;
+    mt25ql256aba_read_op(MT25QL256ABA_READ_FLAG_STATUS_REGISTER, NULL, 0, &flag_register, sizeof(flag_register));
+    flag_reg->program_erase_controller = flag_register >> 7;
+    flag_reg->program = (flag_register >> 4) & 0x1; 
+    flag_reg->byte_addressing = flag_register & 0x1;
+    flag_reg->erase = (flag_register >> 5) & 0x1; 
+    flag_reg->protection = (flag_register >> 1) & 0x1;
+    /*
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("CHECKING FLAG REG.....");
+    NRF_LOG_INFO("program_erase controller %d, erase %d, program %d", 
+                    program_erase_controller, erase, program);
+    NRF_LOG_INFO("protection %d, byte %d",protection, byte_addressing);
+    */
+}
+
+void mt25ql256aba_check_write_in_progress_flag(void)
+{
+    uint8_t flash_ready; 
+
+    do{
+       mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
+       flash_ready = flash_ready & 0x1;
+    }while(flash_ready == 1);
+}
+
+void mt25ql256aba_erase_subsector(uint32_t address)
+{
+    uint8_t addr_buf[3];
+
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("ERASING SUBSECTOR....");
+    mt25ql256aba_check_write_in_progress_flag();
+    convert_4byte_address_to_3byte_address(address, addr_buf);
+    mt25ql256aba_write_enable();
+    mt25ql256aba_write_op(MT25QL256ABA_ERASE_4KB_SUBSECTOR, addr_buf, sizeof(addr_buf), NULL, 0);
+}
+
+void mt25ql256aba_reset_device(void)
+{
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("RESETING DEVICE....");
+    mt25ql256aba_check_write_in_progress_flag();
+    mt25ql256aba_read_op(MT25QL256ABA_RESET_ENABLE, NULL, 0, NULL, 0);
+    mt25ql256aba_read_op(MT25QL256ABA_RESET_MEMORY, NULL, 0, NULL, 0);
+}
+
+void mt25ql256aba_bulk_erase(void)
+{
+    NRF_LOG_INFO("");
+    NRF_LOG_INFO("PERFORMING BULK ERASE");
+    mt25ql256aba_check_write_in_progress_flag();
+    mt25ql256aba_write_enable();
+    mt25ql256aba_write_op(MT25QL256ABA_BULK_ERASE, NULL, 0, NULL, 0);
+}
+
+/*
+ * converts 4 byte address to 3 byte address
+ * @param address - 4 byte flash address
+ * @param address_tx_buffer - 3 byte address stored in a buffer 
+ * @return none 
+ */
+void convert_4byte_address_to_3byte_address(uint32_t address, uint8_t* address_tx_buffer)
+{
+    uint8_t* address_ptr = (uint8_t*)&address;
+    address_tx_buffer[0] = address_ptr[2]; //high address value
+    address_tx_buffer[1] = address_ptr[1];
+    address_tx_buffer[2] = address_ptr[0]; //low address value
 }

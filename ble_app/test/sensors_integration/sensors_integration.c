@@ -11,28 +11,17 @@ void mt25ql256aba_startup_test(void);
 static void spi_ret_check(int8_t ret);
 void adxl372_startup_test(void);
 void mt25ql256aba_erase(void);
-void mt25ql256aba_check_ready_flag(void);
-void bulk_erase(void);
 void full_page_read(void);
 void flash_read_bytes(uint16_t num_bytes);
 void sample_test_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
 void convert_4byte_address_to_3byte_address(uint32_t flash_addr, uint8_t* flash_addr_buf);
-void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr);
+void logging_store_samples(uint32_t* flash_addr);
 
 /**@brief Timeout handler for the measurement timer.
  */
 static void measurement_timer_handler(void * p_context)
 {
     g_measurement_done = true;
-}
-
-void reset_device(void)
-{
-    NRF_LOG_INFO("");
-    NRF_LOG_INFO("RESETING DEVICE....");
-    mt25ql256aba_check_ready_flag();
-    mt25ql256aba_read_op(MT25QL256ABA_RESET_ENABLE, NULL, 0, NULL, 0);
-    mt25ql256aba_read_op(MT25QL256ABA_RESET_MEMORY, NULL, 0, NULL, 0);
 }
 
 int main (void)
@@ -65,7 +54,6 @@ int main (void)
     mt25ql256aba_erase();
     //bulk_erase();
     //reset_device();
-    //nrf_delay_ms(1000);
 
     //full_page_read();
 #ifdef USE_PROX
@@ -85,9 +73,9 @@ int main (void)
         for(int i = 0; i <15; ++i)
             sample_test_impact_data(&high_g_data, &low_g_gyro_data, &rtc_data);
 
-        //prototype_mt25ql256aba_store_samples(&flash_addr);
+        //logging_store_samples(&flash_addr);
         mt25ql256aba_store_samples(&flash_addr);
-        //mt25ql256aba_retrieve_samples();
+        //logging_retrieve_samples();
         serial_output_flash_data();
 
         while(1)
@@ -125,9 +113,9 @@ int main (void)
                 app_timer_stop(m_measurement_timer_id);
                 //reset for next impact
                 g_measurement_done = false;
-                //prototype_mt25ql256aba_store_samples(&flash_addr);
+                //logging_store_samples(&flash_addr);
                 mt25ql256aba_store_samples(&flash_addr);
-                mt25ql256aba_retrieve_samples();
+                logging_retrieve_samples();
                 serial_output_flash_data();
                 while(1)
                 {
@@ -174,7 +162,6 @@ void sample_test_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t
     }
 }
 
-//TODO debug issue with not being able to output more than 607 bytes
 void flash_read_bytes(uint16_t num_bytes)
 {
     uint32_t flash_addr = 0x00000000;
@@ -314,24 +301,10 @@ void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low
         g_buf_index++;
     }
 }
-void bulk_erase(void)
-{
-    NRF_LOG_INFO("");
-    NRF_LOG_INFO("PERFORMING BULK ERASE");
-    mt25ql256aba_write_enable();
-    mt25ql256aba_write_op(MT25QL256ABA_BULK_ERASE, NULL, 0, NULL, 0);
-}
 
-void mt25ql256aba_check_ready_flag(void)
-{
-    uint8_t flash_ready; 
-
-    do{
-       mt25ql256aba_read_op(MT25QL256ABA_READ_STATUS_REGISTER, NULL, 0, &flash_ready, sizeof(flash_ready));
-       flash_ready = flash_ready & 0x1;
-    }while(flash_ready == 1);
-}
-
+/*
+ * Depreciated
+ */
 void mt25ql256aba_store_samples(uint32_t* flash_addr)
 {
     uint8_t flash_addr_buf[3]= {0};
@@ -373,7 +346,7 @@ void mt25ql256aba_store_samples(uint32_t* flash_addr)
     }
 }
 
-void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr)
+void logging_store_samples(uint32_t* flash_addr)
 {
     uint8_t flash_addr_buf[3]= {0};
     uint8_t sample_size_bytes = sizeof(impact_sample_t);
@@ -403,18 +376,9 @@ void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr)
     }
 }
 
-void convert_4byte_address_to_3byte_address(uint32_t flash_addr, uint8_t* flash_addr_buf)
+void logging_retrieve_samples(uint32_t address)
 {
-    uint8_t* flash_addr_ptr = (uint8_t*)&flash_addr;
-    flash_addr_buf[0] = flash_addr_ptr[2]; //high address value
-    flash_addr_buf[1] = flash_addr_ptr[1];
-    flash_addr_buf[2] = flash_addr_ptr[0]; //low address value
-}
-
-void mt25ql256aba_retrieve_samples(void)
-{
-    uint32_t addr32 = 0x00000000;
-    uint8_t addr[3] = {0};
+    uint8_t addr[3];
     uint8_t sample_size_bytes = sizeof(impact_sample_t);
     uint8_t *sample_byte_ptr;
 
@@ -423,7 +387,7 @@ void mt25ql256aba_retrieve_samples(void)
     for(int i = 0; i < g_buf_index; ++i) 
     {
         mt25ql256aba_check_ready_flag();
-        convert_4byte_address_to_3byte_address(addr32, addr);
+        convert_4byte_address_to_3byte_address(address, addr);
         sample_byte_ptr = (uint8_t*) &g_flash_output_buf[i];
         mt25ql256aba_read_op(MT25QL256ABA_READ,
                               addr,
@@ -433,20 +397,9 @@ void mt25ql256aba_retrieve_samples(void)
         NRF_LOG_INFO("READ: ID: %d, addr: 0x%03x, OUTPUT: %d (%d)",
                        i, addr32, g_flash_output_buf[i].adxl_data.x,
                         g_sample_set_buf[i].adxl_data.x);
-        addr32 = addr32 + sample_size_bytes;
+        address = address + sample_size_bytes;
     }
 }
-
-void mt25ql256aba_erase(void)
-{
-    uint8_t addr[3] = {0x00, 0x00, 0x00};
-
-    mt25ql256aba_check_ready_flag();
-    mt25ql256aba_write_enable();
-    mt25ql256aba_write_op(MT25QL256ABA_ERASE_4KB_SUBSECTOR, addr, sizeof(addr), NULL, 0);
-    mt25ql256aba_write_disable();
-}
-
 
 void serial_output_flash_data(void)
 {
