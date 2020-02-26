@@ -87,6 +87,7 @@ extern "C" {
 #define FLASH_SPI_SCK_PIN       6
 #define FLASH_SPI_MOSI_PIN      8
 #define FLASH_SPI_MISO_PIN      13
+//#define USE_FLASH
 
 
 

@@ -27,26 +27,32 @@
 * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 *
 */
-#ifndef NRF52832_MDK_H
-#define NRF52832_MDK_H
+#ifndef IMU_PCB_REV1_H
+#define IMU_PCB_REV1_H 
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define RX_PIN_NUMBER  24
-#define TX_PIN_NUMBER  23
+#define RX_PIN_NUMBER  23
+#define TX_PIN_NUMBER  24
+#define HWFC           false
 
 //===================SPI PINOUT========================//
-#define SPI_SCK_PIN             12
-#define SPI_MISO_PIN            13
-#define SPI_MOSI_PIN            14
+#define SPI_MOSI_PIN            0 //gyro
+#define SPI_MISO_PIN            1
+#define SPI_SCK_PIN             2
 #define SPI_ICM20649_CS_PIN     5
-#define SPI_MT25QL256ABA_CS_PIN 8
-#define SPI_ADXL372_CS_PIN      30
+#define SPI_MT25QL256ABA_CS_PIN 12
+#define SPI_ADXL372_CS_PIN      8
 
+
+#define SPI_FLASH_MOSI_PIN      19
+#define SPI_FLASH_MISO_PIN      15
+#define SPI_FLASH_SCK_PIN       14
+#define SPI_FLASH_CS_PIN        18
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif // NRF52832_MDK_H
+#endif // IMU_PCB_REV1_H
