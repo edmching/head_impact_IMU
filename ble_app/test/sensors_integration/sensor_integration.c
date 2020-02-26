@@ -2,7 +2,7 @@
 #include "nrf_delay.h"
 
 #define NUM_SAMPLES 50
-//#define USE_DEMO_APP
+#define USE_DEMO_APP
 
 static void log_init(void);
 static void lfclk_request(void);
@@ -105,7 +105,7 @@ int main (void)
         if(prox_val >= PROX_THRESHOLD)
         {
 #endif
-            //nrf_delay_ms(500);
+            nrf_delay_ms(500);
             adxl372_get_accel_data(&high_g_data);
 
             //NRF_LOG_INFO("%d, %d, %d", high_g_data.x, high_g_data.y, high_g_data.z);

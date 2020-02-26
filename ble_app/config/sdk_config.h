@@ -7580,7 +7580,7 @@
 // <268435456=> 1000000 baud 
 
 #ifndef NRF_LOG_BACKEND_UART_BAUDRATE
-#define NRF_LOG_BACKEND_UART_BAUDRATE 30801920 // 115200 calm down it just in hex
+#define NRF_LOG_BACKEND_UART_BAUDRATE 30801920 // 115200
 #endif
 
 // <o> NRF_LOG_BACKEND_UART_TEMP_BUFFER_SIZE - Size of buffer for partially processed strings. 

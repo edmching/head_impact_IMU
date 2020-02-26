@@ -46,6 +46,10 @@
 #ifdef USE_APP_CONFIG
 #include "app_config.h"
 #endif
+/* Add in sdk_config.h */
+#ifndef _PARAMS
+#define _PARAMS(paramlist)		paramlist
+#endif
 // <h> Application 
 
 // <h> nRF_BLE 
@@ -7369,7 +7373,7 @@
 #endif
 // <o> NRF_LOG_BACKEND_UART_TX_PIN - UART TX pin 
 #ifndef NRF_LOG_BACKEND_UART_TX_PIN
-#define NRF_LOG_BACKEND_UART_TX_PIN 20
+#define NRF_LOG_BACKEND_UART_TX_PIN 24
 #endif
 
 // <o> NRF_LOG_BACKEND_UART_BAUDRATE  - Default Baudrate

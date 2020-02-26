@@ -1,4 +1,4 @@
-PROJECT_NAME     := icm20649_test_nrf52832_mdk_s132
+PROJECT_NAME     := icm20649_imu_pcb_rev1
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
@@ -60,6 +60,8 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
+  ${CURDIR} \
+  $(PROJ_DIR)/config \
   $(APP_DIR)/test/icm20649_test \
   $(APP_DIR)/drivers/spi \
   $(SDK_ROOT)/integration/nrfx/legacy \
@@ -93,7 +95,6 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/cli \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/libraries/util \
-  $(PROJ_DIR)/config \
   $(SDK_ROOT)/components/libraries/csense \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ecc \
@@ -136,12 +137,14 @@ OPT = -O3 -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBOARD_CUSTOM
-CFLAGS += -DNRF52832_IMU_PCB_REV1
+CFLAGS += -DNRF52832_MDK
+#CFLAGS += -DIMU_PCB_REV1
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DNRF52
 CFLAGS += -DNRF52832_XXAA
 CFLAGS += -DNRF52_PAN_74
+#CFLAGS += -DNRF_LOG_USES_RTT=1 
 #CFLAGS += -DNRF_SD_BLE_API_VERSION=6
 CFLAGS += -DS132
 #CFLAGS += -DSOFTDEVICE_PRESENT
@@ -222,34 +225,39 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 # Flash the program
 flash: default
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex --sectorerase
+	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex --sectorerase --verify
 	nrfjprog -f nrf52 --reset
 #pyocd-flashtool -t nrf52 -se $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
+
+# Compare nrfjprog with pyocd
+flash_debug: default
+	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
+	pyocd-flashtool -t nrf52 -se $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
 
 # Flash softdevice
 flash_softdevice:
 	@echo Flashing: s132_nrf52_6.1.0_softdevice.hex
-	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex --sectorerase 
-	#pyocd-flashtool -t nrf52 -se $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
+	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex --sectorerase --verify
+#pyocd-flashtool -t nrf52 -se $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
 
 # Merge application and softdevice, then flash
 flash_all: default
 	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
-	#pyocd-flashtool -t nrf52 -ce $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
+	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex --sectorerase --verify
+#pyocd-flashtool -t nrf52 -ce $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 
 # Erase chip
 erase:
 	nrfjprog -f nrf52 --eraseall
-	#pyocd-flashtool -t nrf52 -ce
+#pyocd-flashtool -t nrf52 -ce
 
 # Generate hex file
 release:
 	@echo Generating hex file...
 	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(APP_DIR)/hex/$(PROJECT_NAME).hex
 
-SDK_CONFIG_FILE := $(APP_DIR)/config/sdk_config.h
+SDK_CONFIG_FILE := ${CURDIR}/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)

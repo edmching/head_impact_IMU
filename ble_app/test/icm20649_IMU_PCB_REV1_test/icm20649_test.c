@@ -2,10 +2,12 @@
 #include <stdint.h>
 #include <string.h>
 
+#include "sdk_config.h"
 //general nrf
 #include "nrf.h"
 #include "nordic_common.h"
 #include "boards.h"
+#include "nrf_delay.h"
 
 #include "spi_driver.h"
 
@@ -26,7 +28,7 @@ typedef struct{
     int16_t gyro_z;
 } icm20649_data_t;
 
-static void log_init(void);
+void log_init(void);
 int8_t icm20649_write_reg(uint8_t address, uint8_t data);
 int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data);
 int8_t icm20649_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes);
@@ -35,9 +37,17 @@ void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data);
 int main (void)
 {
     // Initialize.
+    log_init();
+    NRF_LOG_INFO("TEST PROGRAM");
+    NRF_LOG_INFO("HELLO");
+    while(1){
+        NRF_LOG_INFO("HELLO WORLD");
+        nrf_delay_ms(1000);
+
+    }
+#ifdef TEST_GYRO
     spi_init();
     log_init();
-
     NRF_LOG_INFO(" ICM20649 TEST measurement mode");
     nrf_delay_ms(10);
 
@@ -123,6 +133,7 @@ int main (void)
     
         nrf_delay_ms(1000);
     }
+#endif
 
     return 0;
 }
@@ -191,7 +202,7 @@ void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data)
 
 }
 
-static void log_init(void)
+void log_init(void)
 {
     ret_code_t err_code = NRF_LOG_INIT(NULL);
     APP_ERROR_CHECK(err_code);
