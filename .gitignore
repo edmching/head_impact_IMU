@@ -19,3 +19,4 @@ material/*
 projectfiles
 *.py*
 .vs/
+*.log
