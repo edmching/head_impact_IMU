@@ -2,14 +2,16 @@
 #include <stdint.h>
 #include <string.h>
 
-#include "sdk_config.h"
 //general nrf
 #include "nrf.h"
 #include "nordic_common.h"
 #include "boards.h"
 #include "nrf_delay.h"
+#include "nrf_gpio.h"
+#include "system_nrf52.h"
 
 #include "spi_driver.h"
+#include "adxl372.h"
 
 //for NRF_LOG()
 #include "nrf_log.h"
@@ -18,6 +20,8 @@
 
 //for error logging
 #include "app_error.h"
+
+//const uint32_t UICR_ADDR_0x20C __attribute__ ((section(".uicrNfcPinsAddress"))) __attribute__((used));
 
 typedef struct{
     int16_t accel_x;
@@ -34,22 +38,156 @@ int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data);
 int8_t icm20649_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes);
 void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data);
 
+void adxl372_test()
+{
+    int8_t ret = 0;
+    uint8_t device_id;
+    uint8_t mst_devid;
+    uint8_t devid;
+
+    NRF_LOG_INFO("-----------------------------");
+    NRF_LOG_INFO("adxl372 test measurement mode");
+    nrf_delay_ms(100);
+
+    adxl372_reset();
+
+    //--------------------READ TEST---------------------//
+    device_id = adxl372_get_dev_ID();
+    ret |= adxl372_read_reg( ADI_ADXL372_MST_DEVID, &mst_devid);
+    ret |= adxl372_read_reg(ADI_ADXL372_DEVID, &devid);
+    if (ret < 0)
+    {
+        NRF_LOG_ERROR("SPI WRITE READ FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+
+    NRF_LOG_INFO("adi device id = 0x%x (0xAD)", device_id);
+    if(device_id != ADI_ADXL372_ADI_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    NRF_LOG_INFO("mst device id2 = 0x%x (0x1D)", mst_devid);
+    if(mst_devid != ADI_ADXL372_MST_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    NRF_LOG_INFO("mems id = 0x%x (0xFA)(372 octal)", devid);
+    if(devid != ADI_ADXL372_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    else{
+        NRF_LOG_INFO("ADXL READ TEST PASS");
+    }
+    // ==========================================
+
+    // Write TEST 
+    uint8_t p_reg;
+    uint8_t lpf_val;
+    uint8_t hpf_val;
+    uint8_t op_val;
+    adxl372_set_op_mode(STAND_BY);
+    adxl372_set_lpf_disable(true);
+    adxl372_set_hpf_disable(true);
+    ret |= adxl372_read_reg(ADI_ADXL372_POWER_CTL, &p_reg);
+    if (ret < 0)
+    {
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    lpf_val = (p_reg >> PWRCTRL_LPF_DISABLE_POS) & 0x1;
+    hpf_val = (p_reg >> PWRCTRL_HPF_DISABLE_POS) & 0x1;
+    op_val = (p_reg >> PWRCTRL_OPMODE_POS) & 0x3;
+    NRF_LOG_INFO("lpf val = %d (expected: 1)", lpf_val);
+    NRF_LOG_INFO("hpf val = %d (expected: 1)", hpf_val);
+    NRF_LOG_INFO("op val = %d (expected: 0)", op_val);
+    if(lpf_val != 1 || hpf_val != 1 || op_val !=0)
+    {
+        NRF_LOG_ERROR("ADXL WRITE TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    else{
+        NRF_LOG_INFO("ADXL WRITE TEST PASS");
+    }
+}
+
+
 int main (void)
 {
     // Initialize.
+    SystemInit();
     log_init();
-    NRF_LOG_INFO("TEST PROGRAM");
-    NRF_LOG_INFO("HELLO");
-    while(1){
-        NRF_LOG_INFO("HELLO WORLD");
-        nrf_delay_ms(1000);
+    //spi_init();
 
+    /*
+    adxl372_test();
+    adxl372_default_init();
+    adxl372_accel_data_t accel_data;
+    while (1)
+    {
+        adxl372_get_accel_data(&accel_data);
+        NRF_LOG_INFO("X accel = %d mG, Y accel = %d mG, Z accel = %d mG",
+                        accel_data.x, accel_data.y, accel_data.z);
+        nrf_delay_ms(1000);
     }
-#ifdef TEST_GYRO
-    spi_init();
-    log_init();
+    */
+    nrf_gpio_cfg_output(SPI_SCK_PIN);
+    nrf_gpio_cfg_output(SPI_MOSI_PIN);
+    nrf_gpio_cfg_output(SPI_MISO_PIN);
+    nrf_gpio_cfg_output(SPI_ICM20649_CS_PIN);
+    //nrf_gpio_cfg_output(SPI_ADXL372_CS_PIN);
+
+    while(1)
+    {
+        //nrf_gpio_pin_set(SPI_ICM20649_CS_PIN);
+        //nrf_delay_ms(1);
+        //nrf_gpio_pin_clear(SPI_ICM20649_CS_PIN);
+        //nrf_delay_ms(2);
+        
+        //nrf_gpio_pin_set(SPI_ADXL372_CS_PIN);
+        //nrf_delay_ms(1);
+        //nrf_gpio_pin_clear(SPI_ADXL372_CS_PIN);
+        //nrf_delay_ms(2);
+
+        nrf_gpio_pin_set(SPI_SCK_PIN);
+        nrf_delay_ms(1);
+        nrf_gpio_pin_clear(SPI_SCK_PIN);
+        nrf_delay_ms(2);
+
+        nrf_gpio_pin_set(SPI_MOSI_PIN);
+        //nrf_delay_ms(1);
+        //nrf_gpio_pin_clear(SPI_MOSI_PIN);
+        nrf_delay_ms(2);
+
+        nrf_gpio_pin_set(SPI_MISO_PIN);
+        nrf_delay_ms(1);
+        nrf_gpio_pin_clear(SPI_MISO_PIN);
+        nrf_delay_ms(2);
+        
+    }
+    
+    
     NRF_LOG_INFO(" ICM20649 TEST measurement mode");
-    nrf_delay_ms(10);
 
     /*********TEST READ******************/
     uint8_t who_am_i = 0x0;
@@ -62,7 +200,14 @@ int main (void)
     else
     {
         NRF_LOG_INFO("VAL ERROR"); 
-       // while(1);
+        /*
+       while(1)
+       {
+           icm20649_read_reg(0x0, &who_am_i);
+           NRF_LOG_INFO("who_am_i = 0x%x (0xE1)", who_am_i );
+           nrf_delay_ms(300);
+       }
+       */
     }
 
     /********************************************/
@@ -84,7 +229,11 @@ int main (void)
     else
     {
         NRF_LOG_INFO("VAL ERROR"); 
-       // while(1);
+        while(1)
+        {
+          __WFE();
+        }
+        
     }
 
     /********************************************/
@@ -133,7 +282,6 @@ int main (void)
     
         nrf_delay_ms(1000);
     }
-#endif
 
     return 0;
 }

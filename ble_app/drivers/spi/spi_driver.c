@@ -71,12 +71,12 @@ void spi_init (void)
     };
     ret_code_t err_code = nrf_drv_spi_init(&spi, &spi_config, spi_event_handler, NULL);
     APP_ERROR_CHECK(err_code);
+    nrf_gpio_cfg_output(SPI_ICM20649_CS_PIN);
+    nrf_gpio_cfg_output(SPI_ADXL372_CS_PIN);
     nrf_gpio_pin_clear(SPI_ADXL372_CS_PIN);
     nrf_gpio_pin_clear(SPI_ICM20649_CS_PIN);
     nrf_gpio_pin_set(SPI_ADXL372_CS_PIN);
     nrf_gpio_pin_set(SPI_ICM20649_CS_PIN);
-    nrf_gpio_cfg_output(SPI_ADXL372_CS_PIN);
-    nrf_gpio_cfg_output(SPI_ICM20649_CS_PIN);
 }
 
 #ifdef USE_FLASH

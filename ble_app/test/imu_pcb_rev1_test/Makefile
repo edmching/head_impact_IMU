@@ -62,7 +62,7 @@ SRC_FILES += \
 # Include folders common to all targets
 INC_FOLDERS += \
   ${CURDIR} \
-  $(ROOT_DIR)/config \
+  $(ROOT_DIR)/board_config \
   $(PROJ_DIR)/test/icm20649_test \
   $(PROJ_DIR)/drivers/spi \
   $(PROJ_DIR)/drivers/adxl372/ \
@@ -139,6 +139,7 @@ OPT = -O3 -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBOARD_CUSTOM
+# Uncomment to switch between the hardware boards
 #CFLAGS += -DNRF52832_MDK
 CFLAGS += -DIMU_PCB_REV1
 CFLAGS += -DCONFIG_NFCT_PINS_AS_GPIOS
