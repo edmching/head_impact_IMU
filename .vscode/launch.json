@@ -1,0 +1,24 @@
+{
+    //JLINK DEBUGGING
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+        "type": "cortex-debug",
+        "request": "launch",
+        "name": "Debug J-Link",
+        "cwd": "${workspaceRoot}",
+        "executable": "${workspaceRoot}/ble_app/test/imu_pcb_rev1_test/_build/nrf52832_xxaa.out",
+        "serverpath": "/opt/SEGGER/JLink/JLinkGDBServerCLExe", 
+        "servertype": "jlink",
+        "device": "nrf52832_xxaa",
+        "interface": "swd",
+        "serialNumber": "", //if you have more than one J-Link probe add the serial number here 
+        "jlinkscript":"",
+        "runToMain": true,
+        "svdFile": "/opt/SEGGER/Ozone/Config/CPU/Cortex-M4F.svd" 
+        }
+        ]
+    }

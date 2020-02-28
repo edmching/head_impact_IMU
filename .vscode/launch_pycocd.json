@@ -1,0 +1,16 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "type": "cortex-debug",
+            "request": "launch",
+            "servertype": "pyocd",
+            "cwd": "${workspaceRoot}",
+            "executable": "${workspaceRoot}/ble_app/test/sensors_integration/_build/nrf52832_xxaa.out",
+            "name": "Debug (pyOCD)",
+            "device": "nrf52832_xxaa",
+            "targetId": "nrf52",
+            "boardId": ""
+        }
+    ]
+}

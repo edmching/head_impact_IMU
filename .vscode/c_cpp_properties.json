@@ -1,0 +1,23 @@
+{
+    "configurations": [
+        {
+            "name": "Linux",
+            "includePath": [
+                "${workspaceFolder}/**"
+            ],
+            "defines": [
+                "_DEBUG",
+                "UNICODE",
+                "_UNICODE",
+                "__UINT8_TYPE__=unsigned char",
+                "__INT8_TYPE__=char"
+                ],
+            "compilerPath": "/home/edm/Downloads/gcc-arm-none-eabi",
+            "compilerArgs": ["-mcpu=cortex-m4", "-mthumb", "-mfloat-abi=hard"],
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-x64"
+        }
+    ],
+    "version": 4
+}
