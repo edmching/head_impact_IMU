@@ -3,8 +3,8 @@ TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
 APP_DIR := ../..
-PROJ_DIR := $(APP_DIR)/..
-SDK_ROOT := $(PROJ_DIR)/nrf_sdk
+ROOT_DIR := $(APP_DIR)/..
+SDK_ROOT := $(ROOT_DIR)/nrf_sdk
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
   LINKER_SCRIPT  := $(APP_DIR)/ble_app_blinky_gcc_nrf52.ld
@@ -92,7 +92,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/cli \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/libraries/util \
-  $(PROJ_DIR)/config \
+  $(ROOT_DIR)/board_config \
   $(SDK_ROOT)/components/libraries/csense \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ecc \

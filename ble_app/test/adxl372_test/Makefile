@@ -2,20 +2,20 @@ PROJECT_NAME     := adxl372_test_nrf52832_mdk_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
-APP_DIR := ../..
-PROJ_DIR := $(APP_DIR)/..
-SDK_ROOT := $(PROJ_DIR)/nrf_sdk
+PROJ_DIR := ../..
+ROOT_DIR := $(PROJ_DIR)/..
+SDK_ROOT := $(ROOT_DIR)/nrf_sdk
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
-  LINKER_SCRIPT  := $(APP_DIR)/ble_app_blinky_gcc_nrf52.ld
+  LINKER_SCRIPT  := $(PROJ_DIR)/ble_app_blinky_gcc_nrf52.ld
 
 # Source files common to all targets
 SRC_FILES += \
   adxl372_test.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
-  $(APP_DIR)/drivers/spi/spi_driver.c \
-  $(APP_DIR)/drivers/adxl372/adxl372.c \
+  $(PROJ_DIR)/drivers/spi/spi_driver.c \
+  $(PROJ_DIR)/drivers/adxl372/adxl372.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
@@ -61,10 +61,10 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
-  $(PROJ_DIR)/config \
-  $(APP_DIR)/test/adxl372_test \
-  $(APP_DIR)/drivers/adxl372 \
-  $(APP_DIR)/drivers/spi \
+  $(ROOT_DIR)/board_config \
+  $(PROJ_DIR)/test/adxl372_test \
+  $(PROJ_DIR)/drivers/adxl372 \
+  $(PROJ_DIR)/drivers/spi \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/modules/nrfx/hal \
@@ -243,9 +243,9 @@ erase:
 # Generate hex file
 release:
 	@echo Generating hex file...
-	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(APP_DIR)/hex/$(PROJECT_NAME).hex
+	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(PROJ_DIR)/hex/$(PROJECT_NAME).hex
 
-SDK_CONFIG_FILE := $(APP_DIR)/config/sdk_config.h
+SDK_CONFIG_FILE := $(PROJ_DIR)/config/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)

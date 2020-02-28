@@ -6,6 +6,7 @@
 #include "nrf.h"
 #include "nordic_common.h"
 #include "boards.h"
+#include "nrf_delay.h"
 
 #include "spi_driver.h"
 
