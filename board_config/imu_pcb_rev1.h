@@ -40,8 +40,8 @@ extern "C" {
 //===================SPI PINOUT========================//
 #define USE_GYRO
 #ifdef USE_GYRO
-#define SPI_MOSI_PIN            0 //gyro
-#define SPI_MISO_PIN            1
+#define SPI_MOSI_PIN            1 //gyro - pins 0 & 1 are flipped
+#define SPI_MISO_PIN            0 
 #define SPI_SCK_PIN             2
 #endif
 #ifndef USE_GYRO

@@ -107,6 +107,7 @@ int8_t spi_write_and_read (uint8_t cs_pin, uint8_t* tx_msg, uint8_t tx_length, u
 
     nrf_gpio_pin_clear(cs_pin);
     ret_code_t err_code = nrf_drv_spi_transfer(&spi, tx_msg , tx_length, rx_msg, rx_length);
+    //set the cs_pin here??
     if (err_code != NRF_SUCCESS)
         return -1;
 

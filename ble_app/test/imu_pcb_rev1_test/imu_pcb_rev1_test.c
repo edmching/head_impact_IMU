@@ -21,6 +21,8 @@
 //for error logging
 #include "app_error.h"
 
+#define TEST_GYRO
+
 //const uint32_t UICR_ADDR_0x20C __attribute__ ((section(".uicrNfcPinsAddress"))) __attribute__((used));
 
 typedef struct{
@@ -137,9 +139,11 @@ int main (void)
     // Initialize.
     SystemInit();
     log_init();
-    //spi_init();
+#ifndef TEST_GPIO
+    spi_init();
+#endif
 
-    /*
+#ifdef USE_ACCEL
     adxl372_test();
     adxl372_default_init();
     adxl372_accel_data_t accel_data;
@@ -150,7 +154,9 @@ int main (void)
                         accel_data.x, accel_data.y, accel_data.z);
         nrf_delay_ms(1000);
     }
-    */
+#endif
+    
+#ifdef TEST_GPIO
     nrf_gpio_cfg_output(SPI_SCK_PIN);
     nrf_gpio_cfg_output(SPI_MOSI_PIN);
     nrf_gpio_cfg_output(SPI_MISO_PIN);
@@ -185,8 +191,10 @@ int main (void)
         nrf_delay_ms(2);
         
     }
+#endif
     
     
+#ifdef TEST_GYRO
     NRF_LOG_INFO(" ICM20649 TEST measurement mode");
 
     /*********TEST READ******************/
@@ -207,7 +215,7 @@ int main (void)
            NRF_LOG_INFO("who_am_i = 0x%x (0xE1)", who_am_i );
            nrf_delay_ms(300);
        }
-       */
+      */
     }
 
     /********************************************/
@@ -282,6 +290,7 @@ int main (void)
     
         nrf_delay_ms(1000);
     }
+#endif
 
     return 0;
 }
