@@ -21,8 +21,6 @@
 //for error logging
 #include "app_error.h"
 
-#define TEST_GYRO
-
 //const uint32_t UICR_ADDR_0x20C __attribute__ ((section(".uicrNfcPinsAddress"))) __attribute__((used));
 
 typedef struct{
@@ -153,43 +151,6 @@ int main (void)
         NRF_LOG_INFO("X accel = %d mG, Y accel = %d mG, Z accel = %d mG",
                         accel_data.x, accel_data.y, accel_data.z);
         nrf_delay_ms(1000);
-    }
-#endif
-    
-#ifdef TEST_GPIO
-    nrf_gpio_cfg_output(SPI_SCK_PIN);
-    nrf_gpio_cfg_output(SPI_MOSI_PIN);
-    nrf_gpio_cfg_output(SPI_MISO_PIN);
-    nrf_gpio_cfg_output(SPI_ICM20649_CS_PIN);
-    //nrf_gpio_cfg_output(SPI_ADXL372_CS_PIN);
-
-    while(1)
-    {
-        //nrf_gpio_pin_set(SPI_ICM20649_CS_PIN);
-        //nrf_delay_ms(1);
-        //nrf_gpio_pin_clear(SPI_ICM20649_CS_PIN);
-        //nrf_delay_ms(2);
-        
-        //nrf_gpio_pin_set(SPI_ADXL372_CS_PIN);
-        //nrf_delay_ms(1);
-        //nrf_gpio_pin_clear(SPI_ADXL372_CS_PIN);
-        //nrf_delay_ms(2);
-
-        nrf_gpio_pin_set(SPI_SCK_PIN);
-        nrf_delay_ms(1);
-        nrf_gpio_pin_clear(SPI_SCK_PIN);
-        nrf_delay_ms(2);
-
-        nrf_gpio_pin_set(SPI_MOSI_PIN);
-        //nrf_delay_ms(1);
-        //nrf_gpio_pin_clear(SPI_MOSI_PIN);
-        nrf_delay_ms(2);
-
-        nrf_gpio_pin_set(SPI_MISO_PIN);
-        nrf_delay_ms(1);
-        nrf_gpio_pin_clear(SPI_MISO_PIN);
-        nrf_delay_ms(2);
-        
     }
 #endif
     
