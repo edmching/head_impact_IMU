@@ -21,6 +21,8 @@
 //for error logging
 #include "app_error.h"
 
+#define TEST_GYRO
+
 //const uint32_t UICR_ADDR_0x20C __attribute__ ((section(".uicrNfcPinsAddress"))) __attribute__((used));
 
 typedef struct{
@@ -244,12 +246,14 @@ int main (void)
         data.accel_x = ((float) data.accel_x/1024.0)*1000;
         data.accel_y = ((float) data.accel_y/1024.0)*1000;
         data.accel_z = ((float) data.accel_z/1024.0)*1000;
-        data.gyro_x = ((float) data.gyro_x / 32767.0) * 2000.0 * deg2rad;
+        data.gyro_x = ((float) data.gyro_x / 32767.0) * 2000.0 * deg2rad*1000;
+        data.gyro_y = ((float) data.gyro_y / 32767.0) * 2000.0 * deg2rad*1000;
+        data.gyro_z = ((float) data.gyro_z / 32767.0) * 2000.0 * deg2rad*1000;
 
-        NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
+        NRF_LOG_RAW_INFO("accel x = %d, accel y = %d, accel z = %d, gyro x = %d, gyro y = %d, gyro z = %d \r\n", 
         data.accel_x, data.accel_y, data.accel_z, data.gyro_x, data.gyro_y, data.gyro_z );
     
-        nrf_delay_ms(1000);
+        nrf_delay_ms(100);
     }
 #endif
 
