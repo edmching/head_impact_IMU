@@ -22,7 +22,8 @@
         "segger_rtt_conf.h": "c",
         "segger_rtt.h": "c",
         "nrf_log_default_backends.h": "c",
-        "nrf_gpio.h": "c"
+        "nrf_gpio.h": "c",
+        "nrf_drv_spi.h": "c"
     },
     "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve",
     "C_Cpp.default.includePath": ["${workspaceFolder}/**"],

@@ -84,9 +84,9 @@ extern "C" {
 #define SPI_MOSI_PIN            4
 #define SPI_MISO_PIN            28
 #define SPI_SCK_PIN             3
-#define FLASH_SPI_SCK_PIN       6
-#define FLASH_SPI_MOSI_PIN      8
-#define FLASH_SPI_MISO_PIN      13
+#define SPI_FLASH_SCK_PIN       6
+#define SPI_FLASH_MOSI_PIN      8
+#define SPI_FLASH_MISO_PIN      13
 
 //===================I2C PINOUT========================//
 // I2C pin assignment

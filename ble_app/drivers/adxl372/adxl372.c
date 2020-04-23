@@ -1,13 +1,10 @@
 #include "adxl372.h"
 #include "spi_driver.h"
+#include "nrf_delay.h"
+
 
 void adxl372_default_init (void)
 {
-    /*
-    GPIO for INT1 pin and INT2 pin,
-    gpio_init();
-    */
-
     //initialize device settings
     /* set up measurement mode */
     adxl372_reset();
@@ -417,7 +414,3 @@ int8_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *s
     return 0;
 }
 
-void adxl372_set_interrupts(void)
-{
-    //TODO once we have INT1 and INT2 pins setup
-}

@@ -38,26 +38,21 @@ extern "C" {
 #define HWFC           false
 
 //===================SPI PINOUT========================//
-#define USE_GYRO
-#ifdef USE_GYRO
-#define SPI_MOSI_PIN            1 //gyro - pins 0 & 1 are flipped
-#define SPI_MISO_PIN            0 
-#define SPI_SCK_PIN             2
-#endif
-#ifndef USE_GYRO
-#define SPI_MOSI_PIN            10 //gyro
-#define SPI_MISO_PIN            9
-#define SPI_SCK_PIN             11
-#endif
-#define SPI_ICM20649_CS_PIN     3
-#define SPI_ADXL372_CS_PIN      8
+#define SPI_GYRO_MOSI_PIN            1 //gyro - pins 0 & 1 are flipped
+#define SPI_GYRO_MISO_PIN            0 
+#define SPI_GYRO_SCK_PIN             2
+#define SPI_GYRO_CS_PIN              3
 
+#define SPI_ACCEL_MOSI_PIN            10
+#define SPI_ACCEL_MISO_PIN            9
+#define SPI_ACCEL_SCK_PIN             11
+#define SPI_ACCEL_CS_PIN              8
 
 #define SPI_FLASH_MOSI_PIN      19
 #define SPI_FLASH_MISO_PIN      15
 #define SPI_FLASH_SCK_PIN       14
 #define SPI_FLASH_CS_PIN        18
-#define SPI_MT25QL256ABA_CS_PIN 15
+#define SPI_FLASH_CS_PIN        15
 
 #ifdef __cplusplus
 }
