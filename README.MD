@@ -6,24 +6,6 @@ Requirements:
 * GNU make [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/) 
 * pyOCD
 
-## TODO
-* Develop serial data logging application
-  * Frontend
-    * command line
-      * NRF CLI Library or app_uart
-    * Serial plotter
-  * Backend
-    * Flash sample storage
-      * store only high g accel (6 bytes) and gyroscope values(6 bytes) + inital rtc data (8 bytes)
-    * Integrate proximity sensor
-
-* Validation Testing
-  * Validate adxl accel values with icm accel values
-    * Tune adxl accel values
-  * Hardware Integration
-    * Develop test program for validating all sensors
-* Features to add later
-  * Bluetooth
 ## Getting Started
 
 ### Downloading Git (For Windows Users Only)
