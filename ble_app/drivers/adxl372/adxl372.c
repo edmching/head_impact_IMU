@@ -1,6 +1,5 @@
 #include "adxl372.h"
 #include "spi_driver.h"
-#include "nrf_delay.h"
 
 void adxl372_default_init (void)
 {
