@@ -36,7 +36,7 @@ static uint8_t ps_ms_data =		(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3
 static volatile bool m_xfer_done = false;
 
 /* TWI instance. */
-static const nrf_drv_twi_t vcnl_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+static const nrf_drv_twi_t twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 /* Buffer for samples read from temperature sensor. */
 static uint8_t m_sample_lsb;
@@ -46,16 +46,24 @@ static uint16_t m_sample;
 /**
  * @brief Function for setting active mode on VCNL4040 proximity sensor
  */
+/**
+ * @brief Function for setting active mode on VCNL4040 proximity sensor
+ */
 void vcnl_config(void)
 {	
+
+    NRF_LOG_INFO("Configuring VCNL...");
+
 	uint8_t reg1[3] = {VCNL4040_PS_CONF3, ps_conf3_data, ps_ms_data};
-    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
+    nrf_drv_twi_tx(&twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
     while (m_xfer_done == false);
 	
     uint8_t reg2[3] = {VCNL4040_PS_CONF1, ps_conf1_data, ps_conf2_data};
-    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
+    nrf_drv_twi_tx(&twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
     while (m_xfer_done == false);
 }
+
+
 
 /**
  * @brief Function for handling data from temperature sensor.
@@ -75,13 +83,24 @@ void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
     switch (p_event->type)
     {
         case NRF_DRV_TWI_EVT_DONE:
-            if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
-            {
-                data_handler(m_sample);
-            }
+            // if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
+            //     {
+            //         prox_val = m_sample;
+            //     }
             m_xfer_done = true;
             break;
+        case NRF_DRV_TWI_EVT_DATA_NACK:
+            //m_xfer_done = true;
+            NRF_LOG_INFO("\r\nDATA NACK ERROR");
+            NRF_LOG_FLUSH();
+            break;
+        case NRF_DRV_TWI_EVT_ADDRESS_NACK:
+            //m_xfer_done = true;
+            NRF_LOG_INFO("\r\nADDRESS NACK ERROR");
+            NRF_LOG_FLUSH();
+            break;
         default:
+            //m_xfer_done = true
             break;
     }
 }
@@ -93,18 +112,18 @@ void twi_init (void)
 {
     ret_code_t err_code;
 
-    const nrf_drv_twi_config_t twi_lm75b_config = {
-       .scl                = VCNL4040_SCL,
-       .sda                = VCNL4040_SDA,
-       .frequency          = NRF_DRV_TWI_FREQ_100K,
+    const nrf_drv_twi_config_t twi_config = {
+       .scl                = I2C_SCL,
+       .sda                = I2C_SDA,
+       .frequency          = NRF_DRV_TWI_FREQ_400K,
        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
        .clear_bus_init     = false
     };
 
-    err_code = nrf_drv_twi_init(&vcnl_twi, &twi_lm75b_config, twi_handler, NULL);
+    err_code = nrf_drv_twi_init(&twi, &twi_config, twi_handler, NULL);
     APP_ERROR_CHECK(err_code);
 
-    nrf_drv_twi_enable(&vcnl_twi);
+    nrf_drv_twi_enable(&twi);
 }
 
 /**
@@ -123,8 +142,8 @@ static void read_sensor_data()
     uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
     uint8_t *p_ret = reg4;
     nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, p_ret};
-    nrf_drv_twi_xfer(&vcnl_twi, &vcnl_desc, false);
-    while(nrf_drv_twi_is_busy(&vcnl_twi) == true);
+    nrf_drv_twi_xfer(&twi, &vcnl_desc, false);
+    while(nrf_drv_twi_is_busy(&twi) == true);
 
     m_sample_lsb = *p_ret;
     p_ret++;

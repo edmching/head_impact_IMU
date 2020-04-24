@@ -90,10 +90,8 @@ extern "C" {
 
 //===================I2C PINOUT========================//
 // I2C pin assignment
-#define DS1388_SDA 				15
-#define DS1388_SCL 				16
-#define VCNL4040_SDA 			17
-#define VCNL4040_SCL 			18
+#define I2C_SDA                 15
+#define I2C_SCL                 16
 
 
 #ifdef __cplusplus

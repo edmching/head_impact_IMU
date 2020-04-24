@@ -36,14 +36,10 @@
 //flash driver
 #include "mt25ql256aba.h"
 
-#define PROX_THRESHOLD 10000
+#define PROX_THRESHOLD 5000
 #define IMPACT_DURATION 100 //in milliseconds
 #define IMPACT_G_THRESHOLD 10000 //in mili-g's
 #define MAX_SAMPLE_BUF_LENGTH 500
-
-// I2C pin assignment
-#define I2C_SDA 17
-#define I2C_SCL 18
 
 // TWI instance ID
 #define TWI_INSTANCE_ID     1
@@ -68,11 +64,8 @@ static uint8_t ps_conf3_data =	(0 << 7) | (0 << 6) | (0 << 5) | (1 << 4) | (0 <<
 static uint8_t ps_ms_data =		(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (1 << 2) | (1 << 1) | (1 << 0);
 //static uint8_t blank =		    (0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (0 << 2) | (0 << 1) | (0 << 0);
  
-/* Indicates if operation on VCNL4040 I2C has ended. */
-static volatile bool m_xfer_done_vc = false;
-
-/* TWI instance for VCNL4040. */
-static const nrf_drv_twi_t vcnl_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+// /* Indicates if operation on VCNL4040 I2C has ended. */
+// static volatile bool m_xfer_done_vc = false;
 
 /* Buffer for samples read from temperature sensor. */
 static uint8_t m_sample_lsb;
@@ -105,10 +98,10 @@ static uint8_t init_time[8] = {20, 2, 12, 3, 4, 1, 0, 0};
 //init_time[7] = 0;  (hundredth of second)
  
 /* Indicates if operation on DS1388 I2C has ended. */
-static volatile bool m_xfer_done_ds = false;
+static volatile bool m_xfer_done = false;
 
-/* TWI instance for DS1388. */
-static const nrf_drv_twi_t ds_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+/* TWI instance. */
+static const nrf_drv_twi_t twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 
 typedef struct{
@@ -127,7 +120,7 @@ typedef struct{
     //uint8_t padding[6]; //to align with 32byte
 }impact_sample_t;
 
-uint16_t prox_val;
+volatile uint16_t prox_val = 0;
 //adxl372_accel_data_t g_high_G_buf[MAX_SAMPLE_BUF_LENGTH];
 //icm20649_data_t g_low_G_buf[MAX_SAMPLE_BUF_LENGTH];
 impact_sample_t g_sample_set_buf[MAX_SAMPLE_BUF_LENGTH];
@@ -154,7 +147,7 @@ void mt25ql256aba_retrieve_samples(void);
 void serial_output_flash_data(void);
 
 void vcnl_config(void);
-__STATIC_INLINE void data_handler(uint16_t prox);
+//__STATIC_INLINE void data_handler(uint16_t prox);
 void twi_handler_vcnl(nrf_drv_twi_evt_t const * p_event, void * p_context);
 void twi_init_vcnl_4040 (void);
 void read_sensor_data();

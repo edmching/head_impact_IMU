@@ -3,6 +3,7 @@
 
 #define NUM_SAMPLES 50
 #define USE_DEMO_APP
+#define USE_PROX
 
 static void log_init(void);
 static void lfclk_request(void);
@@ -41,9 +42,9 @@ int main (void)
     log_init();
     spi_init();
     flash_spi_init();
-#ifdef USE_PROX
-    twi_init_vcnl_4040();
-#endif
+//#ifdef USE_PROX
+    //twi_init_vcnl_4040();
+//#endif
 
     //for app_timer
     lfclk_request();
@@ -58,18 +59,22 @@ int main (void)
     //init sensors
     icm20649_init();
     adxl372_init();
+    NRF_LOG_INFO("TWI start");
     twi_init();
+    NRF_LOG_INFO("DS config start");
     ds_config();
-
+    NRF_LOG_INFO("DS config done");
 
     mt25ql256aba_erase();
     //bulk_erase();
     //reset_device();
     //nrf_delay_ms(1000);
-
+    NRF_LOG_INFO("Flash Erased");
     //full_page_read();
 #ifdef USE_PROX
+    NRF_LOG_INFO("VCNL start");
     vcnl_config();
+    NRF_LOG_INFO("VCNL configured");
 #endif
 
     app_timer_init();
@@ -102,13 +107,11 @@ int main (void)
     {   
 #ifdef USE_PROX
         read_sensor_data();
-        if(prox_val >= PROX_THRESHOLD)
-        {
-#endif
+#endif      
             nrf_delay_ms(500);
             adxl372_get_accel_data(&high_g_data);
 
-            //NRF_LOG_INFO("%d, %d, %d", high_g_data.x, high_g_data.y, high_g_data.z);
+            NRF_LOG_INFO("%d, %d, %d", high_g_data.x, high_g_data.y, high_g_data.z);
 
             if(high_g_data.x >= IMPACT_G_THRESHOLD|| high_g_data.y >= IMPACT_G_THRESHOLD
                     || high_g_data.z >= IMPACT_G_THRESHOLD)
@@ -135,9 +138,6 @@ int main (void)
                 }
 
             }
-#ifdef USE_PROX
-        }
-#endif
     }
 #endif
 
@@ -739,91 +739,95 @@ static void log_init(void)
  */
 void vcnl_config(void)
 {	
+
+    NRF_LOG_INFO("Configuring VCNL...");
+
 	uint8_t reg1[3] = {VCNL4040_PS_CONF3, ps_conf3_data, ps_ms_data};
-    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
-    while (m_xfer_done_vc == false);
+    nrf_drv_twi_tx(&twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
+    while (m_xfer_done == false);
 	
     uint8_t reg2[3] = {VCNL4040_PS_CONF1, ps_conf1_data, ps_conf2_data};
-    nrf_drv_twi_tx(&vcnl_twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
-    while (m_xfer_done_vc == false);
+    nrf_drv_twi_tx(&twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
+    while (m_xfer_done == false);
 }
 
-/**
- * @brief Function for handling data from temperature sensor.
- *
- * @param[in] temp          Temperature in Celsius degrees read from sensor.
- */
-__STATIC_INLINE void data_handler(uint16_t prox)
-{
-    NRF_LOG_INFO("Proximity: %d", prox);
-}
 
-/**
- * @brief TWI events handler.
- */
-void twi_handler_vcnl(nrf_drv_twi_evt_t const * p_event, void * p_context)
-{
-    switch (p_event->type)
-    {
-        case NRF_DRV_TWI_EVT_DONE:
-            if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
-            {
-                prox_val = m_sample;
-            }
-            m_xfer_done_vc = true;
-            break;
-        default:
-            break;
-    }
-}
+// /**
+//  * @brief TWI events handler.
+//  */
+// void twi_handler_vcnl(nrf_drv_twi_evt_t const * p_event, void * p_context)
+// {
+//     switch (p_event->type)
+//     {
+//         case NRF_DRV_TWI_EVT_DONE:
+//             if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
+//             {
+//                 prox_val = m_sample;
+//             }
+//             m_xfer_done = true;
+//             break;
+//         default:
+//             break;
+//     }
+// }
 
-/**
- * @brief UART initialization.
- */
-void twi_init_vcnl_4040 (void)
-{
-    ret_code_t err_code;
+// /**
+//  * @brief UART initialization.
+//  */
+// void twi_init_vcnl_4040 (void)
+// {
+//     ret_code_t err_code;
 
-    const nrf_drv_twi_config_t twi_lm75b_config = {
-       .scl                = VCNL4040_SCL,
-       .sda                = VCNL4040_SDA,
-       .frequency          = NRF_DRV_TWI_FREQ_100K,
-       .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
-       .clear_bus_init     = false
-    };
+//     const nrf_drv_twi_config_t twi_lm75b_config = {
+//        .scl                = VCNL4040_SCL,
+//        .sda                = VCNL4040_SDA,
+//        .frequency          = NRF_DRV_TWI_FREQ_100K,
+//        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
+//        .clear_bus_init     = false
+//     };
 
-    err_code = nrf_drv_twi_init(&vcnl_twi, &twi_lm75b_config, twi_handler_vcnl, NULL);
-    APP_ERROR_CHECK(err_code);
+//     err_code = nrf_drv_twi_init(&vcnl_twi, &twi_lm75b_config, twi_handler_vcnl, NULL);
+//     APP_ERROR_CHECK(err_code);
 
-    nrf_drv_twi_enable(&vcnl_twi);
-}
+//     nrf_drv_twi_enable(&vcnl_twi);
+// }
 
 /**
  * @brief Function for reading data from VCNL4040 sensor.
  */
 void read_sensor_data()
 {
-    do
-    {
-        __WFE();
-    }while (m_xfer_done_vc == false);
-    
-    m_xfer_done_vc = false;
+    // do
+    // {
+    //     __WFE();
+    // }while (m_xfer_done == false);
+    m_xfer_done = false;
 
-    uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
-    uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
-    uint8_t *p_ret = reg4;
-    nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, p_ret};
-    nrf_drv_twi_xfer(&vcnl_twi, &vcnl_desc, false);
-    while(nrf_drv_twi_is_busy(&vcnl_twi) == true);
+    while(prox_val <= PROX_THRESHOLD){
+        uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
+        uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
+        uint8_t *p_ret = reg4;
+        nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, p_ret};
+        nrf_drv_twi_xfer(&twi, &vcnl_desc, false);
+        while(nrf_drv_twi_is_busy(&twi) == true);
 
-    m_sample_lsb = *p_ret;
-    p_ret++;
-    m_sample_msb = *p_ret;
+        m_sample_lsb = *p_ret;
+        p_ret++;
+        m_sample_msb = *p_ret;
 
-    m_sample = (((m_sample_msb) << 8) | (m_sample_lsb));
-    prox_val = m_sample;
-    NRF_LOG_INFO("Proximity: %d", m_sample);
+        m_sample = (((m_sample_msb) << 8) | (m_sample_lsb));
+        prox_val = m_sample;
+        NRF_LOG_INFO("Proximity: %d", m_sample);
+    }
+
+        uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};
+        uint8_t reg4[2] = {m_sample_lsb, m_sample_msb};
+        uint8_t *p_ret = reg4;
+        nrf_drv_twi_xfer_desc_t const vcnl_desc = {NRFX_TWI_XFER_TXRX, VCNL4040_ADDR, sizeof(reg3), sizeof(reg4), reg3, p_ret};
+        nrf_drv_twi_xfer(&twi, &vcnl_desc, false);
+        while(nrf_drv_twi_is_busy(&twi) == true);
+
+    return;
 
 }
 
@@ -883,8 +887,8 @@ uint8_t hex2dec(uint8_t val) {
 void ds_config(void)
 {	
 	uint8_t reg0[2] = {CONTROL_REG, (EN_OSCILLATOR | DIS_WD_COUNTER)};
-    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg0, sizeof(reg0), false);
-    while (m_xfer_done_ds == false);
+    nrf_drv_twi_tx(&twi, DS1388_ADDRESS, reg0, sizeof(reg0), false);
+    while (m_xfer_done == false);
   
     uint8_t reg1[9] = {HUNDRED_SEC_REG,
                         dec2hex(init_time[7]),
@@ -897,8 +901,8 @@ void ds_config(void)
                         dec2hex(init_time[0])
     };
 
-    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg1, sizeof(reg1), false);
-    while (m_xfer_done_ds == false);
+    nrf_drv_twi_tx(&twi, DS1388_ADDRESS, reg1, sizeof(reg1), false);
+    while (m_xfer_done == false);
 
     NRF_LOG_INFO("RTC initialized");
 }
@@ -906,25 +910,29 @@ void ds_config(void)
 /**
  * @brief TWI events handler.
  */
-void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context)
+void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
 {
     switch (p_event->type)
     {
         case NRF_DRV_TWI_EVT_DONE:
-            m_xfer_done_ds = true;
+            // if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
+            //     {
+            //         prox_val = m_sample;
+            //     }
+            m_xfer_done = true;
             break;
         case NRF_DRV_TWI_EVT_DATA_NACK:
-            //m_xfer_done_ds = true;
+            //m_xfer_done = true;
             NRF_LOG_INFO("\r\nDATA NACK ERROR");
             NRF_LOG_FLUSH();
             break;
         case NRF_DRV_TWI_EVT_ADDRESS_NACK:
-            //m_xfer_done_ds = true;
+            //m_xfer_done = true;
             NRF_LOG_INFO("\r\nADDRESS NACK ERROR");
             NRF_LOG_FLUSH();
             break;
         default:
-            //m_xfer_done_ds = true
+            //m_xfer_done = true
             break;
     }
 }
@@ -936,18 +944,18 @@ void twi_init (void)
 {
     ret_code_t err_code;
 
-    const nrf_drv_twi_config_t twi_lm75b_config = {
-       .scl                = DS1388_SCL,
-       .sda                = DS1388_SDA,
+    const nrf_drv_twi_config_t twi_config = {
+       .scl                = I2C_SCL,
+       .sda                = I2C_SDA,
        .frequency          = NRF_DRV_TWI_FREQ_400K,
        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
        .clear_bus_init     = false
     };
 
-    err_code = nrf_drv_twi_init(&ds_twi, &twi_lm75b_config, twi_handler_ds, NULL);
+    err_code = nrf_drv_twi_init(&twi, &twi_config, twi_handler, NULL);
     APP_ERROR_CHECK(err_code);
 
-    nrf_drv_twi_enable(&ds_twi);
+    nrf_drv_twi_enable(&twi);
 }
 
 uint8_t readRegister(uint8_t reg_addr)
@@ -955,15 +963,15 @@ uint8_t readRegister(uint8_t reg_addr)
     do
         {
             __WFE();
-        }while (m_xfer_done_ds == false);
+        }while (m_xfer_done == false);
 
-    m_xfer_done_ds = false;
+    m_xfer_done = false;
 
     nrf_drv_twi_xfer_desc_t const ds_desc = {NRFX_TWI_XFER_TXRX, DS1388_ADDRESS, sizeof(reg_addr), sizeof(byte), &reg_addr, &byte};
 
-    nrf_drv_twi_xfer(&ds_twi, &ds_desc, false);
+    nrf_drv_twi_xfer(&twi, &ds_desc, false);
     
-    while(nrf_drv_twi_is_busy(&ds_twi) == true);
+    while(nrf_drv_twi_is_busy(&twi) == true);
 
     return byte;
 }
@@ -1003,3 +1011,5 @@ uint8_t get_time(ds1388_data_t* date)
     return ret;
   }
 }
+
+
