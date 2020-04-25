@@ -12,6 +12,7 @@
 
 //#include "spi_driver.h"
 #include "adxl372.h"
+#include "icm20649.h"
 
 //for NRF_LOG()
 #include "nrf_log.h"
@@ -166,7 +167,7 @@ void spi_init(void)
     ret_code_t err_code = nrf_drv_spi_init(&accel_spi, &accel_spi_config, spi_event_handler, NULL);
     APP_ERROR_CHECK(err_code);
 
-    ret_code_t err_code = nrf_drv_spi_init(&gyro_spi, &gyro_spi_config, spi_event_handler, NULL);
+    err_code = nrf_drv_spi_init(&gyro_spi, &gyro_spi_config, spi_event_handler, NULL);
     APP_ERROR_CHECK(err_code);
 
 }
@@ -191,7 +192,6 @@ int main (void)
 
     while(1)
     {
-
         icm20649_read_gyro_accel_data(&data);
         data.accel_x = ((float) data.accel_x/1024.0)*1000;
         data.accel_y = ((float) data.accel_y/1024.0)*1000;
@@ -199,7 +199,7 @@ int main (void)
         data.gyro_x = ((float) data.gyro_x / 32767.0) * 2000.0 * deg2rad;
 
         adxl372_get_accel_data(&accel_data);
-        NRF_LOG_INFO("X accel = %d mG, Y accel = %d mG, Z accel = %d mG",
+        NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mG",
                         accel_data.x, accel_data.y, accel_data.z);
 
         NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 

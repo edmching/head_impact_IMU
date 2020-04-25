@@ -1,7 +1,19 @@
 #include "adxl372.h"
-#include "spi_driver.h"
 #include "nrf_delay.h"
 
+const nrf_drv_spi_t accel_spi = NRF_DRV_SPI_INSTANCE(ACCEL_SPI_INSTANCE);  
+
+nrf_drv_spi_config_t const accel_spi_config = {
+        .ss_pin       = SPI_ACCEL_CS_PIN,
+        .miso_pin     = SPI_ACCEL_MISO_PIN,
+        .mosi_pin     = SPI_ACCEL_MOSI_PIN,
+        .sck_pin      = SPI_ACCEL_SCK_PIN,
+        .irq_priority = SPI_IRQ_PRIORITY,
+        .orc          = 0xFF,
+        .frequency    = NRF_DRV_SPI_FREQ_1M,
+        .mode         = NRF_DRV_SPI_MODE_0,
+        .bit_order    = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST,
+    };
 
 void adxl372_default_init (void)
 {
@@ -12,7 +24,7 @@ void adxl372_default_init (void)
     //Please refer to figure 36 User offset trim profile for more info
     //For ADXL372 Vs=3.3V, x_offset = 0, y_offset=2, z_offset=5 
     adxl372_set_x_offset(0);
-    adxl372_set_y_offset(2); //+10 LSB
+    adxl372_set_y_offset(0); //+10 LSB
     adxl372_set_z_offset(5); //+35 LSB
     adxl372_set_hpf_disable(true);
     adxl372_set_lpf_disable(true);
@@ -65,7 +77,7 @@ int8_t adxl372_read_reg( uint8_t reg_addr, uint8_t *reg_data)
 
     read_addr = ((reg_addr & 0xFF) << 1) | ADXL_SPI_RNW; //set R/W bit to 1 for reading
 
-    ret = spi_write_and_read(SPI_ADXL372_CS_PIN, &read_addr, 1, buf, 2);
+    ret = spi_write_and_read(&accel_spi, SPI_ACCEL_CS_PIN, &read_addr, 1, buf, 2);
     if (ret < 0)
         return ret;
     
@@ -88,7 +100,7 @@ int8_t adxl372_write_reg(uint8_t reg_addr, uint8_t reg_data)
     tx_buf[0] = (reg_addr & 0xFF) << 1; //addr is 7-bits
     tx_buf[1] = reg_data;
 
-    return spi_write_and_read(SPI_ADXL372_CS_PIN, tx_buf, 2, rx_buf, 2);
+    return spi_write_and_read(&accel_spi, SPI_ACCEL_CS_PIN, tx_buf, 2, rx_buf, 2);
 }
 
 /*
@@ -109,7 +121,7 @@ int8_t adxl372_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t 
     read_addr = (reg_addr << 1) | 0x01; //set R bit to 1
     memset(rx_buf, 0x00, num_bytes + 1);
 
-    ret = spi_write_and_read(SPI_ADXL372_CS_PIN, &read_addr, 1, rx_buf, num_bytes + 1 );
+    ret = spi_write_and_read(&accel_spi, SPI_ACCEL_CS_PIN, &read_addr, 1, rx_buf, num_bytes + 1 );
     if (ret < 0)
         return ret;
     

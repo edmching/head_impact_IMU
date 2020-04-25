@@ -52,7 +52,6 @@ extern "C" {
 #define SPI_FLASH_MISO_PIN      15
 #define SPI_FLASH_SCK_PIN       14
 #define SPI_FLASH_CS_PIN        18
-#define SPI_FLASH_CS_PIN        15
 
 #ifdef __cplusplus
 }

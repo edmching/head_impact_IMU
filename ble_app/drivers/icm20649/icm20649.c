@@ -1,7 +1,20 @@
 #include "icm20649.h"
-#include "spi_driver.h"
 
-void icm20649_default_init()
+const nrf_drv_spi_t gyro_spi = NRF_DRV_SPI_INSTANCE(GYRO_SPI_INSTANCE);  
+
+nrf_drv_spi_config_t const gyro_spi_config = {
+        .ss_pin       = SPI_GYRO_CS_PIN,
+        .miso_pin     = SPI_GYRO_MISO_PIN,
+        .mosi_pin     = SPI_GYRO_MOSI_PIN,
+        .sck_pin      = SPI_GYRO_SCK_PIN,
+        .irq_priority = SPI_IRQ_PRIORITY,
+        .orc          = 0xFF,
+        .frequency    = NRF_DRV_SPI_FREQ_1M,
+        .mode         = NRF_DRV_SPI_MODE_0,
+        .bit_order    = NRF_DRV_SPI_BIT_ORDER_MSB_FIRST,
+};
+
+void icm20649_default_init(void)
 {
     //USER CTRL disable all
     icm20649_write_reg(0x03, 0x0);
@@ -38,7 +51,7 @@ int8_t icm20649_write_reg(uint8_t address, uint8_t data)
     tx_msg[0] = address;
     tx_msg[1] = data;
 
-    return spi_write_and_read(SPI_ICM20649_CS_PIN, tx_msg, 2, rx_buf, 2 ); // send 2 bytes
+    return spi_write_and_read(&gyro_spi, SPI_GYRO_CS_PIN, tx_msg, 2, rx_buf, 2 ); // send 2 bytes
 }
 
 int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data)
@@ -48,7 +61,7 @@ int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data)
     uint8_t rx_buf[2];
 
     reg_addr = (uint8_t)  ( address | 0x80 ); //set 1st bit for reads
-    ret = spi_write_and_read(SPI_ICM20649_CS_PIN, &reg_addr, 1, rx_buf, 2);
+    ret = spi_write_and_read(&gyro_spi, SPI_GYRO_CS_PIN, &reg_addr, 1, rx_buf, 2);
 
     *reg_data = rx_buf[1];
 
@@ -67,7 +80,7 @@ int8_t icm20649_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t
     read_addr = reg_addr | 0x80; //set MSB to 1 for read
     memset( buf, 0x00, num_bytes + 1);
 
-    ret = spi_write_and_read(SPI_ICM20649_CS_PIN, &read_addr, 1, buf, num_bytes + 1 );
+    ret = spi_write_and_read(&gyro_spi, SPI_GYRO_CS_PIN, &read_addr, 1, buf, num_bytes + 1 );
     if (ret < 0)
         return ret;
     
