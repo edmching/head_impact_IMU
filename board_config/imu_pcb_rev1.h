@@ -53,6 +53,10 @@ extern "C" {
 #define SPI_FLASH_SCK_PIN       14
 #define SPI_FLASH_CS_PIN        18
 
+//===================I2C PINOUT========================//
+#define I2C_SCL                 19
+#define I2C_SDA                 20
+
 #ifdef __cplusplus
 }
 #endif

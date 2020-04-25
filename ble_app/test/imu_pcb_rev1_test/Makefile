@@ -15,9 +15,14 @@ SRC_FILES += \
   $(PROJ_DIR)/drivers/icm20649/icm20649.c \
   $(PROJ_DIR)/drivers/adxl372/adxl372.c \
   $(PROJ_DIR)/drivers/spi/spi_driver.c \
+  $(PROJ_DIR)/drivers/vcnl4040/vcnl4040.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twi.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
+  $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_uart.c \
@@ -64,10 +69,12 @@ SRC_FILES += \
 INC_FOLDERS += \
   ${CURDIR} \
   $(ROOT_DIR)/board_config \
+  $(PROJ_DIR)/drivers/spi \
   $(PROJ_DIR)/drivers/icm20649 \
   $(PROJ_DIR)/drivers/adxl372 \
-  $(PROJ_DIR)/drivers/spi \
+  $(PROJ_DIR)/drivers/vcnl4040 \
   $(SDK_ROOT)/integration/nrfx/legacy \
+  $(SDK_ROOT)/components/libraries/timer/ \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT)/components/libraries/log \

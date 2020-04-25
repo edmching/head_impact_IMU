@@ -106,3 +106,61 @@ void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data)
     icm20649_data->gyro_z = rx_buf[10]<<8 | rx_buf[11];
     
 }
+
+void icm20649_convert_data(icm20649_data_t * data)
+{
+    float deg2rad = 3.1415/180.0;
+
+    data->accel_x = ((float) data->accel_x/1024.0)*1000;
+    data->accel_y = ((float) data->accel_y/1024.0)*1000;
+    data->accel_z = ((float) data->accel_z/1024.0)*1000;
+    data->gyro_x = ((float) data->gyro_x / 32767.0) * 2000.0 * deg2rad *1000;
+    data->gyro_y = ((float) data->gyro_y / 32767.0) * 2000.0 * deg2rad *1000;
+    data->gyro_z = ((float) data->gyro_z / 32767.0) * 2000.0 * deg2rad *1000;
+}
+
+
+void icm20649_test(void)
+{
+    NRF_LOG_INFO(" ICM20649 TEST measurement mode");
+
+    /*********TEST READ******************/
+    uint8_t who_am_i = 0x0;
+    icm20649_read_reg(0x0, &who_am_i);
+    NRF_LOG_INFO("who_am_i = 0x%x (0xE1)", who_am_i );
+    if(who_am_i == 0xE1)
+    {
+        NRF_LOG_INFO("READ SUCCESSFUL");
+    }
+    else
+    {
+        NRF_LOG_INFO("VAL ERROR"); 
+    }
+    /********************************************/
+
+    
+    /*********TEST WRITE******************/
+
+    uint8_t write_read;
+    //PWR_MGMT 1 select best clk and disable everything else
+    icm20649_write_reg(0x06, 0x1);
+
+    icm20649_read_reg(0x06, &write_read);
+
+    NRF_LOG_INFO("write_read = 0x%x (0x1)", write_read );
+    if(write_read == 0x1)
+    {
+        NRF_LOG_INFO("WRITE SUCCESSFUL");
+    }
+    else
+    {
+        NRF_LOG_INFO("VAL ERROR"); 
+        while(1)
+        {
+          __WFE();
+        }
+        
+    }
+    /********************************************/
+
+}

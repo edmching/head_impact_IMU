@@ -36,13 +36,10 @@
 //flash driver
 #include "mt25ql256aba.h"
 
-#define PROX_THRESHOLD 5000
-#define IMPACT_DURATION 100 //in milliseconds
-#define IMPACT_G_THRESHOLD 10000 //in mili-g's
-#define MAX_SAMPLE_BUF_LENGTH 500
-
 // TWI instance ID
 #define TWI_INSTANCE_ID     1
+
+#define PROX_THRESHOLD 5000
 
 // Proximity sensor address
 #define VCNL4040_ADDR 0x60U //U >> 1

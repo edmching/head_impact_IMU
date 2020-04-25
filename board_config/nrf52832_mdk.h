@@ -78,8 +78,8 @@ extern "C" {
 #define HWFC           false
 
 //===================SPI PINOUT========================//
-#define SPI_ICM20649_CS_PIN     29
-#define SPI_ADXL372_CS_PIN      30
+#define SPI_GYRO_CS_PIN     29
+#define SPI_ACCEL_CS_PIN      30
 #define SPI_MT25QL256ABA_CS_PIN 27
 #define SPI_MOSI_PIN            4
 #define SPI_MISO_PIN            28

@@ -46,11 +46,11 @@
 #include <string.h> 
 #include "spi_driver.h"
 #include <nrf_drv_spi.h>
+#include "nrf_log.h"
 
 #define L_ENDIAN
 
 #define ACCEL_SPI_INSTANCE 0 /**< SPI instance index. */
-
 
 extern const nrf_drv_spi_t accel_spi;
 
@@ -269,8 +269,6 @@ struct adxl372_device {
     fifo_config_t fifo_config;
 };
 
-
-// Register read and write functions
 int8_t adxl372_read_reg( uint8_t reg_addr, uint8_t *reg_data);
 
 int8_t adxl372_write_reg(uint8_t reg_addr, uint8_t reg_data);
@@ -278,7 +276,6 @@ int8_t adxl372_write_reg(uint8_t reg_addr, uint8_t reg_data);
 int8_t adxl372_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes);
 
 int8_t adxl372_write_mask(uint8_t reg_addr, uint32_t mask, uint32_t pos, uint8_t val);
-//==================================================================================
 
 void adxl372_default_init (void);
 
@@ -335,6 +332,8 @@ void adxl372_set_z_offset(uint8_t offset);
 int32_t adxl372_configure_fifo (struct adxl372_device *dev, uint16_t fifo_samples, adxl372_fifo_mode_t fifo_mode, adxl372_fifo_format_t fifo_format);
 
 int8_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *fifo_data);
+
+void adxl372_test(void);
 
 #endif /* ADXL372_H */
 

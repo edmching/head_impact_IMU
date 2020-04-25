@@ -5334,7 +5334,7 @@
 // <e> SPI1_ENABLED - Enable SPI1 instance
 //==========================================================
 #ifndef SPI1_ENABLED
-#define SPI1_ENABLED 1
+#define SPI1_ENABLED 0
 #endif
 // <q> SPI1_USE_EASY_DMA  - Use EasyDMA
  
@@ -5560,7 +5560,7 @@
 // <e> TWI_ENABLED - nrf_drv_twi - TWI/TWIM peripheral driver - legacy layer
 //==========================================================
 #ifndef TWI_ENABLED
-#define TWI_ENABLED 0
+#define TWI_ENABLED 1
 #endif
 // <o> TWI_DEFAULT_CONFIG_FREQUENCY  - Frequency
  
@@ -5620,13 +5620,13 @@
 // <e> TWI1_ENABLED - Enable TWI1 instance
 //==========================================================
 #ifndef TWI1_ENABLED
-#define TWI1_ENABLED 0
+#define TWI1_ENABLED 1
 #endif
 // <q> TWI1_USE_EASY_DMA  - Use EasyDMA (if present)
  
 
 #ifndef TWI1_USE_EASY_DMA
-#define TWI1_USE_EASY_DMA 0
+#define TWI1_USE_EASY_DMA 1
 #endif
 
 // </e>

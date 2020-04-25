@@ -23,7 +23,8 @@
         "segger_rtt.h": "c",
         "nrf_log_default_backends.h": "c",
         "nrf_gpio.h": "c",
-        "nrf_delay.h": "c"
+        "nrf_delay.h": "c",
+        "adxl372.h": "c"
     },
     "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve",
     "C_Cpp.default.includePath": ["${workspaceFolder}/**"],

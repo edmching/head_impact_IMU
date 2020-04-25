@@ -426,3 +426,96 @@ int8_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *s
     return 0;
 }
 
+void adxl372_test(void)
+{
+    int8_t ret = 0;
+    uint8_t device_id = 0;
+    uint8_t mst_devid = 0;
+    uint8_t devid = 0;
+
+    NRF_LOG_INFO("-----------------------------");
+    NRF_LOG_INFO("adxl372 test measurement mode");
+    nrf_delay_ms(100);
+
+    adxl372_reset();
+
+    //--------------------READ TEST---------------------//
+    device_id = adxl372_get_dev_ID();
+    ret |= adxl372_read_reg( ADI_ADXL372_MST_DEVID, &mst_devid);
+    ret |= adxl372_read_reg(ADI_ADXL372_DEVID, &devid);
+    if (ret < 0)
+    {
+        NRF_LOG_ERROR("SPI WRITE READ FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+
+    NRF_LOG_INFO("adi device id = 0x%x (0xAD)", device_id);
+    if(device_id != ADI_ADXL372_ADI_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    NRF_LOG_INFO("mst device id2 = 0x%x (0x1D)", mst_devid);
+    if(mst_devid != ADI_ADXL372_MST_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    NRF_LOG_INFO("mems id = 0x%x (0xFA)(372 octal)", devid);
+    if(devid != ADI_ADXL372_DEVID_VAL)
+    {
+        NRF_LOG_ERROR("ADXL READ TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    else{
+        NRF_LOG_INFO("ADXL READ TEST PASS");
+    }
+    // ==========================================
+
+    // Write TEST 
+    uint8_t p_reg;
+    uint8_t lpf_val;
+    uint8_t hpf_val;
+    uint8_t op_val;
+    adxl372_set_op_mode(STAND_BY);
+    adxl372_set_lpf_disable(true);
+    adxl372_set_hpf_disable(true);
+    ret |= adxl372_read_reg(ADI_ADXL372_POWER_CTL, &p_reg);
+    if (ret < 0)
+    {
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    lpf_val = (p_reg >> PWRCTRL_LPF_DISABLE_POS) & 0x1;
+    hpf_val = (p_reg >> PWRCTRL_HPF_DISABLE_POS) & 0x1;
+    op_val = (p_reg >> PWRCTRL_OPMODE_POS) & 0x3;
+    NRF_LOG_INFO("lpf val = %d (expected: 1)", lpf_val);
+    NRF_LOG_INFO("hpf val = %d (expected: 1)", hpf_val);
+    NRF_LOG_INFO("op val = %d (expected: 0)", op_val);
+    if(lpf_val != 1 || hpf_val != 1 || op_val !=0)
+    {
+        NRF_LOG_ERROR("ADXL WRITE TEST FAIL");
+        while(1)
+        {
+            __WFE();
+        }
+    }
+    else{
+        NRF_LOG_INFO("ADXL WRITE TEST PASS");
+    }
+}
+
