@@ -1,25 +1,35 @@
+//-------------------------------------------
+// Name: ds1388_auto.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This file utlizes the ds1388
+// RTC test code from "\ble_app\test\ds1388_test"
+// and modifies it slightly for usage with the
+// batch script "autoset.bat". Running that
+// batch script will autoset the RTC and
+// then compile and flash this file.
+//
+// Referenced code: https://github.com/DelfiSpace/DS1388/blob/master/DS1388.cpp
+//-------------------------------------------
+
 #include <stdio.h>
-#include <time.h>
-#include <stdint.h>
 #include "boards.h"
 #include "app_util_platform.h"
 #include "app_error.h"
-#include "nrf_drv_twi.h"	//I2C driver library
+#include "nrf_drv_twi.h"    // I2C driver library
 #include "nrf_delay.h"
-#include "nrf52832_mdk.h"
-#include "ds1388_auto.h"
+#include "nrf52832_mdk.h"   // Board (pin mapping) header file for breadboard setup
+#include "ds1388_auto.h"    // RTC header file with register/command defines
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
 
-#define foundit
-
-#define _CRT_SECURE_NO_WARNINGS
-
 // TWI instance ID
 #define TWI_INSTANCE_ID     0
 
+// Struct type with all necessary date and time variables
+// Each variable is byte-wide to ensure compatibility with
+// the ds1388's internal memory structure (see datasheet)
 typedef struct{
     uint8_t year;
     uint8_t month;
@@ -31,20 +41,27 @@ typedef struct{
     uint8_t hundreth;
 } ds1388_data_t;
 
-//static uint8_t date[8];
-ds1388_data_t date;
+ds1388_data_t date; // declaration of above struct
 static uint8_t byte;
-static uint8_t time_format =  HOUR_MODE_24; //select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
+static uint8_t time_format =  HOUR_MODE_24; // select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
 
+// This "default" array of date/time variables is overwritten
+// by "autoset.bat" with the current system time. After the
+// batch file has completed (and this file has been flashed to
+// the board), the system time is replaced one more by this
+// default array of all zeros. This is to ensure that the batch
+// script can be reused indefinitely to update the RTC time!
+// IMPORTANT: if you manually modify this default array, the 
+// batch script will not be able to replace it.
 static uint8_t init_time[8] = {0,0,0,0,0,0,0,0};
-//init_time[0] = 20; (year)
-//init_time[1] = 2;  (month)
-//init_time[2] = 1;  (date)
-//init_time[3] = 6;  (day of the week, MONDAY: 1, TUESDAY: 2, ... SUNDAY: 7)
-//init_time[4] = 4;  (hour) 
-//init_time[5] = 25; (minutes) 
-//init_time[6] = 0;  (seconds)
-//init_time[7] = 0;  (hundredth of second)
+// init_time[0] = 20; (year)
+// init_time[1] = 2;  (month)
+// init_time[2] = 1;  (date)
+// init_time[3] = 6;  (day of the week, MONDAY: 1, TUESDAY: 2, ... SUNDAY: 7)
+// init_time[4] = 4;  (hour) 
+// init_time[5] = 25; (minutes) 
+// init_time[6] = 0;  (seconds)
+// init_time[7] = 0;  (hundredth of second)
  
 /* Indicates if operation on I2C has ended. */
 static volatile bool m_xfer_done_ds = false;
@@ -53,7 +70,7 @@ static volatile bool m_xfer_done_ds = false;
 static const nrf_drv_twi_t ds_twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 /**
- * @brief Function for setting active mode on VCNL4040 proximity sensor
+ * @brief Function for converting decimal number to hexadecimal
  */
 uint8_t dec2hex(uint8_t val) {
   val = val + 6 * (val / 10);
@@ -61,7 +78,7 @@ uint8_t dec2hex(uint8_t val) {
 }
 
 /**
- * @brief Function for setting active mode on VCNL4040 proximity sensor
+ * @brief Function for converting hexadecimal number to decimal
  */
 uint8_t hex2dec(uint8_t val) {
   val = val - 6 * (val >> 4);
@@ -69,14 +86,21 @@ uint8_t hex2dec(uint8_t val) {
 }
 
 /**
- * @brief Function for setting active mode on VCNL4040 proximity sensor
+ * @brief Function for configuring the ds1388. Writes the appropriate control
+ * variables into the control register and then updates the internal RTC
+ * registers with the date and time from the init_time[8] array
  */
 void ds_config(void)
 {	
+    // Prepares target register (CONTROL_REG) and data to be written (EN_OSCILLATOR | DIS_WD_COUNTER)
+    // In this case, the RTC oscillator is enabled and the watch dog counter is disabled
 	uint8_t reg0[2] = {CONTROL_REG, (EN_OSCILLATOR | DIS_WD_COUNTER)};
-    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg0, sizeof(reg0), false);
-    while (m_xfer_done_ds == false);
+    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg0, sizeof(reg0), false); // initates I2C transfer to ds1388
+    while (m_xfer_done_ds == false); // waits for the I2C transfer to complete
     
+    // Prepares a multibyte write starting at the target register (HUNDRED_SEC_REG) and
+    // writes the time and date data in successive cycles. The RTC's internal address pointer
+    // automatically increments the write address (see datasheet)
     uint8_t reg1[9] = {HUNDRED_SEC_REG,
                         dec2hex(init_time[7]),
                         dec2hex(init_time[6]),
@@ -88,12 +112,12 @@ void ds_config(void)
                         dec2hex(init_time[0])
     };
 
-    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg1, sizeof(reg1), false);
-    while (m_xfer_done_ds == false);
+    nrf_drv_twi_tx(&ds_twi, DS1388_ADDRESS, reg1, sizeof(reg1), false); // initates I2C transfer to ds1388
+    while (m_xfer_done_ds == false); // waits for the I2C transfer to complete
 }
 
 /**
- * @brief Function for handling data from temperature sensor.
+ * @brief Function for handling data from RTC for logging to serial.
  *
  * @param[in]  Real-time data
  */
@@ -114,48 +138,55 @@ __STATIC_INLINE void data_handler(ds1388_data_t rtc_data)
  */
 void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context)
 {
+
+    // Should specific errors occur in I2C communication (such as slave NACK),
+    // corresponding error message is printed to serial
+
     switch (p_event->type)
     {
         case NRF_DRV_TWI_EVT_DONE:
             m_xfer_done_ds = true;
             break;
         case NRF_DRV_TWI_EVT_DATA_NACK:
-            //m_xfer_done_ds = true;
             NRF_LOG_INFO("\r\nDATA NACK ERROR");
             NRF_LOG_FLUSH();
             break;
         case NRF_DRV_TWI_EVT_ADDRESS_NACK:
-            //m_xfer_done_ds = true;
             NRF_LOG_INFO("\r\nADDRESS NACK ERROR");
             NRF_LOG_FLUSH();
             break;
         default:
-            //m_xfer_done_ds = true
             break;
     }
 }
 
 /**
- * @brief UART initialization.
+ * @brief TWI initialization.
  */
 void twi_init (void)
 {
     ret_code_t err_code;
 
-    const nrf_drv_twi_config_t twi_lm75b_config = {
+    // Initializes the I2C connection to 400 kHz,
+    // using the SDA and SCL pins for the board
+    // (see README to change which board/platform is in use)
+
+    const nrf_drv_twi_config_t twi_ds1388_config = {
        .scl                = I2C_SCL,
        .sda                = I2C_SDA,
        .frequency          = NRF_DRV_TWI_FREQ_400K,
        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
        .clear_bus_init     = false
     };
-
-    err_code = nrf_drv_twi_init(&ds_twi, &twi_lm75b_config, twi_handler_ds, NULL);
+    
+    err_code = nrf_drv_twi_init(&ds_twi, &twi_ds1388_config, twi_handler_ds, NULL);
     APP_ERROR_CHECK(err_code);
 
     nrf_drv_twi_enable(&ds_twi);
 }
-
+/**
+ * @brief Performs a one-byte RTC internal register read.
+ */
 uint8_t readRegister(uint8_t reg_addr)
 {
     do
@@ -165,15 +196,24 @@ uint8_t readRegister(uint8_t reg_addr)
 
     m_xfer_done_ds = false;
 
+    // The descriptor below is used to properly handle the ds1388's read protocol
+    // The ds1388 device address is selected, the register to read is passed and the read byte is returned
+    // See the nrf SDK reference guide for more information on nrf_drv_twi_xfer_desc_t
     nrf_drv_twi_xfer_desc_t const ds_desc = {NRFX_TWI_XFER_TXRX, DS1388_ADDRESS, sizeof(reg_addr), sizeof(byte), &reg_addr, &byte};
+    nrf_drv_twi_xfer(&ds_twi, &ds_desc, false); // initiates transfer using I2C descriptor above
+    while(nrf_drv_twi_is_busy(&ds_twi) == true); // waits for the transfer to complete
 
-    nrf_drv_twi_xfer(&ds_twi, &ds_desc, false);
-    
-    while(nrf_drv_twi_is_busy(&ds_twi) == true);
-
-    return byte;
+    return byte; // read byte is returned
 }
 
+/**
+ * @brief Reads all of the date and time registers, converts their hex
+ * values to decimal, and then stores them within the date struct. 
+ * Returns:
+ * 0 if AM mode
+ * 1 if PM mode
+ * 2 if 24-hour mode
+ */
 uint8_t get_time()
 {
   uint8_t ret;
@@ -211,23 +251,25 @@ uint8_t get_time()
 }
 
 /**
- * @brief Function for main application entry.
+ * @brief Function for main application entry. Initializes I2C,
+ * configures RTC, and prints current date and time to serial
+ * once every second.
  */
 int main(void)
 {
     APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 
-    NRF_LOG_INFO("\r\nTWI sensor example started.");
+    NRF_LOG_INFO("\r\nRTC autoset test code started");
     NRF_LOG_FLUSH();
-    twi_init();
-	ds_config();
+    twi_init(); // initializes I2C
+	ds_config(); // configures the ds1388
 
     while (true)
     {
         nrf_delay_ms(1000);
-        get_time();
-        data_handler(date);
+        get_time(); // gets the current time and date stored by the RTC
+        data_handler(date); // prints the current time and date to serial
         NRF_LOG_FLUSH();
     }
 }

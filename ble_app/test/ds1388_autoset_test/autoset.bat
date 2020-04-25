@@ -1,14 +1,14 @@
-rem | ---------------------------------------------------------------------------------------
+rem | ----------------------------------------------------------------------------------------
 rem | Name: autoset.bat
 rem | Author: UBC Capstone Team 48 - 2019/2020
-rem | Desc: Running this batch file in the "head_impact_IMU\ble_app\test\ds1388_autoset_test"
+rem | Description: Running this batch file in "head_impact_IMU\ble_app\test\ds1388_autoset_test"
 rem | directory will load the RTC test code to the nrf_mdk development board
 rem | with (near) real time values loaded onto the RTC. Because programming the board
 rem | comes with inherent delay, the RTC will actually be behind by a few seconds.
 rem | The full delay value is given at the end of the script and must be accounted for during
 rem | eventual data offload.
-rem | [Run this file via git bash using "./autoset.bat"]
-rem | ---------------------------------------------------------------------------------------
+rem | [Run this file via linux shell or git bash using "./autoset.bat"]
+rem | ----------------------------------------------------------------------------------------
 
 @echo OFF
 

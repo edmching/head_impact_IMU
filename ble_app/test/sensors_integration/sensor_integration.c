@@ -1,5 +1,5 @@
 //-------------------------------------------
-// Title: sensor_integration.c
+// Name: sensor_integration.c
 // Author: UBC Capstone Team 48 - 2019/2020
 // Description: This file brings together the
 // test code written for each sensor and
