@@ -177,8 +177,6 @@ int main (void)
     // Initialize.
     SystemInit();
     log_init();
-
-
     spi_init();
 
     adxl372_test();
