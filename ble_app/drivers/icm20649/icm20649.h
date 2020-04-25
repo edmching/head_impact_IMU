@@ -8,7 +8,7 @@
 #include "nrf_drv_spi.h"
 #include "spi_driver.h"
 
-#define GYRO_SPI_INSTANCE 1 /**< SPI instance index. */
+#define GYRO_SPI_INSTANCE 2 /**< SPI instance index. */
 
 extern const nrf_drv_spi_t gyro_spi;
 
