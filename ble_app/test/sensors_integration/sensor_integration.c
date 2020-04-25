@@ -1,3 +1,16 @@
+//-------------------------------------------
+// Title: sensor_integration.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This file brings together the
+// test code written for each sensor and
+// integrates them by performing the
+// following steps:
+// 1. Sensor/peripheral initialization
+// 2. Proximity sensor threshold detection
+// 3. High-g data threshold detection
+// 4. 
+//-------------------------------------------
+
 #include "sensors_integration.h"
 #include "nrf_delay.h"
 
@@ -750,47 +763,6 @@ void vcnl_config(void)
     nrf_drv_twi_tx(&twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
     while (m_xfer_done == false);
 }
-
-
-// /**
-//  * @brief TWI events handler.
-//  */
-// void twi_handler_vcnl(nrf_drv_twi_evt_t const * p_event, void * p_context)
-// {
-//     switch (p_event->type)
-//     {
-//         case NRF_DRV_TWI_EVT_DONE:
-//             if (p_event->xfer_desc.type == NRF_DRV_TWI_XFER_RX)
-//             {
-//                 prox_val = m_sample;
-//             }
-//             m_xfer_done = true;
-//             break;
-//         default:
-//             break;
-//     }
-// }
-
-// /**
-//  * @brief UART initialization.
-//  */
-// void twi_init_vcnl_4040 (void)
-// {
-//     ret_code_t err_code;
-
-//     const nrf_drv_twi_config_t twi_lm75b_config = {
-//        .scl                = VCNL4040_SCL,
-//        .sda                = VCNL4040_SDA,
-//        .frequency          = NRF_DRV_TWI_FREQ_100K,
-//        .interrupt_priority = APP_IRQ_PRIORITY_HIGH,
-//        .clear_bus_init     = false
-//     };
-
-//     err_code = nrf_drv_twi_init(&vcnl_twi, &twi_lm75b_config, twi_handler_vcnl, NULL);
-//     APP_ERROR_CHECK(err_code);
-
-//     nrf_drv_twi_enable(&vcnl_twi);
-// }
 
 /**
  * @brief Function for reading data from VCNL4040 sensor.

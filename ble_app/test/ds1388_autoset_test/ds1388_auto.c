@@ -1,15 +1,21 @@
 #include <stdio.h>
+#include <time.h>
+#include <stdint.h>
 #include "boards.h"
 #include "app_util_platform.h"
 #include "app_error.h"
 #include "nrf_drv_twi.h"	//I2C driver library
 #include "nrf_delay.h"
 #include "nrf52832_mdk.h"
-#include "ds1388.h"
+#include "ds1388_auto.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
 #include "nrf_log_default_backends.h"
+
+#define foundit
+
+#define _CRT_SECURE_NO_WARNINGS
 
 // TWI instance ID
 #define TWI_INSTANCE_ID     0
@@ -30,7 +36,7 @@ ds1388_data_t date;
 static uint8_t byte;
 static uint8_t time_format =  HOUR_MODE_24; //select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
 
-static uint8_t init_time[8] = {20, 2, 11, 2, 7, 26, 10, 0};
+static uint8_t init_time[8] = {0,0,0,0,0,0,0,0};
 //init_time[0] = 20; (year)
 //init_time[1] = 2;  (month)
 //init_time[2] = 1;  (date)
@@ -215,9 +221,7 @@ int main(void)
     NRF_LOG_INFO("\r\nTWI sensor example started.");
     NRF_LOG_FLUSH();
     twi_init();
-    nrf_delay_ms(1000);
 	ds_config();
-    nrf_delay_ms(1000);
 
     while (true)
     {
