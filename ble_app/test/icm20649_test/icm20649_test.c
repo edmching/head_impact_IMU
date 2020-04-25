@@ -118,6 +118,8 @@ int main (void)
         data.accel_y = ((float) data.accel_y/1024.0)*1000;
         data.accel_z = ((float) data.accel_z/1024.0)*1000;
         data.gyro_x = ((float) data.gyro_x / 32767.0) * 2000.0 * deg2rad;
+        data.gyro_y = ((float) data.gyro_y / 32767.0) * 2000.0 * deg2rad;
+        data.gyro_z = ((float) data.gyro_z / 32767.0) * 2000.0 * deg2rad;
 
         NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
         data.accel_x, data.accel_y, data.accel_z, data.gyro_x, data.gyro_y, data.gyro_z );

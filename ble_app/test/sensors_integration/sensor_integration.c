@@ -669,8 +669,8 @@ void icm20649_convert_data(icm20649_data_t * data)
     data->accel_y = ((float) data->accel_y/1024.0)*1000;
     data->accel_z = ((float) data->accel_z/1024.0)*1000;
     data->gyro_x = ((float) data->gyro_x / 32767.0) * 2000.0 * deg2rad *1000;
-    data->gyro_y = ((float) data->gyro_x / 32767.0) * 2000.0 * deg2rad *1000;
-    data->gyro_z = ((float) data->gyro_x / 32767.0) * 2000.0 * deg2rad *1000;
+    data->gyro_y = ((float) data->gyro_y / 32767.0) * 2000.0 * deg2rad *1000;
+    data->gyro_z = ((float) data->gyro_z / 32767.0) * 2000.0 * deg2rad *1000;
 }
 
 int8_t icm20649_write_reg(uint8_t address, uint8_t data)

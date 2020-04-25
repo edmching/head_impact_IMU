@@ -37,16 +37,24 @@
  *
 *******************************************************************************/
 
-#ifndef ADXL372_H_
-#define ADXL372_H_
+#ifndef ADXL372_H
+#define ADXL372_H
 
 #include <stdio.h>
 #include <stdbool.h>
 #include <stdint.h>
 #include <string.h> 
+#include "spi_driver.h"
 #include <nrf_drv_spi.h>
 
 #define L_ENDIAN
+
+#define ACCEL_SPI_INSTANCE 0 /**< SPI instance index. */
+
+
+extern const nrf_drv_spi_t accel_spi;
+
+extern nrf_drv_spi_config_t const accel_spi_config;
 
 /* Register address */
 #define ADI_ADXL372_ADI_DEVID           0x00u   /* Analog Devices, Inc., accelerometer ID */
@@ -328,5 +336,5 @@ int32_t adxl372_configure_fifo (struct adxl372_device *dev, uint16_t fifo_sample
 
 int8_t adxl372_get_fifo_data(struct adxl372_device *dev, adxl372_accel_data_t *fifo_data);
 
-#endif /* ADXL372_H_ */
+#endif /* ADXL372_H */
 

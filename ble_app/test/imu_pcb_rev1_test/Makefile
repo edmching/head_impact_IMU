@@ -12,6 +12,7 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   imu_pcb_rev1_test.c \
+  $(PROJ_DIR)/drivers/icm20649/icm20649.c \
   $(PROJ_DIR)/drivers/adxl372/adxl372.c \
   $(PROJ_DIR)/drivers/spi/spi_driver.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
@@ -63,9 +64,9 @@ SRC_FILES += \
 INC_FOLDERS += \
   ${CURDIR} \
   $(ROOT_DIR)/board_config \
-  $(PROJ_DIR)/test/icm20649_test \
+  $(PROJ_DIR)/drivers/icm20649 \
+  $(PROJ_DIR)/drivers/adxl372 \
   $(PROJ_DIR)/drivers/spi \
-  $(PROJ_DIR)/drivers/adxl372/ \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/modules/nrfx/hal \
