@@ -1,6 +1,6 @@
 //-------------------------------------------
 // Name: vcnl_4040.c
-// Author: UBC Capstone Team 48 - 2019/2020
+// Author: Gregor Morrison
 // Description: This file initiates I2C communication
 // with the vcnl4040 proximity sensor, configures the device,
 // and then prints out the relative proximity value serially.
@@ -57,9 +57,9 @@ static volatile bool m_xfer_done = false;
 static const nrf_drv_twi_t twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 /* Buffer for samples read from proximity sensor. */
-static uint8_t m_sample_lsb;
-static uint8_t m_sample_msb;
-static uint16_t m_sample;
+volatile uint8_t m_sample_lsb;
+volatile uint8_t m_sample_msb;
+volatile uint16_t m_sample;
 
 /**
  * @brief Function for setting active mode on VCNL4040 proximity sensor

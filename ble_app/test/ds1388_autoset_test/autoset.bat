@@ -1,7 +1,7 @@
 @echo OFF
 rem | ----------------------------------------------------------------------------------------
 rem | Name: autoset.bat
-rem | Author: UBC Capstone Team 48 - 2019/2020
+rem | Author: Gregor Morrison
 rem | Description: Running this batch file in "head_impact_IMU\ble_app\test\ds1388_autoset_test"
 rem | directory will load the RTC test code to the nrf_mdk development board
 rem | with (near) real time values loaded onto the RTC. Because programming the board
