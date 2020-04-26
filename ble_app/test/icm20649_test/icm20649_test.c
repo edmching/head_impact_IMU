@@ -119,7 +119,7 @@ int main (void)
         data.accel_z = ((float) data.accel_z/1024.0)*1000;
         data.gyro_x = ((float) data.gyro_x / 32767.0) * 2000.0 * deg2rad;
 
-        NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mg, gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
+        NRF_LOG_INFO("accel x = %d mg, accel y = %d mg, accel z = %d mg, gyro x = %d mrad/s, gyro y = %d mrad/s, gyro z = %d mrad/s", 
         data.accel_x, data.accel_y, data.accel_z, data.gyro_x, data.gyro_y, data.gyro_z );
     
         nrf_delay_ms(1000);

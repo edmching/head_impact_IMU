@@ -1,7 +1,7 @@
 //-------------------------------------------
 // Name: ds1388_auto.c
 // Author: UBC Capstone Team 48 - 2019/2020
-// Description: This file utlizes the ds1388
+// Description: This file utilizes the ds1388
 // RTC test code from "\ble_app\test\ds1388_test"
 // and modifies it slightly for usage with the
 // batch script "autoset.bat". Running that

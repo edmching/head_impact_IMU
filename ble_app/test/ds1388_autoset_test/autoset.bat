@@ -1,3 +1,4 @@
+@echo OFF
 rem | ----------------------------------------------------------------------------------------
 rem | Name: autoset.bat
 rem | Author: UBC Capstone Team 48 - 2019/2020
@@ -10,13 +11,13 @@ rem | eventual data offload.
 rem | [Run this file via linux shell or git bash using "./autoset.bat"]
 rem | ----------------------------------------------------------------------------------------
 
-@echo OFF
-
 rem | These lines extract the system date into year/month/day
 echo DATE: %date%
 set year=%date:~2,2%
 set month=%date:~5,2%
 set day=%date:~8,2%
+rem | NOTE: batch system time does not hold day of the week data (i.e. Monday, Tuesday...) inherently.
+rem | Therefore, if day of the week is needed, it must be inferred from the calendar date (i.e. the 14th)
 
 rem | These lines extract the system time into hour/minute/second/hundredth
 echo PRE-FLASH TIME: %time%
@@ -32,7 +33,7 @@ echo -----------------------------
 echo.
 
 rem | this line replaces the default time/date values (all zeros) in the test file with the current time/date
-sed -i 's/{0,0,0,0,0,0,0,0}/{%year%,%month%,%day%,0,%hour%,%min%,%sec%,%hsec%}/g' ds1388_auto.c\
+sed -i 's/{0,0,0,0,0,0,0,0}/{%year%,%month%,%day%,0,%hour%,%min%,%sec%,%hsec%}/g' ds1388_auto.c
 rem | "make flash" runs make and then programs the executable files in this directory to the board
 make flash
 rem | this line re-writes the default time/date values (all zeros) in the test file to ensure that this script can be run again
