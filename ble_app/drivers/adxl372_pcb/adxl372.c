@@ -1,3 +1,10 @@
+//-------------------------------------------
+// Title: adxl372.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This is refactored adxl372 drivers located in adxl372_pcb folder
+// the adxl372 folder is now depreciated and is used for breadboard example programs
+// Please use this verison for PCB rev2
+//-------------------------------------------
 #include "adxl372.h"
 #include "nrf_delay.h"
 

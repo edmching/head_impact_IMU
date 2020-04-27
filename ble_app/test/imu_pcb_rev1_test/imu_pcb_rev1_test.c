@@ -83,7 +83,7 @@ APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer
 
 //const uint32_t UICR_ADDR_0x20C __attribute__ ((section(".uicrNfcPinsAddress"))) __attribute__((used));
 void log_init(void);
-static void lfclk_request(void);
+void lfclk_request(void);
 static void create_timers(void);
 static void spi_ret_check(int8_t ret);
 void spi_accel_init(void);
@@ -147,9 +147,12 @@ int main (void)
 
     //init accel
     adxl372_test();
+#ifdef USE_CONT_SAMPLING_MODE
+    adxl372_default_init();
+#endif
 #ifndef USE_CONT_SAMPLING_MODE
     adxl372_init();
-#
+#endif
 
     //init gyro
     icm20649_test();
@@ -168,13 +171,13 @@ int main (void)
     app_timer_init();
     create_timers();
 
+#ifndef USE_CONT_SAMPLE_MODE
     icm20649_data_t low_g_gyro_data;
     adxl372_accel_data_t high_g_data;
     ds1388_data_t rtc_data;
     uint32_t flash_addr = MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START;
     uint32_t num_impacts = 0;
 
-#ifndef USE_CONT_SAMPLE_MODE
     while(1){
         vcnl4040_read_sensor_data();
         adxl372_get_accel_data(&high_g_data);
@@ -501,7 +504,7 @@ void spi_flash_uninit(void)
  * @details This is needed by RTC1 which is used by the Application Timer
  *          (When SoftDevice is enabled the LFCLK is always running and this is not needed).
  */
-static void lfclk_request(void)
+void lfclk_request(void)
 {
     ret_code_t err_code = nrf_drv_clock_init();
     APP_ERROR_CHECK(err_code);

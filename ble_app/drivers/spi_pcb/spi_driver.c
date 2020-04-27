@@ -1,3 +1,11 @@
+//-------------------------------------------
+// Title: spi_driver.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This is refactored spi drivers located in spi_pcb folder
+// the spi folder is now depreciated and is used for breadboard example programs
+// Please use this verison for PCB rev2
+// This requires setting up spi_init in your program's main file
+//-------------------------------------------
 #include "spi_driver.h"
 
 static volatile bool m_transfer_completed = true; /**< A flag to inform about completed transfer. */

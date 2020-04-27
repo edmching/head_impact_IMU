@@ -12,12 +12,12 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 # Source files common to all targets
 SRC_FILES += \
   imu_pcb_rev1_test.c \
-  $(PROJ_DIR)/drivers/spi/spi_driver.c \
+  $(PROJ_DIR)/drivers/spi_pcb/spi_driver.c \
   $(PROJ_DIR)/drivers/mt25ql256aba/mt25ql256aba.c \
   $(PROJ_DIR)/drivers/vcnl4040/vcnl4040.c \
   $(PROJ_DIR)/drivers/ds1388/ds1388.c \
   $(PROJ_DIR)/drivers/icm20649/icm20649.c \
-  $(PROJ_DIR)/drivers/adxl372/adxl372.c \
+  $(PROJ_DIR)/drivers/adxl372_pcb/adxl372.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
   $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
@@ -71,11 +71,11 @@ SRC_FILES += \
 INC_FOLDERS += \
   ${CURDIR} \
   $(ROOT_DIR)/board_config \
+  $(PROJ_DIR)/drivers/spi_pcb \
   $(PROJ_DIR)/drivers/mt25ql256aba \
   $(PROJ_DIR)/drivers/icm20649 \
-  $(PROJ_DIR)/drivers/adxl372 \
+  $(PROJ_DIR)/drivers/adxl372_pcb \
   $(PROJ_DIR)/drivers/vcnl4040 \
-  $(PROJ_DIR)/drivers/spi \
   $(PROJ_DIR)/drivers/ds1388 \
   $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/timer/ \
