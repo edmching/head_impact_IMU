@@ -118,7 +118,7 @@ INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
 [========================================]
 INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
 ```
-## Recieving Data Serially
+## Receiving Data Serially
 
 Nearly all of the project code prints messages or data serially. In order to receive this data, an SSH client is required. We used [PuTTY](https://www.putty.org/).
 
