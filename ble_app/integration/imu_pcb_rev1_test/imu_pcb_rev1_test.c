@@ -5,11 +5,11 @@
 // two modes high impact storage mode and continuous sampling mode.
 // At the startup it will test all sensors 
 // and configure them to their default states
-//
+// note: the flash memory is cleared first on startup
 // high impact storage mode
 // 1. Proximity sensor detection
 // 2. high impact detection
-// 3. Store a 2 max of number seperate impacts to flash
+// 3. Store a separate impact events to flash
 // 4. Serially outputs the impact data via physical UART connection
 // 
 // This program can also run in continuous sampling mode by uncomment USE_CONT_SAMPLE_MODE
@@ -176,7 +176,6 @@ int main (void)
     adxl372_accel_data_t high_g_data;
     ds1388_data_t rtc_data;
     uint32_t flash_addr = MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START;
-    uint32_t num_impacts = 0;
 
     while(1){
         vcnl4040_read_sensor_data();
@@ -207,14 +206,6 @@ int main (void)
             flash_retrieve_samples(&flash_addr);
             serial_output_flash_data();
             spi_switch_to_accel_from_flash();
-            num_impacts++;
-            if(num_impacts == 2)
-            {
-                while(1)
-                {
-                    __WFE();
-                }
-            }  
 
         }
     }
