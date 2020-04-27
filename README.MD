@@ -122,7 +122,21 @@ INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages)
 You may use any text editor you like, however we chose [Visual Studio Code](https://code.visualstudio.com/) since it provided a debugging environment. 
 We used the following extensions in VS Code:
 * [C/C++ IntelliSense](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
-* [Cortex-Debug] (https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)
+* [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)
+
+a launch.json file is included for setting up the pyocd debugger and jlink debugger.
+launch.json is for debugging PCB firmware and launch_pyocd.json is for debugging breadboard firmware. If you wish to debug breadboard firmware you must rename the launch_pyocd.json to launch.json.
+
+Another note is the jlink launch.json is set up for a linux user so you will have to change the path locations for "serverpath" and "svdFile" in the launch.json.
+
+```sh
+        "serverpath": "/opt/SEGGER/JLink/JLinkGDBServerCLExe", //change to your path
+        .
+        .
+        .
+        "svdFile": "/opt/SEGGER/Ozone/Config/CPU/Cortex-M4F.svd" //change to your path
+```
+* See reference links at the end on a guide to setup your launch.json *
 
 ## Receiving Data Serially
 
