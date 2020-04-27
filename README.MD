@@ -150,7 +150,7 @@ There are also three main sub-directories:
 * board_config
 * ble_app
 
-#### nrf_sdk
+### nrf_sdk
 
 This directory contains part of the Nordic Semiconductor Software Development Kit (SDK). The full version is an extremely detailed guide for developing applications on the NRF52832 microcontroller used by the project.
 
@@ -158,7 +158,7 @@ The partial version contained here consists mainly of toolchain resources (as yo
 
 [The full SDK](https://www.nordicsemi.com/Software-and-tools/Software/nRF5-SDK) contains various examples, most of which are irrelevant to this project, and so are not included here. Nordic Semiconductor also has an online[Infocenter](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Fexamples.html) that provides more detailed information on the SDK and its various modules.
 
-#### board_config
+### board_config
 
 This directory contains board configuration files for both currently implemented platforms: PCB Revision 1 (*imu_pcb_rev1*) and the breadboard + MCU development (*nrf52832_mdk*).
 
@@ -168,11 +168,11 @@ These files describe the pin mapping for each of these specific platforms - they
 
 A template (*custom_board*) is included so that pin mapping can be done for future platforms.
 
-#### ble_app
+### ble_app
 
 This directory contains all of the code developed so far for the IMU project. All new code should be added to one of the sub-directories located here (or in a new sub-directory).
 
-##### test
+#### test
 
 This directory contains all of the test code written throughout to project (which is the bulk of the code). Each sub-directory contains code to test a specific component of the IMU. For example, the *adxl372_test* directory contains all of the code relevant to communicate with and receive measurements from the ADXL372 accelerometer. Running code such as this ensures the functionality of each peripheral, and can be used as reference when integrating multiple peripherals together.
 
@@ -180,19 +180,19 @@ Each sub-directory contains source code (.c, .h) that, in general, initializes a
 
 It is highly recommnded that any substantive new code begin its life here, prior to being introduced to any integrated code.
 
-##### integration
+#### integration
 
 The code located here brings the device peripherals together and offers integrated functionality. The *sensors_integration* code was developed for the breadboard platform, while the *imu_pcb_rev1* was developed for PCB Revision 1.
 
-##### drivers
+#### drivers
 
 This directory contains additional driver files that are called by several SPI peripherals. Note that the two current platforms utilize different SPI drivers - see the driver file comments for more information.
 
-##### config
+#### config
 
 This directory contains the default *sdk_config.c* file. This file type is discussed in more detail later.
 
-##### ble_app_cli
+#### ble_app_cli
 
 This directory contains the code for the Bluetooth command line interface.
 
