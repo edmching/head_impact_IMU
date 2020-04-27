@@ -1,3 +1,13 @@
+//-------------------------------------------
+// Name: ds1388.h
+// Author: Gregor Morrison
+// Description: This driver header file contains the
+// addresses, registers and commands needed to read/write
+// to the ds1388 RTC using the ds1388 drivers.
+// See ds1388 datasheet for more information 
+//
+// Referenced code: https://github.com/DelfiSpace/DS1388/blob/master/DS1388.h
+//-------------------------------------------
 #ifndef DS1388_H
 #define DS1388_H
 
