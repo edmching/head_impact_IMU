@@ -124,8 +124,8 @@ We used the following extensions in VS Code:
 * [C/C++ IntelliSense](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 * [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)
 
-a launch.json file is included for setting up the pyocd debugger and jlink debugger.
-launch.json is for debugging PCB firmware and launch_pyocd.json is for debugging breadboard firmware. If you wish to debug breadboard firmware you must rename the launch_pyocd.json to launch.json.
+A launch.json file is included in .vscode folder for setting up the pyocd debugger and jlink debugger.
+launch.json is for debugging PCB firmware and launch_pyocd.json is for debugging breadboard firmware. If you wish to debug breadboard firmware you must rename the launch_pyocd.json to launch.json and vice versa.
 
 Another note is the jlink launch.json is set up for a linux user so you will have to change the path locations for "serverpath" and "svdFile" in the launch.json.
 
@@ -149,17 +149,85 @@ The default setup for the USB serial port is 115200 baud, 8 bits, 1 stop bit, no
 More information on using terminal with the development board can be found [here](https://wiki.makerdiary.com/nrf52832-mdk/getting-started/).
 
 ## Setting up PCB development environment
-Requirements:
+Software Requirements:
 * GNU Arm Embedded Toolchain
 * GNU make [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/) 
 * nRF Command Line Tools
 
-Assuming you have GNU arm toolchain and make setup properly
-Tools:
+Assuming you have GNU arm toolchain and make setup properly from the above.
+
+Hardware Requirements:
+* PCB REV
 * JLink mini EDU
 * USB to UART adapter
 * Lipo battery (optional if you are using the USB to UART adapter to power the device)
-The USB to UART adapter is for getting serial output from the tx and rx pins. The Jlink is for programming and debugging firmware on the PCB. JLink requires using nrfjprog from nRF Command Line Tools package instead of pyocd.
+
+The USB to UART adapter is for getting serial output from the tx and rx pins. You may use the VCC and GND of the USB to UART adapter to power the PCB. The connections are simply VBAT->VCC, GND->GND, Tx->Rx, Rx->Tx.
+
+## Installing nRF Command Line Tools
+Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools). By default, the installer should include it in the path environment variable. Check that the path environment variable is set like:
+
+``` sh
+C:\Program Files\Nordic Semiconductor\nrf-command-line-tools\bin\
+ ```
+
+Now instead of using pyocd as the programmer and debugger, the nrfjprog will be the programmer and debugger. The type of programmer should already be included in the makefile.
+The Jlink is for programming and debugging firmware on the PCB. JLink requires using nrfjprog from nRF Command Line Tools package instead of pyocd. The JLink has a ribbon cable connector included. To check if the connection is correct, you can run JLinkExe and check that the VTref is ~3.3V and that you can connect to the MCU. See below for an example output.
+```sh
+> JLinkExe
+SEGGER J-Link Commander V6.62a (Compiled Jan 31 2020 12:58:00)
+DLL version V6.62a, compiled Jan 31 2020 12:57:49
+
+Connecting to J-Link via USB...O.K.
+Firmware: J-Link EDU Mini V1 compiled Jan  7 2020 16:53:19
+Hardware version: V1.00
+S/N: 801011674
+License(s): FlashBP, GDB
+VTref=3.299V
+
+
+Type "connect" to establish a target connection, '?' for help
+J-Link>connect
+Please specify device / core. <Default>: NRF52832_XXAA
+Type '?' for selection dialog
+Device>
+Please specify target interface:
+  J) JTAG (Default)
+  S) SWD
+  T) cJTAG
+TIF>S
+Specify target interface speed [kHz]. <Default>: 4000 kHz
+Speed>
+Device "NRF52832_XXAA" selected.
+
+
+Connecting to target via SWD
+InitTarget() start
+InitTarget() end
+Found SW-DP with ID 0x2BA01477
+DPIDR: 0x2BA01477
+Scanning AP map to find all available APs
+AP[2]: Stopped AP scan as end of AP map has been reached
+AP[0]: AHB-AP (IDR: 0x24770011)
+AP[1]: JTAG-AP (IDR: 0x02880000)
+Iterating through AP map to find AHB-AP to use
+AP[0]: Core found
+AP[0]: AHB-AP ROM base: 0xE00FF000
+CPUID register: 0x410FC241. Implementer code: 0x41 (ARM)
+Found Cortex-M4 r0p1, Little endian.
+FPUnit: 6 code (BP) slots and 2 literal slots
+CoreSight components:
+ROMTbl[0] @ E00FF000
+ROMTbl[0][0]: E000E000, CID: B105E00D, PID: 000BB00C SCS-M7
+ROMTbl[0][1]: E0001000, CID: B105E00D, PID: 003BB002 DWT
+ROMTbl[0][2]: E0002000, CID: B105E00D, PID: 002BB003 FPB
+ROMTbl[0][3]: E0000000, CID: B105E00D, PID: 003BB001 ITM
+ROMTbl[0][4]: E0040000, CID: B105900D, PID: 000BB9A1 TPIU
+ROMTbl[0][5]: E0041000, CID: B105900D, PID: 000BB925 ETM
+Cortex-M4 identified.
+J-Link>
+
+```
 
 ## Installing nRF Command Line Tools
 Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools). By default, the installer should include it in the path environment variable. Check that the path environment variable is set like:
