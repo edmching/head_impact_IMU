@@ -143,3 +143,45 @@ Now instead of using pyocd as the programmer and debugger, the nrfjprog will be 
 * [Setting up visual studio code debugger](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)
 * [Nordic SDK 15.2 documentation](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)
 >>>>>>> 58e512cafde380d03f4c61fa11962bb9ad1e6226
+
+## Navigating the Repository
+
+### head_impact_IMU
+
+This is the repo's root directory. You can access everything you need starting from here. If you need to edit this README file, you can find it here.
+There are also three main sub-directories: 
+* nrf_sdk
+* board_config
+* ble_app
+
+#### nrf_sdk
+
+This directory contains part of the Nordic Semiconductor Software Development Kit (SDK). The full version is an extremely detailed guide for developing applications on the NRF52832 microcontroller used by the project.
+
+The partial version contained here consists mainly of toolchain resources (as you have seen above), as well as various libraries that are included throughout the project.
+
+[The full SDK](https://www.nordicsemi.com/Software-and-tools/Software/nRF5-SDK) contains various examples, most of which are irrelevant to this project, and so are not included here. Nordic Semiconductor also has an online[Infocenter](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Fexamples.html) that provides more detailed information on the SDK and its various modules.
+
+#### board_config
+
+This directory contains board configuration files for both currently implemented platforms: PCB Revision 1 (*imu_pcb_rev1*) and the breadboard + MCU development (*nrf52832_mdk*).
+
+These files describe the pin mapping for each of these specific platforms - they are fairly different, so make sure you know which platform you are using and that the code you are running aligns with that platform. One of these files will be #included at the top of the code you are running.
+
+**Note:** running code on a different platform than it was written for is not always as easy as changing these #included files, especially when SPI drivers are involved. PCB Revision 1 uses different SPI drivers than the breadboard set-up - refer to the commented driver files for more information.
+
+A template (*custom_board*) is included so that pin mapping can be done for future platforms.
+
+#### ble_app
+
+This directory contains all of the code developed so far for the IMU project. All new code should be added to one of the sub-directories located here (or in a new sub-directory).
+
+##### test
+
+This directory contains all of the test code written throughout to project (which is the bulk of the code). Each sub-directory contains code to test a specific component of the IMU. For example, the *adxl372_test* directory contains all of the code relevant to communicate with and receive measurements from the ADXL372 accelerometer. Running code such as this ensures the functionality of each peripheral, and can be used as reference when integrating multiple peripherals together.
+
+Each sub-directory contains source code (.c, .h) that, in general, initializes a single, specific peripheral, configures it, and prints messages or data to serial to showcase its functionality. Additionally, each sub-directory includes a makefile and sdk_config file, which are discussed later.
+
+It is highly recommnded that any substantive new code begin its life here, prior to being introduced to any integrated code.
+
+##### integration
