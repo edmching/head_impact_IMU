@@ -7,10 +7,10 @@ static uint8_t ps_conf3_data =	(0 << 7) | (0 << 6) | (0 << 5) | (1 << 4) | (0 <<
 static uint8_t ps_ms_data =		(0 << 7) | (0 << 6) | (0 << 5) | (0 << 4) | (0 << 3) | (1 << 2) | (1 << 1) | (1 << 0);
  
 /* Indicates if operation on I2C has ended. */
-static volatile bool m_xfer_done = false;
+volatile bool m_xfer_done = false;
 
 /* TWI instance. */
-static const nrf_drv_twi_t twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
+const nrf_drv_twi_t twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
 /* Buffer for samples read from proximity sensor. */
 static uint8_t m_sample_lsb;
@@ -31,11 +31,9 @@ void twi_handler(nrf_drv_twi_evt_t const * p_event, void * p_context)
             break;
         case NRF_DRV_TWI_EVT_DATA_NACK:
             NRF_LOG_INFO("\r\nDATA NACK ERROR");
-            NRF_LOG_FLUSH();
             break;
         case NRF_DRV_TWI_EVT_ADDRESS_NACK:
             NRF_LOG_INFO("\r\nADDRESS NACK ERROR");
-            NRF_LOG_FLUSH();
             break;
         default:
             break;
@@ -51,10 +49,12 @@ void vcnl4040_config(void)
     NRF_LOG_INFO("Configuring VCNL...");
 
 	uint8_t reg1[3] = {VCNL4040_PS_CONF3, ps_conf3_data, ps_ms_data};
+    m_xfer_done = false;
     nrf_drv_twi_tx(&twi, VCNL4040_ADDR, reg1, sizeof(reg1), false);
     while (m_xfer_done == false);
 	
     uint8_t reg2[3] = {VCNL4040_PS_CONF1, ps_conf1_data, ps_conf2_data};
+    m_xfer_done = false;
     nrf_drv_twi_tx(&twi, VCNL4040_ADDR, reg2, sizeof(reg2), false);
     while (m_xfer_done == false);
     NRF_LOG_INFO("VCNL CONFIG DONE")
@@ -102,7 +102,7 @@ void vcnl4040_read_sensor_data(void)
 
         m_sample = (((m_sample_msb) << 8) | (m_sample_lsb));
         prox_val = m_sample;
-        NRF_LOG_INFO("Proximity: %d", m_sample);
+        //NRF_LOG_INFO("Proximity: %d", m_sample);
     }
 
     uint8_t reg3[2] = {VCNL4040_PS_DATA, VCNL4040_ADDR};

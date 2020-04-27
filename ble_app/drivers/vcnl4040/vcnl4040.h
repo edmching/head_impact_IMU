@@ -8,6 +8,7 @@
 #include "nrf_drv_twi.h"	//I2C driver library
 #include "app_error.h"
 #include "nrf_delay.h"
+#include "boards.h"
 
 #include "nrf_log.h"
 #include "nrf_log_ctrl.h"
@@ -17,10 +18,6 @@
 #define TWI_INSTANCE_ID 1
 
 #define PROX_THRESHOLD 5000
-
-//===================I2C PINOUT========================//
-#define I2C_SCL                 19
-#define I2C_SDA                 20
 
 // Proximity sensor address
 #define VCNL4040_ADDR 0x60U //U >> 1
@@ -33,6 +30,10 @@
 #define VCNL4040_PS_DATA 0x08U
 
 #define NORMAL_MODE 0U
+
+extern const nrf_drv_twi_t twi;
+
+extern volatile bool m_xfer_done;
 
 void twi_init(void);
 
