@@ -37,6 +37,7 @@ void spi_init(void)
 
 }
 
+/*
 void spi_uninit(void)
 {
     nrf_drv_spi_uinit(&accel_spi);
@@ -44,9 +45,10 @@ void spi_uninit(void)
 
 void spi_flash_init(void)
 {
-    //ret_code_t err_code = nrf_drv_spi_init(&flash_spi, &flash_spi_config, spi_event_handler, NULL);
+    ret_code_t err_code = nrf_drv_spi_init(&flash_spi, &flash_spi_config, spi_event_handler, NULL);
     APP_ERROR_CHECK(err_code);
 }
+*/
 
 int main (void)
 {
