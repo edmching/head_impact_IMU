@@ -1,12 +1,3 @@
-//-------------------------------------------
-// Name: vcnl_4040.h
-// Author: Gregor Morrison
-// Description: This driver file contains functions for communication
-// with the proximity sensor over I2C.
-//
-// Referenced code: https://github.com/sparkfun/SparkFun_VCNL4040_Arduino_Library/blob/master/src/SparkFun_VCNL4040_Arduino_Library.cpp
-//-------------------------------------------
-
 #ifndef VCNL4040_H
 #define VCNL4040_H
 
@@ -28,21 +19,15 @@
 
 #define PROX_THRESHOLD 5000
 
-// Proximity sensor address (for I2C)
-#define VCNL4040_ADDR 0x60
+// Proximity sensor address
+#define VCNL4040_ADDR 0x60U //U >> 1
 
-// Proximity sensor register addresses
-// Note: The VCNL4040 uses 2-byte command registers,
-// with one upper and one lower byte. The datasheet
-// distinguishes between upper and lower bytes by
-// giving each byte a different name (i.e. CONF1 and CONF2)
-// for the 2 bytes located at 0x03. This convention is followed
-// here (see datasheet for more info).
-#define VCNL4040_PS_CONF1 0x03 //Lower
-#define VCNL4040_PS_CONF2 0x03 //Upper
-#define VCNL4040_PS_CONF3 0x04 //Lower
-#define VCNL4040_PS_MS 0x04 //Upper
-#define VCNL4040_PS_DATA 0x08
+// Proximity sensor command codes
+#define VCNL4040_PS_CONF1 0x03U //Lower
+#define VCNL4040_PS_CONF2 0x03U //Upper
+#define VCNL4040_PS_CONF3 0x04U //Lower
+#define VCNL4040_PS_MS 0x04U //Upper
+#define VCNL4040_PS_DATA 0x08U
 
 #define NORMAL_MODE 0U
 
