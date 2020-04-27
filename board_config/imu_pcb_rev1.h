@@ -56,6 +56,7 @@ extern "C" {
 //===================I2C PINOUT========================//
 #define I2C_SCL                 19
 #define I2C_SDA                 20
+#define RTC_RST_PIN             22
 
 #ifdef __cplusplus
 }
