@@ -118,6 +118,12 @@ INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
 [========================================]
 INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
 ```
+## Text Editor
+You may use any text editor you like, however we chose [Visual Studio Code](https://code.visualstudio.com/) since it provided a debugging environment. 
+We used the following extensions in VS Code:
+* [C/C++ IntelliSense](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
+* [Cortex-Debug] (https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)
+
 ## Receiving Data Serially
 
 Nearly all of the project code prints messages or data serially. In order to receive this data, an SSH client is required. We used [PuTTY](https://www.putty.org/).
@@ -135,6 +141,11 @@ Requirements:
 * nRF Command Line Tools
 
 Assuming you have GNU arm toolchain and make setup properly
+Tools:
+* JLink mini EDU
+* USB to UART adapter
+* Lipo battery (optional if you are using the USB to UART adapter to power the device)
+The USB to UART adapter is for getting serial output from the tx and rx pins. The Jlink is for programming and debugging firmware on the PCB. JLink requires using nrfjprog from nRF Command Line Tools package instead of pyocd.
 
 ## Installing nRF Command Line Tools
 Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools). By default, the installer should include it in the path environment variable. Check that the path environment variable is set like:
