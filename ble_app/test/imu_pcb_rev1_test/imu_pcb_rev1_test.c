@@ -1,13 +1,22 @@
 //-------------------------------------------
 // Title: imu_pcb_rev1_test.c
 // Author: UBC Capstone Team 48 - 2019/2020
-// Description: This file brings together the
-// test code written for each sensor and
-// integrates them by performing the
-// following steps:
-// 1. Sensor/peripheral initialization
-// 2. Proximity sensor threshold detection
-// 3. High-g data threshold detection
+// Description: This program demostrates the following
+// two modes high impact storage mode and continuous sampling mode.
+// At the startup it will test all sensors 
+// and configure them to their default states
+//
+// high impact storage mode
+// 1. Proximity sensor detection
+// 2. high impact detection
+// 3. Store a 2 max of number seperate impacts to flash
+// 4. Serially outputs the impact data via physical UART connection
+// 
+// This program can also run in continuous sampling mode by uncomment USE_CONT_SAMPLE_MODE
+// Continuous sampling mode
+// 1. samples accel, gyro, proximity, and rtc sensors
+// 2. Does not use flash
+// 
 //-------------------------------------------
 
 //general c libraries
@@ -44,11 +53,11 @@
 //for error logging
 #include "app_error.h"
 
-//Uncomment to use continuous sampling mode
-//#define USE_SAMPLE_MODE
+//Uncomment to use continuous sampling mode and disable impact storage mode
+//#define USE_CONT_SAMPLE_MODE
 
-#define NUM_SAMPLES 50
-#define MAX_SAMPLE_BUF_LENGTH 500
+//keep in small since there is limited ram space
+#define MAX_SAMPLE_BUF_LENGTH 500 
 #define IMPACT_G_THRESHOLD 10000 //in milli-g's
 #define IMPACT_DURATION 100 //in milliseconds
 
@@ -59,14 +68,15 @@ typedef struct{
     uint8_t padding[6]; //to align with 32byte
 }impact_sample_t;
 
-//adxl372_accel_data_t g_high_G_buf[MAX_SAMPLE_BUF_LENGTH];
-//icm20649_data_t g_low_G_buf[MAX_SAMPLE_BUF_LENGTH];
+//Variable to temporary store the sample set in RAM and to transfer over to flash
 impact_sample_t g_sample_set_buf[MAX_SAMPLE_BUF_LENGTH];
 impact_sample_t g_flash_output_buf[MAX_SAMPLE_BUF_LENGTH];
 uint32_t g_buf_index = 0;
-uint32_t g_total_samples_buf_index = 0;
 
+//Variable to know when the sampling is finished
 bool g_measurement_done = false;
+
+//variable that enables reading the rtc at the beginning of every high impact
 bool g_record_timestamp = false;
 APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer 
                                          used for the impact duration */ 
@@ -97,7 +107,7 @@ static void measurement_timer_handler(void * p_context)
 }
 
 //================================================================//
-// NOTE: These two functions are ONLY for PCB REV1
+// NOTE: These two functions below are ONLY for PCB REV1
 // Due to the limition number of spi/twi peripherals (3)
 // accel and flash have separate pin config and will require
 // uninitializing one inorder to switch between devices.
@@ -137,7 +147,9 @@ int main (void)
 
     //init accel
     adxl372_test();
+#ifndef USE_CONT_SAMPLING_MODE
     adxl372_init();
+#
 
     //init gyro
     icm20649_test();
@@ -162,7 +174,7 @@ int main (void)
     uint32_t flash_addr = MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START;
     uint32_t num_impacts = 0;
 
-#ifndef USE_SAMPLE_MODE
+#ifndef USE_CONT_SAMPLE_MODE
     while(1){
         vcnl4040_read_sensor_data();
         adxl372_get_accel_data(&high_g_data);
@@ -205,7 +217,7 @@ int main (void)
     }
 #endif
 
-#ifdef USE_SAMPLE_MODE
+#ifdef USE_CONT_SAMPLE_MODE
     adxl372_accel_data_t accel_data;
     icm20649_data_t gyro_data;
     ds1388_data_t ds_data;
@@ -355,6 +367,7 @@ void serial_output_flash_data(void)
     NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
 }
 
+//depreciated
 void serial_debug_output_flash_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
