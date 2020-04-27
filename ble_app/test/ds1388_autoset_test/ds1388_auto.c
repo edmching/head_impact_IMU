@@ -126,7 +126,6 @@ __STATIC_INLINE void data_handler(ds1388_data_t rtc_data)
     NRF_LOG_INFO("Year:   20%d", rtc_data.year);
     NRF_LOG_INFO("Month:  %d", rtc_data.month);
     NRF_LOG_INFO("Date:   %d", rtc_data.date);
-    NRF_LOG_INFO("Day:    %d", rtc_data.day);
     NRF_LOG_INFO("Hour:   %d", rtc_data.hour);
     NRF_LOG_INFO("Minute: %d", rtc_data.minute);
     NRF_LOG_INFO("Second: %d\n", rtc_data.second);
@@ -267,7 +266,7 @@ int main(void)
 
     while (true)
     {
-        nrf_delay_ms(1000);
+        nrf_delay_ms(1000); // arbitrarily prints once every second
         get_time(); // gets the current time and date stored by the RTC
         data_handler(date); // prints the current time and date to serial
         NRF_LOG_FLUSH();
