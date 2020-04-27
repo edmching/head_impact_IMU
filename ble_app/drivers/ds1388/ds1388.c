@@ -3,16 +3,8 @@
 /* RTC variables. */
 static uint8_t byte;
 static uint8_t time_format =  HOUR_MODE_24; //select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
-static uint8_t init_time[8] = {20, 2, 12, 3, 4, 1, 0, 0};
-//init_time[0] = 20; (year)
-//init_time[1] = 2;  (month)
-//init_time[2] = 1;  (date)
-//init_time[3] = 6;  (day of the week, MONDAY: 1, TUESDAY: 2, ... SUNDAY: 7)
-//init_time[4] = 4;  (hour) 
-//init_time[5] = 25; (minutes) 
-//init_time[6] = 0;  (seconds)
-//init_time[7] = 0;  (hundredth of second)
- 
+static uint8_t init_time[8] = {20, 4, 26, 6, 21, 53, 25, 0};
+
 /**
  * @brief Function for converting from dec to hex
  */
@@ -34,7 +26,11 @@ uint8_t hex2dec(uint8_t val) {
  */
 void ds1388_config(void)
 {	
-	uint8_t reg0[2] = {CONTROL_REG, (EN_OSCILLATOR | DIS_WD_COUNTER)};
+	  uint8_t reg0[2] = {CONTROL_REG, (EN_OSCILLATOR | DIS_WD_COUNTER)};
+    nrf_gpio_cfg_output(RTC_RST_PIN);
+    nrf_gpio_pin_set(RTC_RST_PIN);
+    nrf_delay_ms(500);
+    m_xfer_done = false;
     nrf_drv_twi_tx(&twi, DS1388_ADDRESS, reg0, sizeof(reg0), false);
     while (m_xfer_done == false);
   
@@ -77,14 +73,14 @@ uint8_t ds1388_get_time(ds1388_data_t* date)
 {
   uint8_t ret;
   
-  date->year = readRegister(YEAR_REG);
-  date->month = readRegister(MONTH_REG);
-  date->date = readRegister(DATE_REG);
-  date->day = readRegister(DAY_REG);
-  date->hour = readRegister(HOUR_REG);
-  date->minute = readRegister(MIN_REG);
-  date->second = readRegister(SEC_REG);
-  date->hundreth = readRegister(HUNDRED_SEC_REG);
+  date->year = ds1388_readRegister(YEAR_REG);
+  date->month = ds1388_readRegister(MONTH_REG);
+  date->date = ds1388_readRegister(DATE_REG);
+  date->day = ds1388_readRegister(DAY_REG);
+  date->hour = ds1388_readRegister(HOUR_REG);
+  date->minute = ds1388_readRegister(MIN_REG);
+  date->second = ds1388_readRegister(SEC_REG);
+  date->hundreth = ds1388_readRegister(HUNDRED_SEC_REG);
   
   //Time processing 
   date->year = hex2dec(date->year);

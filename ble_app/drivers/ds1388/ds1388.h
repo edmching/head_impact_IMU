@@ -1,8 +1,21 @@
 #ifndef DS1388_H
 #define DS1388_H
 
+#include <stdio.h>
+#include <stdbool.h>
+#include <stdint.h>
+#include <string.h> 
+#include "nrf_drv_twi.h"	//I2C driver library
+#include "app_error.h"
+#include "vcnl4040.h"
+#include "nrf_gpio.h"
+#include "nrf_delay.h"
+
+#include "nrf_log.h"
+
+
 //Slave addresses
-#define DS1388_ADDRESS         0x68  //b1101000, for RTC and WD
+#define DS1388_ADDRESS      0x68  //b1101000, for RTC and WD
 #define EEPROM_ADDRESS_1    0x69  //b1101001, EEPROM block 1
 #define EEPROM_ADDRESS_2    0x6A  //b1101010, EEPROM block 2
 
@@ -33,6 +46,18 @@
 #define HOUR_MODE_24        0x00
 #define AM                  0x00
 #define PM                  0x20
+
+// Data structure for RTC data
+typedef struct{
+    uint8_t year;
+    uint8_t month;
+    uint8_t date;
+    uint8_t day;
+    uint8_t hour;
+    uint8_t minute;
+    uint8_t second;
+    uint8_t hundreth;
+} ds1388_data_t;
 
 uint8_t ds1388_get_time(ds1388_data_t* date);
 
