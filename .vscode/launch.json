@@ -10,7 +10,7 @@
         "request": "launch",
         "name": "Debug J-Link",
         "cwd": "${workspaceRoot}",
-        "executable": "${workspaceRoot}/ble_app/test/ble_imu_pcb_test/_build/nrf52832_xxaa.out",
+        "executable": "${workspaceRoot}/ble_app/test/imu_pcb_rev1_test/_build/nrf52832_xxaa.out",
         "serverpath": "/opt/SEGGER/JLink/JLinkGDBServerCLExe", 
         "servertype": "jlink",
         "device": "nrf52832_xxaa",
