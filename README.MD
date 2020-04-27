@@ -180,7 +180,9 @@ The code located here brings the device peripherals together and offers integrat
 
 #### drivers
 
-This directory contains additional driver files that are called by several SPI peripherals. Note that the two current platforms utilize different SPI drivers - see the driver file comments for more information.
+This directory contains the driver files that are called by the SPI and I2C peripherals. Note that the two current platforms utilize different SPI drivers - see the driver file comments for more information.
+
+These files are **NOT** intended to be run on their own, and therefore do not have dedicated makefiles or config files - their functions are heavily used throughout the test and integration code sets.
 
 #### config
 
