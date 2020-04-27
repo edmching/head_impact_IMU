@@ -64,8 +64,10 @@ typedef struct{
 impact_sample_t g_sample_set_buf[MAX_SAMPLE_BUF_LENGTH];
 impact_sample_t g_flash_output_buf[MAX_SAMPLE_BUF_LENGTH];
 uint32_t g_buf_index = 0;
+uint32_t g_total_samples_buf_index = 0;
 
 bool g_measurement_done = false;
+bool g_record_timestamp = false;
 APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer 
                                          used for the impact duration */ 
 
@@ -83,7 +85,8 @@ void spi_flash_uninit(void);
 void adxl372_init(void);
 void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
 void flash_store_samples(uint32_t* flash_addr);
-void flash_retrieve_samples(void);
+void flash_retrieve_samples(uint32_t* flash_addr);
+void serial_debug_output_flash_data(void);
 void serial_output_flash_data(void);
 
 /**@brief Timeout handler for the measurement timer.
@@ -157,6 +160,7 @@ int main (void)
     adxl372_accel_data_t high_g_data;
     ds1388_data_t rtc_data;
     uint32_t flash_addr = MT25QL256ABA_LOW_128MBIT_SEGMENT_ADDRESS_START;
+    uint32_t num_impacts = 0;
 
 #ifndef USE_SAMPLE_MODE
     while(1){
@@ -165,11 +169,14 @@ int main (void)
 
         //NRF_LOG_INFO("%d, %d, %d", high_g_data.x, high_g_data.y, high_g_data.z);
 
+        g_record_timestamp = false;
         if(high_g_data.x >= IMPACT_G_THRESHOLD|| high_g_data.y >= IMPACT_G_THRESHOLD
                 || high_g_data.z >= IMPACT_G_THRESHOLD)
         {
+#ifdef DEBUG
             NRF_LOG_INFO("");
             NRF_LOG_INFO("BEGIN MEASUREMENT");
+#endif
             app_timer_start(m_measurement_timer_id,
                              APP_TIMER_TICKS(IMPACT_DURATION),
                              measurement_timer_handler);
@@ -182,12 +189,17 @@ int main (void)
             g_measurement_done = false;
             spi_switch_to_flash_from_accel();
             flash_store_samples(&flash_addr);
-            flash_retrieve_samples();
+            flash_retrieve_samples(&flash_addr);
             serial_output_flash_data();
-            while(1)
+            spi_switch_to_accel_from_flash();
+            num_impacts++;
+            if(num_impacts == 2)
             {
-                __WFE();
-            }
+                while(1)
+                {
+                    __WFE();
+                }
+            }  
 
         }
     }
@@ -225,15 +237,19 @@ int main (void)
 
 void sample_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data)
 {
+    if(g_record_timestamp == false)
+    {
+        ds1388_get_time(rtc_data);
+        g_sample_set_buf[g_buf_index].ds_data = *rtc_data;
+        g_record_timestamp = true;
+    }
     adxl372_get_accel_data(high_g_data);
     icm20649_read_gyro_accel_data(low_g_gyro_data);
     icm20649_convert_data(low_g_gyro_data);
-    ds1388_get_time(rtc_data);
     if (g_buf_index < MAX_SAMPLE_BUF_LENGTH)
     {
         g_sample_set_buf[g_buf_index].adxl_data = *high_g_data;
         g_sample_set_buf[g_buf_index].icm_data = *low_g_gyro_data;
-        g_sample_set_buf[g_buf_index].ds_data = *rtc_data;
         g_buf_index++;
     }
 }
@@ -250,8 +266,10 @@ void flash_store_samples(uint32_t* flash_addr)
     //store one impact sample set to flash
     for (int i = 0; i < g_buf_index; ++i)
     {
+#ifdef DEBUG
         NRF_LOG_INFO("");
         NRF_LOG_INFO("WRITE: ID: %d, addr: 0x%03x", i, *flash_addr);
+#endif
 
         mt25ql256aba_check_write_in_progress_flag();
         convert_4byte_address_to_3byte_address(*flash_addr, flash_addr_buf);
@@ -268,15 +286,17 @@ void flash_store_samples(uint32_t* flash_addr)
     }
 }
 
-void flash_retrieve_samples(void)
+void flash_retrieve_samples(uint32_t* flash_addr)
 {
-    uint32_t addr32 = 0x00000000;
-    uint8_t addr[3] = {0};
     uint8_t sample_size_bytes = sizeof(impact_sample_t);
+    uint32_t addr32 = *flash_addr-sample_size_bytes*g_buf_index;
+    uint8_t addr[3] = {0};
     uint8_t *sample_byte_ptr;
 
+#ifdef DEBUG
     NRF_LOG_INFO("");
     NRF_LOG_INFO("BEGIN RETRIEVE SAMPLES");
+#endif
     for(int i = 0; i < g_buf_index; ++i) 
     {
         mt25ql256aba_check_write_in_progress_flag();
@@ -287,14 +307,55 @@ void flash_retrieve_samples(void)
                               sizeof(addr),
                               sample_byte_ptr,
                               sample_size_bytes);
+#ifdef DEBUG
         NRF_LOG_INFO("READ: ID: %d, addr: 0x%03x, OUTPUT: %d (%d)",
                        i, addr32, g_flash_output_buf[i].adxl_data.x,
                         g_sample_set_buf[i].adxl_data.x);
+#endif
         addr32 = addr32 + sample_size_bytes;
     }
 }
 
 void serial_output_flash_data(void)
+{
+    NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
+    for (int i = 0; i < g_buf_index; ++i)
+    {
+        NRF_LOG_INFO("");
+        NRF_LOG_INFO("ID = %d", i);
+        NRF_LOG_INFO("accel x= %d, accel y = %d,  accel z= %d mG's",
+                        g_flash_output_buf[i].adxl_data.x, 
+                        g_flash_output_buf[i].adxl_data.y,
+                        g_flash_output_buf[i].adxl_data.z);
+        NRF_LOG_INFO("      accel x = %d, accel y = %d, accel z = %d mG's",
+                            g_flash_output_buf[i].icm_data.accel_x,
+                            g_flash_output_buf[i].icm_data.accel_y,
+                            g_flash_output_buf[i].icm_data.accel_z);
+        NRF_LOG_INFO("      gyro x = %d, gyro y = %d, gyro z = %d mrad/s", 
+                            g_flash_output_buf[i].icm_data.gyro_x,
+                            g_flash_output_buf[i].icm_data.gyro_y,
+                            g_flash_output_buf[i].icm_data.gyro_z);
+        if(i == 0)
+        {
+            NRF_LOG_INFO("      date: %d day: %d",
+                            g_flash_output_buf[i].ds_data.date,
+                            g_flash_output_buf[i].ds_data.day);
+            NRF_LOG_INFO("      Year: %d Month: %d Hour: %d ",
+                                g_flash_output_buf[i].ds_data.year,
+                                g_flash_output_buf[i].ds_data.month,
+                                g_flash_output_buf[i].ds_data.hour);
+            NRF_LOG_INFO("      Minute: %d, Second: %d, Hundreth: %d",
+                            g_flash_output_buf[i].ds_data.minute,
+                            g_flash_output_buf[i].ds_data.second,
+                            g_flash_output_buf[i].ds_data.hundreth); 
+        }
+    }
+    g_buf_index = 0; //reset buf index
+    memset(g_flash_output_buf, 0x00, sizeof(g_flash_output_buf));
+    NRF_LOG_INFO("\r\n====================DATA OUTPUT FINISH==================");
+}
+
+void serial_debug_output_flash_data(void)
 {
     NRF_LOG_INFO("\r\n===================IMPACT DATA OUTPUT===================");
     for (int i = 0; i < g_buf_index; ++i)
