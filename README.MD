@@ -173,7 +173,7 @@ C:\Program Files\Nordic Semiconductor\nrf-command-line-tools\bin\
 
 Now instead of using `pyocd` as the programmer and debugger, the `nrfjprog` will be the programmer and debugger. The type of programmer should already be included in the makefile.
 
-The Jlink is for programming and debugging firmware on the PCB. JLink requires using the `nrfjprog` command from nRF Command Line Tools package instead of `pyocd`. The JLink has a ribbon cable connector included. To check if the connection is correct, you can run JLinkExe and check that the VTref is ~3.3V and that you can connect to the MCU. See below for an example output.
+The Jlink is for programming and debugging firmware on the PCB. JLink requires using the `nrfjprog` command from nRF Command Line Tools package instead of `pyocd`. The JLink has a ribbon cable connector included. To check if the connection is correct, you can run `JLinkExe` and check that the `VTref is ~3.3V` and that you can connect to the MCU. See below for an example output.
 
 ```sh
 > JLinkExe
