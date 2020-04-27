@@ -181,3 +181,19 @@ Each sub-directory contains source code (.c, .h) that, in general, initializes a
 It is highly recommnded that any substantive new code begin its life here, prior to being introduced to any integrated code.
 
 ##### integration
+
+The code located here brings the device peripherals together and offers integrated functionality. The *sensors_integration* code was developed for the breadboard platform, while the *imu_pcb_rev1* was developed for PCB Revision 1.
+
+##### drivers
+
+This directory contains additional driver files that are called by several SPI peripherals. Note that the two current platforms utilize different SPI drivers - see the driver file comments for more information.
+
+##### config
+
+This directory contains the default *sdk_config.c* file. This file type is discussed in more detail later.
+
+##### ble_app_cli
+
+This directory contains the code for the Bluetooth command line interface.
+
+## Running Code
