@@ -118,6 +118,16 @@ INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
 [========================================]
 INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
 ```
+## Receiving Data Serially
+
+Nearly all of the project code prints messages or data serially. In order to receive this data, an SSH client is required. We used [PuTTY](https://www.putty.org/).
+
+Once you have downloaded PuTTy, you will need to set up the serial port. Make sure you know which serial port the device is using (i.e. COM9).
+
+The default setup for the USB serial port is 115200 baud, 8 bits, 1 stop bit, no parity (115200-8-N-1) - you will need to input this information into your SSH client in order to communicate.
+
+More information on using terminal with the development board can be found [here](https://wiki.makerdiary.com/nrf52832-mdk/getting-started/).
+
 ## Setting up PCB development environment
 Requirements:
 * GNU Arm Embedded Toolchain
@@ -180,7 +190,9 @@ The code located here brings the device peripherals together and offers integrat
 
 #### drivers
 
-This directory contains additional driver files that are called by several SPI peripherals. Note that the two current platforms utilize different SPI drivers - see the driver file comments for more information.
+This directory contains the driver files that are called by the SPI and I2C peripherals. Note that the two current platforms utilize different SPI drivers - see the driver file comments for more information.
+
+These files are **NOT** intended to be run on their own, and therefore do not have dedicated makefiles or config files - their functions are heavily used throughout the test and integration code sets.
 
 #### config
 
@@ -213,5 +225,6 @@ The GNU make manual can be found [here](https://www.gnu.org/software/make/manual
 ## Reference Links
 * [Makerdiary setting up development environment](https://wiki.makerdiary.com/nrf52832-mdk/nrf5-sdk/)
 * [Makerdiary examples to run on development board](https://github.com/makerdiary/nrf52832-mdk)
-* [Setting up visual studio code debugger](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)
+* [Vscode debugging on breadboard using pyocd](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)
+* [Vscode debugging on PCB Rev1 using JLink](https://wiki.segger.com/J-Link:Visual_Studio_Code)
 * [Nordic SDK 15.2 documentation](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)

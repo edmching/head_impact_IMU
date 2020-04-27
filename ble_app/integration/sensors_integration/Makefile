@@ -69,7 +69,7 @@ SRC_FILES += \
 INC_FOLDERS += \
   ${CURDIR} \
   $(PROJ_DIR)/drivers/mt25ql256aba \
-  $(PROJ_DIR)/test/sensors_integration \
+  $(PROJ_DIR)/integration/sensors_integration \
   $(PROJ_DIR)/test/ds1388_test \
   $(PROJ_DIR)/drivers/spi \
   $(PROJ_DIR)/drivers/adxl372/ \

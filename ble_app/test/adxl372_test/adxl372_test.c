@@ -1,6 +1,6 @@
 //-------------------------------------------
 // Name: adxl372_test.c
-// Author: UBC Capstone Team 48 - 2019/2020
+// Author: Edmond Ching
 // Description: This file initiates SPI communication
 // with the ADXL372 accelerometer, performs write and read tests,
 // and then prints out X, Y and Z acceleration values.
@@ -64,7 +64,8 @@ int main (void)
     // The read test below attemps to read the three device ID
     // registers and ensure that each of the three device IDs
     // return the correct value - if not, the read test fails.
-    // Note: if a read test occurs on the breadboard platform, check the wiring!
+    
+    // If this test fails, check the device connections
 
     //--------------------READ TEST---------------------//
     device_id = adxl372_get_dev_ID(); // check the Analog Devices Inc. ID (0xAD)
@@ -101,6 +102,8 @@ int main (void)
     // The write test below attemps to write three known values
     // to the device's power control register and read them back
     // if there is a mismatch, the write test fails
+
+    // If this test fails, check the device connections
 
     //--------------------WRITE TEST---------------------//
     uint8_t p_reg; // a variable to store the read value of the register
