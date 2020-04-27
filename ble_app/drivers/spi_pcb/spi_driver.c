@@ -28,6 +28,9 @@ void spi_event_handler(nrf_drv_spi_evt_t const * p_event, void *  p_context)
     }
 }
 
+/* 
+ * @brief for configuration single master multiple slaves with different cs pins
+ */
 void spi_cfg_cs_pins(uint8_t cs_pin)
 {
     nrf_gpio_cfg_output(cs_pin);
