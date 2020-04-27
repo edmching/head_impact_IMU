@@ -124,10 +124,10 @@ We used the following extensions in VS Code:
 * [C/C++ IntelliSense](https://marketplace.visualstudio.com/items?itemName=ms-vscode.cpptools)
 * [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)
 
-A launch.json file is included in .vscode folder for setting up the pyocd debugger and jlink debugger.
-launch.json is for debugging PCB firmware and launch_pyocd.json is for debugging breadboard firmware. If you wish to debug breadboard firmware you must rename the launch_pyocd.json to launch.json and vice versa.
+A `launch.json` file is included in .vscode folder for setting up the pyocd debugger and jlink debugger.
+`launch.json` is for debugging PCB firmware and `launch_pyocd.json` is for debugging breadboard firmware. If you wish to debug breadboard firmware you must rename the `launch_pyocd.json` to `launch.json` and vice versa.
 
-Another note is the jlink launch.json is set up for a linux user so you will have to change the path locations for "serverpath" and "svdFile" in the launch.json.
+Another note is the jlink `launch.json` is set up for a linux user so you will have to change the path locations for "serverpath" and "svdFile" in the launch.json.
 
 ```sh
         "serverpath": "/opt/SEGGER/JLink/JLinkGDBServerCLExe", //change to your path
@@ -136,7 +136,7 @@ Another note is the jlink launch.json is set up for a linux user so you will hav
         .
         "svdFile": "/opt/SEGGER/Ozone/Config/CPU/Cortex-M4F.svd" //change to your path
 ```
-* See reference links at the end on a guide to setup your launch.json *
+**See reference links at the end on a guide to setup your launch.json**
 
 ## Receiving Data Serially
 
@@ -160,9 +160,9 @@ Hardware Requirements:
 * PCB REV
 * JLink mini EDU
 * USB to UART adapter
-* Lipo battery (optional if you are using the USB to UART adapter to power the device)
+* LiPo battery (optional if you are using the USB to UART adapter to power the device)
 
-The USB to UART adapter is for getting serial output from the tx and rx pins. You may use the VCC and GND of the USB to UART adapter to power the PCB. The connections are simply VBAT->VCC, GND->GND, Tx->Rx, Rx->Tx.
+The USB to UART adapter is for getting serial output from the tx and rx pins. You may use the VCC and GND of the USB to UART adapter to power the PCB. The connections are VCC->VBAT, GND->GND, Tx->Rx, Rx->Tx.
 
 ## Installing nRF Command Line Tools
 Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools). By default, the installer should include it in the path environment variable. Check that the path environment variable is set like:
@@ -171,8 +171,10 @@ Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Softwar
 C:\Program Files\Nordic Semiconductor\nrf-command-line-tools\bin\
  ```
 
-Now instead of using pyocd as the programmer and debugger, the nrfjprog will be the programmer and debugger. The type of programmer should already be included in the makefile.
-The Jlink is for programming and debugging firmware on the PCB. JLink requires using nrfjprog from nRF Command Line Tools package instead of pyocd. The JLink has a ribbon cable connector included. To check if the connection is correct, you can run JLinkExe and check that the VTref is ~3.3V and that you can connect to the MCU. See below for an example output.
+Now instead of using `pyocd` as the programmer and debugger, the `nrfjprog` will be the programmer and debugger. The type of programmer should already be included in the makefile.
+
+The Jlink is for programming and debugging firmware on the PCB. JLink requires using the `nrfjprog` command from nRF Command Line Tools package instead of `pyocd`. The JLink has a ribbon cable connector included. To check if the connection is correct, you can run JLinkExe and check that the VTref is ~3.3V and that you can connect to the MCU. See below for an example output.
+
 ```sh
 > JLinkExe
 SEGGER J-Link Commander V6.62a (Compiled Jan 31 2020 12:58:00)
@@ -228,14 +230,6 @@ Cortex-M4 identified.
 J-Link>
 
 ```
-
-## Installing nRF Command Line Tools
-Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools). By default, the installer should include it in the path environment variable. Check that the path environment variable is set like:
-
-``` sh
-C:\Program Files\Nordic Semiconductor\nrf-command-line-tools\bin\
- ```
-Now instead of using pyocd as the programmer and debugger, the nrfjprog will be the programmer and debugger. The type of programmer should already be included in the makefile.
 
 ## Navigating the Repository
 
