@@ -40,6 +40,9 @@
 #define TWI_INSTANCE_ID     1
 
 #define PROX_THRESHOLD 5000
+#define MAX_SAMPLE_BUF_LENGTH 500 
+#define IMPACT_G_THRESHOLD 10000 //in milli-g's
+#define IMPACT_DURATION 100 //in milliseconds
 
 // Proximity sensor address
 #define VCNL4040_ADDR 0x60U //U >> 1
@@ -84,7 +87,7 @@ typedef struct{
 /* RTC variables. */
 static uint8_t byte;
 static uint8_t time_format =  HOUR_MODE_24; //select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
-static uint8_t init_time[8] = {20, 2, 12, 3, 4, 1, 0, 0};
+static uint8_t init_time[8] = {0,0,0,0,0,0,0,0};
 //init_time[0] = 20; (year)
 //init_time[1] = 2;  (month)
 //init_time[2] = 1;  (date)
@@ -159,5 +162,20 @@ void twi_init (void);
 void ds_config(void);
 uint8_t dec2hex(uint8_t val);
 uint8_t hex2dec(uint8_t val);
+
+static void log_init(void);
+static void lfclk_request(void);
+static void create_timers(void);
+void mt25ql256aba_startup_test(void);
+static void spi_ret_check(int8_t ret);
+void adxl372_startup_test(void);
+void mt25ql256aba_erase(void);
+void mt25ql256aba_check_ready_flag(void);
+void bulk_erase(void);
+void full_page_read(void);
+void flash_read_bytes(uint16_t num_bytes);
+void sample_test_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
+void convert_4byte_address_to_3byte_address(uint32_t flash_addr, uint8_t* flash_addr_buf);
+void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr);
 
 #endif //SENSOR_INTEGRATION_H

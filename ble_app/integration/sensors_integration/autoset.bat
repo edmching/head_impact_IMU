@@ -2,7 +2,7 @@
 rem | ----------------------------------------------------------------------------------------
 rem | Name: autoset.bat
 rem | Author: Gregor Morrison
-rem | Description: Running this batch file in "head_impact_IMU\ble_app\test\ds1388_autoset_test"
+rem | Description: Running this batch file in "head_impact_IMU\ble_app\test\sensors_integration"
 rem | directory will load the RTC test code to the nrf_mdk development board
 rem | with (near) real time values loaded onto the RTC. Because programming the board
 rem | comes with inherent delay, the RTC will actually be behind by a few seconds.
@@ -33,11 +33,11 @@ echo -----------------------------
 echo.
 
 rem | this line replaces the default time/date values (all zeros) in the test file with the current time/date
-sed -i 's/{0,0,0,0,0,0,0,0}/{%year%,%month%,%day%,0,%hour%,%min%,%sec%,%hsec%}/g' ds1388_auto.c
+sed -i 's/{0,0,0,0,0,0,0,0}/{%year%,%month%,%day%,0,%hour%,%min%,%sec%,%hsec%}/g' sensors_integration.h
 rem | "make flash" runs make and then programs the executable files in this directory to the board
 make flash
 rem | this line re-writes the default time/date values (all zeros) in the test file to ensure that this script can be run again
-sed -i 's/{%year%,%month%,%day%,0,%hour%,%min%,%sec%,%hsec%}/{0,0,0,0,0,0,0,0}/g' ds1388_auto.c
+sed -i 's/{%year%,%month%,%day%,0,%hour%,%min%,%sec%,%hsec%}/{0,0,0,0,0,0,0,0}/g' sensors_integration.h
 
 echo.
 echo ------------------------------

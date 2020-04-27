@@ -1,9 +1,9 @@
-PROJECT_NAME     := imu_pcb_rev1_test
+PROJECT_NAME     := sensor_integration_nrf52832_mdk_s132
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
 PROJ_DIR := ../..
-ROOT_DIR:= $(PROJ_DIR)/..
+ROOT_DIR := $(PROJ_DIR)/..
 SDK_ROOT := $(ROOT_DIR)/nrf_sdk
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
@@ -11,20 +11,18 @@ $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
 
 # Source files common to all targets
 SRC_FILES += \
-  imu_pcb_rev1_test.c \
-  $(PROJ_DIR)/drivers/spi_pcb/spi_driver.c \
+  sensor_integration.c \
+  $(PROJ_DIR)/drivers/adxl372/adxl372.c \
   $(PROJ_DIR)/drivers/mt25ql256aba/mt25ql256aba.c \
-  $(PROJ_DIR)/drivers/vcnl4040/vcnl4040.c \
-  $(PROJ_DIR)/drivers/ds1388/ds1388.c \
-  $(PROJ_DIR)/drivers/icm20649/icm20649.c \
-  $(PROJ_DIR)/drivers/adxl372_pcb/adxl372.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
-  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c \
-  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
+  $(PROJ_DIR)/drivers/spi/spi_driver.c \
+  $(SDK_ROOT)/components/libraries/timer/app_timer.c \
+  $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twi.c \
   $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_twim.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_twi.c \
+  $(SDK_ROOT)/integration/nrfx/legacy/nrf_drv_spi.c \
+  $(SDK_ROOT)/modules/nrfx/drivers/src/nrfx_spim.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
-  $(SDK_ROOT)/components/libraries/util/app_util_platform.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_serial.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_uart.c \
@@ -70,15 +68,13 @@ SRC_FILES += \
 # Include folders common to all targets
 INC_FOLDERS += \
   ${CURDIR} \
-  $(ROOT_DIR)/board_config \
-  $(PROJ_DIR)/drivers/spi_pcb \
   $(PROJ_DIR)/drivers/mt25ql256aba \
-  $(PROJ_DIR)/drivers/icm20649 \
-  $(PROJ_DIR)/drivers/adxl372_pcb \
-  $(PROJ_DIR)/drivers/vcnl4040 \
-  $(PROJ_DIR)/drivers/ds1388 \
-  $(SDK_ROOT)/integration/nrfx/legacy \
+  $(PROJ_DIR)/test/sensors_integration \
+  $(PROJ_DIR)/test/ds1388_test \
+  $(PROJ_DIR)/drivers/spi \
+  $(PROJ_DIR)/drivers/adxl372/ \
   $(SDK_ROOT)/components/libraries/timer/ \
+  $(SDK_ROOT)/integration/nrfx/legacy \
   $(SDK_ROOT)/components/libraries/pwm \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT)/components/libraries/log \
@@ -109,6 +105,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/cli \
   $(SDK_ROOT)/components/libraries/crc16 \
   $(SDK_ROOT)/components/libraries/util \
+  $(ROOT_DIR)/board_config \
   $(SDK_ROOT)/components/libraries/csense \
   $(SDK_ROOT)/components/libraries/balloc \
   $(SDK_ROOT)/components/libraries/ecc \
@@ -151,16 +148,14 @@ OPT = -O3 -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBOARD_CUSTOM
-# Uncomment to switch between the hardware boards
-#CFLAGS += -DNRF52832_MDK
-CFLAGS += -DIMU_PCB_REV1
-CFLAGS += -DCONFIG_NFCT_PINS_AS_GPIOS
+CFLAGS += -DNRF52832_MDK
+#enable flash spi drivers
+CFLAGS += -DUSE_FLASH
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DNRF52
 CFLAGS += -DNRF52832_XXAA
 CFLAGS += -DNRF52_PAN_74
-#CFLAGS += -DNRF_LOG_USES_RTT=1 
 #CFLAGS += -DNRF_SD_BLE_API_VERSION=6
 CFLAGS += -DS132
 #CFLAGS += -DSOFTDEVICE_PRESENT
@@ -182,8 +177,7 @@ ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
 ASMFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 ASMFLAGS += -DBOARD_CUSTOM
-#ASMFLAGS += -DNRF52832_MDK
-#ASMFLAGS += -DIMU_PCB_REV1
+ASMFLAGS += -DNRF52832_MDK
 ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DNRF52
@@ -242,40 +236,29 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 # Flash the program
 flash: default
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex --sectorerase --verify
-	nrfjprog -f nrf52 --reset
-#pyocd-flashtool -t nrf52 -se $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
-
-# Compare nrfjprog with pyocd
-flash_debug: default
-	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
 	pyocd-flashtool -t nrf52 -se $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
 
 # Flash softdevice
 flash_softdevice:
 	@echo Flashing: s132_nrf52_6.1.0_softdevice.hex
-	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex --sectorerase --verify
-#pyocd-flashtool -t nrf52 -se $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
+	pyocd-flashtool -t nrf52 -se $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
 
 # Merge application and softdevice, then flash
 flash_all: default
 	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
-	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex --sectorerase --verify
-	nrfjprog -f nrf52 --reset
-#pyocd-flashtool -t nrf52 -ce $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
+	pyocd-flashtool -t nrf52 -ce $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 
 # Erase chip
 erase:
-	nrfjprog -f nrf52 --eraseall
-#pyocd-flashtool -t nrf52 -ce
+	pyocd-flashtool -t nrf52 -ce
 
 # Generate hex file
 release:
 	@echo Generating hex file...
 	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(PROJ_DIR)/hex/$(PROJECT_NAME).hex
 
-SDK_CONFIG_FILE := ${CURDIR}/sdk_config.h
+SDK_CONFIG_FILE := $(PROJ_DIR)/config/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
