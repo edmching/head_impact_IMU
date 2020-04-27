@@ -14,6 +14,7 @@
 #include "adxl372.h"
 #include "icm20649.h"
 #include "vcnl4040.h"
+#include "ds1388.h"
 
 //for NRF_LOG()
 #include "nrf_log.h"
@@ -36,6 +37,17 @@ void spi_init(void)
 
 }
 
+void spi_uninit(void)
+{
+    nrf_drv_spi_uinit(&accel_spi);
+}
+
+void spi_flash_init(void)
+{
+    //ret_code_t err_code = nrf_drv_spi_init(&flash_spi, &flash_spi_config, spi_event_handler, NULL);
+    APP_ERROR_CHECK(err_code);
+}
+
 int main (void)
 {
     // Initialize.
@@ -50,9 +62,12 @@ int main (void)
     icm20649_default_init();
 
     vcnl4040_config();
-    
+    NRF_LOG_INFO("CONFIG RTC");
+    ds1388_config();
+
     adxl372_accel_data_t accel_data;
     icm20649_data_t gyro_data;
+    ds1388_data_t ds_data;
 
     while(1)
     {
@@ -60,13 +75,19 @@ int main (void)
         icm20649_read_gyro_accel_data(&gyro_data);
         icm20649_convert_data(&gyro_data);
         adxl372_get_accel_data(&accel_data);
+        ds1388_get_time(&ds_data);
 
         NRF_LOG_INFO("accel x = %d, accel y = %d, accel z = %d mG",
                         accel_data.x, accel_data.y, accel_data.z);
         NRF_LOG_RAW_INFO("accel x = %d, accel y = %d, accel z = %d, gyro x = %d, gyro y = %d, gyro z = %d \r\n", 
         gyro_data.accel_x, gyro_data.accel_y, gyro_data.accel_z,
         gyro_data.gyro_x, gyro_data.gyro_y, gyro_data.gyro_z );
-    
+        
+        NRF_LOG_INFO("      Date: %d, Day:    %d, Hour:   %d, Minute: %d, Second: %d, Hundreth: %d",
+                    ds_data.date, ds_data.day,
+                    ds_data.hour, ds_data.minute,
+                    ds_data.second, ds_data.hundreth);       
+        
         nrf_delay_ms(1000);
     }
 
