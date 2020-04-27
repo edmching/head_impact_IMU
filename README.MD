@@ -158,8 +158,8 @@ Assuming you have GNU arm toolchain and make setup properly from the above.
 
 Hardware Requirements:
 * PCB REV
-* JLink mini EDU
-* USB to UART adapter
+* JLink mini EDU + USB A to micro USB B cable
+* USB to UART adapter + USB A to USB B cable
 * LiPo battery (optional if you are using the USB to UART adapter to power the device)
 
 The USB to UART adapter is for getting serial output from the tx and rx pins. You may use the VCC and GND of the USB to UART adapter to power the PCB. The connections are VCC->VBAT, GND->GND, Tx->Rx, Rx->Tx.
