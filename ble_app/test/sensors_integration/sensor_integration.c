@@ -1,14 +1,16 @@
 //-------------------------------------------
 // Name: sensor_integration.c
 // Author: Edmond Ching and Gregor Morrison
-// Description: This file brings together the
-// test code written for each sensor and
-// integrates them by performing the
-// following steps:
+// Description: This file brings together the test code written for each 
+// sensor and integrates them by performing the following steps:
 // 1. Sensor/peripheral initialization
 // 2. Proximity sensor threshold detection
 // 3. High-g data threshold detection
-// 4. 
+// 4. Data measurement for impact duration
+// 5. Measurements stored to flash
+// 6. Measurements read back from flash and printed to serial
+// Note: this file uses the legacy SPI drivers and can only be run on the breadboard platform.
+// See "imu_pcb_rev1" for a similar file on the PCB Revision 1 platform
 //-------------------------------------------
 
 #include "sensors_integration.h"
