@@ -87,7 +87,7 @@ typedef struct{
 /* RTC variables. */
 static uint8_t byte;
 static uint8_t time_format =  HOUR_MODE_24; //select either 12-HOUR FORMAT or 24-HOUR FORMAT, if 12-HOUR FORMAT, use together with AM, PM eg: HOUR_MODE_12 | PM
-static uint8_t init_time[8] = {20, 2, 12, 3, 4, 1, 0, 0};
+static uint8_t init_time[8] = {0,0,0,0,0,0,0,0};
 //init_time[0] = 20; (year)
 //init_time[1] = 2;  (month)
 //init_time[2] = 1;  (date)
