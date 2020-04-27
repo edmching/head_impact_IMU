@@ -32,7 +32,7 @@ $ arm-none-eabi-gcc --version
 
 ### Setting up GNUMake
 
-For Windows download and install [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/). Add the path to your GNU Make executable to your "PATH" environment variable. For example:
+For Windows download and install [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/packages/make.htm). Add the path to your GNU Make executable to your "PATH" environment variable. For example:
 
 ``` sh
 C:\Program Files (x86)\GnuWin32\bin
