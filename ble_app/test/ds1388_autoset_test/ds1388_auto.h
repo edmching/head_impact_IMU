@@ -1,6 +1,6 @@
 //-------------------------------------------
 // Name: ds1388_auto.h
-// Author: UBC Capstone Team 48 - 2019/2020
+// Author: Gregor Morrison
 // Description: This header file contains the
 // addresses, registers and commands needed
 // to read/write to the ds1388 RTC using 

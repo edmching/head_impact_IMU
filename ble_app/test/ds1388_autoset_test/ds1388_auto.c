@@ -1,6 +1,6 @@
 //-------------------------------------------
 // Name: ds1388_auto.c
-// Author: UBC Capstone Team 48 - 2019/2020
+// Author: Gregor Morrison
 // Description: This file utilizes the ds1388
 // RTC test code from "\ble_app\test\ds1388_test"
 // and modifies it slightly for usage with the

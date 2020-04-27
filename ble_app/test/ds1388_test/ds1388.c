@@ -1,6 +1,6 @@
 //-------------------------------------------
 // Name: ds1388.c
-// Author: UBC Capstone Team 48 - 2019/2020
+// Author: Gregor Morrison
 // Description: This file initiates I2C communication
 // with the ds1388 RTC, configures the device,
 // and then  prints out the date and time serially.
