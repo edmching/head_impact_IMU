@@ -214,4 +214,4 @@ A makefile is required so that the make command can compile and link your progra
 
 Once again, creating a copy of a current makefile and modifying it for your use is the easiest way of creating a new makefile. 
 
-The GNU make manual can be found [here] (https://www.gnu.org/software/make/manual/make.html)
+The GNU make manual can be found [here](https://www.gnu.org/software/make/manual/make.html)
