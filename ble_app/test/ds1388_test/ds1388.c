@@ -255,7 +255,7 @@ int main(void)
     APP_ERROR_CHECK(NRF_LOG_INIT(NULL));
     NRF_LOG_DEFAULT_BACKENDS_INIT();
 
-    NRF_LOG_INFO("\r\nRTC autoset test code started");
+    NRF_LOG_INFO("\r\nRTC test code started");
     NRF_LOG_FLUSH();
     twi_init(); // initializes I2C
 	ds_config(); // configures the ds1388
