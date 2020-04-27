@@ -1,3 +1,9 @@
+//-------------------------------------------
+// Title: spi_driver.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This is verison of the spi driver is depreciated and is used 
+// for running older breadboard prototype test programs. Please see spi_pcb
+//-------------------------------------------
 #include "spi_driver.h"
 #include "nrf_drv_spi.h"
 #include "nrf_gpio.h"

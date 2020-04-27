@@ -1,3 +1,9 @@
+//-------------------------------------------
+// Title: mt25ql256aba.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This is verison of the flash driver is depreciated and is used 
+// for running older breadboard prototype test programs. Please see mt25ql256aba_pcb
+//-------------------------------------------
 #include "mt25ql256aba.h"
 #include "spi_driver.h"
 

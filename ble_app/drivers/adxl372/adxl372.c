@@ -1,3 +1,9 @@
+//-------------------------------------------
+// Title: adxl372.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This is verison of the adxl372 is depreciated and is used 
+// for running older breadboard prototype test programs. Please see adxl372_pcb
+//-------------------------------------------
 #include "adxl372.h"
 #include "spi_driver.h"
 #include "nrf_delay.h"
