@@ -1,6 +1,7 @@
 # Head Impact IMU Firmware
-This is the base project folder for the IMU firmware. It includes the nRF5 SDK 15.2.0 source files and the nrf52832_mdk development board config files. 
+This is the project folder for the IMU firmware. It includes the nRF5 SDK 15.2.0 source files and the nrf52832_mdk development board config files. 
 
+## Setting up breadboard development environment
 Requirements:
 * GNU Arm Embedded Toolchain
 * GNU make [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/) 
@@ -117,9 +118,26 @@ INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
 [========================================]
 INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
 ```
+## Setting up PCB development environment
+Requirements:
+* GNU Arm Embedded Toolchain
+* GNU make [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/) 
+* nRF Command Line Tools
+
+Assuming you have GNU arm toolchain and make setup properly
+
+## Installing nRF Command Line Tools
+Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Software-and-Tools/Development-Tools/nRF-Command-Line-Tools). By default, the installer should include it in the path environment variable. Check that the path environment variable is set like:
+
+``` sh
+C:\Program Files\Nordic Semiconductor\nrf-command-line-tools\bin\
+ ```
+Now instead of using pyocd as the programmer and debugger, the nrfjprog will be the programmer and debugger. The type of programmer should already be included in the makefile.
+
 
 ## Reference Links
 * [Makerdiary setting up development environment](https://wiki.makerdiary.com/nrf52832-mdk/nrf5-sdk/)
 * [Makerdiary examples to run on development board](https://github.com/makerdiary/nrf52832-mdk)
 * [Setting up visual studio code debugger](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)
+* [Nordic SDK 15.2 documentation](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)
 
