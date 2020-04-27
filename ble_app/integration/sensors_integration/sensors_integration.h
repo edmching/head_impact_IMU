@@ -1,3 +1,11 @@
+//-------------------------------------------
+// Name: sensors_integration.h
+// Author: Edmond Ching and Gregor Morrison
+// Description: This header file contains all
+// of the definitions and declarations necessary
+// for sensor_integration.c
+//-------------------------------------------
+
 #ifndef SENSOR_INTEGRATION_H
 #define SENSOR_INTEGRATION_H
 
@@ -103,6 +111,7 @@ static volatile bool m_xfer_done = false;
 /* TWI instance. */
 static const nrf_drv_twi_t twi = NRF_DRV_TWI_INSTANCE(TWI_INSTANCE_ID);
 
+// custom data structs
 
 typedef struct{
     int16_t accel_x;
@@ -131,6 +140,8 @@ bool g_measurement_done = false;
 APP_TIMER_DEF(m_measurement_timer_id);/**< Handler for measurement timer 
                                          used for the impact duration */ 
 
+// Function definitions
+
 void icm20649_read_test(void);
 void icm20649_write_test(void);
 void icm20649_convert_data(icm20649_data_t * data);
@@ -154,7 +165,6 @@ void read_sensor_data();
 
 void adxl372_init(void);
 
-
 uint8_t get_time(ds1388_data_t* date);
 uint8_t readRegister(uint8_t reg_addr);
 void twi_handler_ds(nrf_drv_twi_evt_t const * p_event, void * p_context);
@@ -176,6 +186,5 @@ void full_page_read(void);
 void flash_read_bytes(uint16_t num_bytes);
 void sample_test_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
 void convert_4byte_address_to_3byte_address(uint32_t flash_addr, uint8_t* flash_addr_buf);
-void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr);
 
 #endif //SENSOR_INTEGRATION_H
