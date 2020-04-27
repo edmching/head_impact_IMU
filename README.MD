@@ -190,10 +190,28 @@ This directory contains additional driver files that are called by several SPI p
 
 #### config
 
-This directory contains the default *sdk_config.c* file. This file type is discussed in more detail later.
+This directory contains the default *sdk_config.h* file. This file type is discussed in more detail later.
 
 #### ble_app_cli
 
 This directory contains the code for the Bluetooth command line interface.
 
-## Running Code
+## Adding Additional Code
+
+Each new code set requires a *sdk_config.h* file and *makefile* within its directory, in addition to the basic source code.
+
+### sdk_config file
+
+This header file allows you to modify the configuration options for the code that you write. Essentially, it contains a list of #define statements that allow you to select the MCU features or specifc modes used by your application.
+
+For continued functionality of the applciations we've developed on these platforms, we suggest copy-and-pasting the sdk_config file used by the current code set that is most comparable to your new code set, and using that as a basis for your new configuration file. In the unlikely event that you need to modify your configurations, you can edit this file.
+
+Nordic Semiconductors supplies more information on these configuration files [here](https://infocenter.nordicsemi.com/index.jsp?topic=%2Fcom.nordic.infocenter.sdk5.v15.0.0%2Fsdk_config.html)
+
+### makefile
+
+A makefile is required so that the make command can compile and link your program. This allows the make command to create the source files required for running code on the device. All of the source files and folders common to the make target need to be included in the makefile in order for the program to be compiled succesfully.
+
+Once again, creating a copy of a current makefile and modifying it for your use is the easiest way of creating a new makefile. 
+
+The GNU make manual can be found [here] (https://www.gnu.org/software/make/manual/make.html)
