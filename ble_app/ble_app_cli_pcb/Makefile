@@ -1,16 +1,21 @@
-PROJECT_NAME     := ble_app_cli_nrf52832_mdk_s132
+PROJECT_NAME     := ble_app_cli_pcb
 TARGETS          := nrf52832_xxaa
 OUTPUT_DIRECTORY := _build
 
-MDK_ROOT := ../../../..
-SDK_ROOT := $(MDK_ROOT)/nrf_sdks/nRF5_SDK_15.2.0_9412b96
-PROJ_DIR := ..
+#ROOT is head_impact_imu, PROJ_DIR is ble_app
+PROJ_DIR := ../
+ROOT_DIR:= $(PROJ_DIR)/..
+SDK_ROOT := $(ROOT_DIR)/nrf_sdk
 
 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.out: \
   LINKER_SCRIPT  := ble_app_cli_gcc_nrf52.ld
 
 # Source files common to all targets
 SRC_FILES += \
+  main.c \
+  cli_adc_cmds.c \
+  cli_bsp_cmds.c \
+  cli_gpio_cmds.c \
   $(SDK_ROOT)/modules/nrfx/mdk/gcc_startup_nrf52.S \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_flash.c \
   $(SDK_ROOT)/components/libraries/log/src/nrf_log_backend_rtt.c \
@@ -73,10 +78,6 @@ SRC_FILES += \
   $(SDK_ROOT)/components/softdevice/common/nrf_sdh_soc.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp.c \
   $(SDK_ROOT)/components/libraries/bsp/bsp_btn_ble.c \
-  $(PROJ_DIR)/main.c \
-  $(PROJ_DIR)/cli_adc_cmds.c \
-  $(PROJ_DIR)/cli_bsp_cmds.c \
-  $(PROJ_DIR)/cli_gpio_cmds.c \
   $(SDK_ROOT)/components/ble/peer_manager/auth_status_tracker.c \
   $(SDK_ROOT)/components/ble/common/ble_advdata.c \
   $(SDK_ROOT)/components/ble/ble_advertising/ble_advertising.c \
@@ -113,6 +114,7 @@ SRC_FILES += \
 
 # Include folders common to all targets
 INC_FOLDERS += \
+  ${CURDIR}\
   $(SDK_ROOT)/components/nfc/ndef/connection_handover/ble_pair_msg \
   $(SDK_ROOT)/components/nfc/t4t_parser/tlv \
   $(SDK_ROOT)/components/drivers_nrf/usbd \
@@ -170,8 +172,7 @@ INC_FOLDERS += \
   $(SDK_ROOT)/components/libraries/usbd/class/hid/mouse \
   $(SDK_ROOT)/components/nfc/t2t_lib/hal_t2t \
   $(SDK_ROOT)/components/ble/ble_services/ble_hids \
-  $(MDK_ROOT)/config \
-  $(PROJ_DIR)/config \
+  $(ROOT_DIR)/board_config \
   $(SDK_ROOT)/components/ble/nrf_ble_gatt \
   $(SDK_ROOT)/modules/nrfx/hal \
   $(SDK_ROOT)/components/libraries/bootloader/ble_dfu \
@@ -265,7 +266,8 @@ OPT = -O3 -g3
 # C flags common to all targets
 CFLAGS += $(OPT)
 CFLAGS += -DBOARD_CUSTOM
-CFLAGS += -DNRF52832_MDK
+CFLAGS += -DIMU_PCB_REV1
+#CFLAGS += -DNRF52832_MDK
 CFLAGS += -DCONFIG_GPIO_AS_PINRESET
 CFLAGS += -DFLOAT_ABI_HARD
 CFLAGS += -DNRF52
@@ -292,7 +294,7 @@ ASMFLAGS += -mcpu=cortex-m4
 ASMFLAGS += -mthumb -mabi=aapcs
 ASMFLAGS += -mfloat-abi=hard -mfpu=fpv4-sp-d16
 ASMFLAGS += -DBOARD_CUSTOM
-ASMFLAGS += -DNRF52832_MDK
+#ASMFLAGS += -DNRF52832_MDK
 ASMFLAGS += -DCONFIG_GPIO_AS_PINRESET
 ASMFLAGS += -DFLOAT_ABI_HARD
 ASMFLAGS += -DNRF52
@@ -348,32 +350,35 @@ $(foreach target, $(TARGETS), $(call define_target, $(target)))
 # Flash the program
 flash: default
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
-	pyocd flash -t nrf52 $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex
+	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex --sectorerase --verify
+	nrfjprog -f nrf52 --reset
 
 # Flash softdevice
 flash_softdevice:
 	@echo Flashing: s132_nrf52_6.1.0_softdevice.hex
-	pyocd flash -t nrf52 $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex
+	nrfjprog -f nrf52 --program $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex --sectorerase --verify
 
 # Merge application and softdevice
 merge: default
 	@echo Merging application and softdevice...
-	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
+	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o ${CURDIR}/hex/$(PROJECT_NAME).hex
 
 # Flash merged firmware
 flash_all: merge
+	mergehex -m $(OUTPUT_DIRECTORY)/nrf52832_xxaa.hex $(SDK_ROOT)/components/softdevice/s132/hex/s132_nrf52_6.1.0_softdevice.hex -o $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
 	@echo Flashing: $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
-	pyocd flash -t nrf52 $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex
+	nrfjprog -f nrf52 --program $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex --sectorerase --verify
+	nrfjprog -f nrf52 --reset
 
 erase:
-	pyocd erase -t nrf52 --chip
+	nrfjprog -f nrf52 --eraseall
 
 # Copy merged firmware to hex folder
 copy: merge
 	@echo Copying: $(PROJECT_NAME).hex
-	cp $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex $(PROJ_DIR)/hex/$(PROJECT_NAME).hex
+	cp $(OUTPUT_DIRECTORY)/nrf52832_xxaa_s132.hex ${CURDIR}/hex/$(PROJECT_NAME).hex
 
-SDK_CONFIG_FILE := $(PROJ_DIR)/config/sdk_config.h
+SDK_CONFIG_FILE := ${CURDIR}/sdk_config.h
 CMSIS_CONFIG_TOOL := $(SDK_ROOT)/external_tools/cmsisconfig/CMSIS_Configuration_Wizard.jar
 sdk_config:
 	java -jar $(CMSIS_CONFIG_TOOL) $(SDK_CONFIG_FILE)
