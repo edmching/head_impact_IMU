@@ -118,4 +118,8 @@ INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
 INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
 ```
 
+##Reference Links
+[Makerdiary setting up development environment](https://wiki.makerdiary.com/nrf52832-mdk/nrf5-sdk/)
+[Makerdiary examples to run on development board](https://github.com/makerdiary/nrf52832-mdk)
+[Setting up visual studio code debugger](https://store.makerdiary.com/blogs/tutorials/debugging-nrf52840-mdk-board-with-visual-studio-code)
 
