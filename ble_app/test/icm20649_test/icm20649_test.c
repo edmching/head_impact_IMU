@@ -45,6 +45,11 @@ int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data);
 int8_t icm20649_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes);
 void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data);
 
+
+
+/**
+ * @brief Main function that initializes peripheral, runs write and read tests and then prints data
+ */
 int main (void)
 {
     // Initialize.
@@ -187,13 +192,17 @@ int8_t icm20649_read_reg(uint8_t address, uint8_t * reg_data)
     return ret; // return the read byte
 }
 
+
+/**
+ * @brief Function for reading up to 256 consecutive bytes from the internal registers
+ */
 int8_t icm20649_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t num_bytes) 
 {
     uint8_t read_addr;
     uint8_t buf[257]; 
     int8_t ret;
     
-    if(num_bytes > 256)
+    if(num_bytes > 256) // if number of bytes is greater than 256, return an error
         return -1;
 
     read_addr = reg_addr | 0x80; //set MSB to 1 for read
@@ -208,6 +217,9 @@ int8_t icm20649_multibyte_read_reg( uint8_t reg_addr, uint8_t* reg_data, uint8_t
     return ret;
 }
 
+/**
+ * @brief Function for reading the gyroscope's data (linear and rotational)
+ */
 void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data)
 {
     uint8_t rx_buf[12] = {0};
@@ -215,8 +227,9 @@ void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data)
     //REG BANK SEL select userbank 0
     icm20649_write_reg(0x7F, 0x0);
 
-    icm20649_multibyte_read_reg( 0x2D, rx_buf, 12);
+    icm20649_multibyte_read_reg( 0x2D, rx_buf, 12); // performs a multibyte read
 
+    // arranges the read data bytes for each measurement to proper values
     icm20649_data->accel_x = rx_buf[0]<<8 | rx_buf[1];
     icm20649_data->accel_y = rx_buf[2]<<8 | rx_buf[3];
     icm20649_data->accel_z = rx_buf[4]<<8 | rx_buf[5];
@@ -227,6 +240,9 @@ void icm20649_read_gyro_accel_data(icm20649_data_t *icm20649_data)
 
 }
 
+/**
+ * @brief Function for initializing the nrf log
+ */
 static void log_init(void)
 {
     ret_code_t err_code = NRF_LOG_INIT(NULL);

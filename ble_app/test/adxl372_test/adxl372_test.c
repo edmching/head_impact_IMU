@@ -43,6 +43,9 @@
 
 static void log_init(void);
 
+/**
+ * @brief Main function that initializes peripheral, runs write and read tests and then prints data
+ */
 int main (void)
 {
     // Initialize.
@@ -174,7 +177,9 @@ int main (void)
     return 0;
 }
 
-
+/**
+ * @brief Function for initializing the nrf log
+ */
 static void log_init(void)
 {
     ret_code_t err_code = NRF_LOG_INIT(NULL);
