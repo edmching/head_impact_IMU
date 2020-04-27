@@ -37,8 +37,13 @@ extern "C" {
 #define TX_PIN_NUMBER  24
 #define HWFC           false
 
-//===================SPI PINOUT========================//
-#define SPI_GYRO_MOSI_PIN            1 //gyro - pins 0 & 1 are flipped
+//===================SPI PINOUT=========
+//gyro - PIN names are mapped wrong in this PCB rev1.
+//This is corrected in PCB rev2
+//gyro's SDI should be mapped to GYRO_MOSI (Pin 0.00)
+//gyro's SDO should be mapped to GYRO_MISO (Pin 0.01)
+//So these pins are corrected below for this rev1
+#define SPI_GYRO_MOSI_PIN            1 
 #define SPI_GYRO_MISO_PIN            0 
 #define SPI_GYRO_SCK_PIN             2
 #define SPI_GYRO_CS_PIN              3
@@ -48,10 +53,15 @@ extern "C" {
 #define SPI_ACCEL_SCK_PIN             11
 #define SPI_ACCEL_CS_PIN              8
 
-#define SPI_FLASH_MOSI_PIN      19
-#define SPI_FLASH_MISO_PIN      15
-#define SPI_FLASH_SCK_PIN       14
-#define SPI_FLASH_CS_PIN        18
+//flash - pin names are mapped wrong in this PCB rev1
+//This is corrected in PCB rev2
+// flash's DQ0 should be mapped to MEM_MOSI (pin 0.16)
+// flash's DQ1 should be mapped to MEM_MISO (pin 0.12)
+//So these pins are corrected below for this rev1
+#define SPI_FLASH_MOSI_PIN      12 
+#define SPI_FLASH_MISO_PIN      16
+#define SPI_FLASH_SCK_PIN       13
+#define SPI_FLASH_CS_PIN        15
 
 //===================I2C PINOUT========================//
 #define I2C_SCL                 19
