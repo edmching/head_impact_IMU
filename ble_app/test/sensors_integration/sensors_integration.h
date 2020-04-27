@@ -44,6 +44,8 @@
 // TWI instance ID
 #define TWI_INSTANCE_ID     1
 
+// test
+
 // Proximity sensor address
 #define VCNL4040_ADDR 0x60U //U >> 1
 
@@ -162,5 +164,20 @@ void twi_init (void);
 void ds_config(void);
 uint8_t dec2hex(uint8_t val);
 uint8_t hex2dec(uint8_t val);
+
+static void log_init(void);
+static void lfclk_request(void);
+static void create_timers(void);
+void mt25ql256aba_startup_test(void);
+static void spi_ret_check(int8_t ret);
+void adxl372_startup_test(void);
+void mt25ql256aba_erase(void);
+void mt25ql256aba_check_ready_flag(void);
+void bulk_erase(void);
+void full_page_read(void);
+void flash_read_bytes(uint16_t num_bytes);
+void sample_test_impact_data (adxl372_accel_data_t* high_g_data, icm20649_data_t* low_g_gyro_data, ds1388_data_t* rtc_data);
+void convert_4byte_address_to_3byte_address(uint32_t flash_addr, uint8_t* flash_addr_buf);
+void prototype_mt25ql256aba_store_samples(uint32_t* flash_addr);
 
 #endif //SENSOR_INTEGRATION_H
