@@ -30,22 +30,6 @@ Adding the path makes it possible to run the toolchain executables from any dire
 $ arm-none-eabi-gcc --version
 ```
 
-Now you make set the path to your toolchain in the `makefile.windows` or `makefile.posix` depending on your OS. This is located in 
-
-``` sh
-nrf_sdk/components/toolchain/gcc
-```
-
-Using any text editor to set the `GNU_INSTALL_ROOT` and `GNU_VERSION`variables. For example:
-
-``` sh
-GNU_INSTALL_ROOT := <path to install directory>/gcc-arm-none-eabi-8-2019-q3-update-win32/bin/
-GNU_VERSION := 8.3.1
-GNU_PREFIX := arm-none-eabi
-```
-
-**Make sure you use '/' or `make` will not be able too find your directory**
-
 ### Setting up GNUMake
 
 For Windows download and install [GNUwin Make (for Windows)](http://gnuwin32.sourceforge.net/). Add the path to your GNU Make executable to your "PATH" environment variable. For example:
