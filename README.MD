@@ -133,7 +133,7 @@ Download and install [nRF Command Line Tools](https://www.nordicsemi.com/Softwar
 C:\Program Files\Nordic Semiconductor\nrf-command-line-tools\bin\
  ```
 Now instead of using pyocd as the programmer and debugger, the nrfjprog will be the programmer and debugger. The type of programmer should already be included in the makefile.
-=======
+
 ## Reference Links
 * [Makerdiary setting up development environment](https://wiki.makerdiary.com/nrf52832-mdk/nrf5-sdk/)
 * [Makerdiary examples to run on development board](https://github.com/makerdiary/nrf52832-mdk)
