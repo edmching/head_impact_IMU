@@ -1,3 +1,12 @@
+//-------------------------------------------
+// Title: mt25ql256aba.c
+// Author: UBC Capstone Team 48 - 2019/2020
+// Description: This is refactored flash drivers
+// the mt25ql256aba folder is now depreciated and is used for running
+// breadboard test programs
+// Please use this verison for PCB rev2
+// This requires setting up spi_init in your program's main file
+//-------------------------------------------
 #include "mt25ql256aba.h"
 
 const nrf_drv_spi_t flash_spi = NRF_DRV_SPI_INSTANCE(FLASH_SPI_INSTANCE);

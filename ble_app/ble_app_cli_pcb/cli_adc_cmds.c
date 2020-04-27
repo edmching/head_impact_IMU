@@ -45,7 +45,6 @@
 #include "nrf_drv_saadc.h"
 #include "nrf_log.h"
 
-
 static void saadc_callback(nrf_drv_saadc_evt_t const * p_event)
 {
     if (p_event->type == NRF_DRV_SAADC_EVT_DONE)

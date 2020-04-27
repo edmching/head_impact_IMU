@@ -33,6 +33,47 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#ifdef USE_BLE_CLI
+    //temporary definitions in order to run ble_app_cli
+    // PCB does not have any leds or buttons avaliable for use
+    // LEDs definitions for nRF52832-MDK
+    #define LEDS_NUMBER    3
+    
+    #define LED_START      22
+    #define LED_1          22
+    #define LED_2          23
+    #define LED_3          24
+    #define LED_STOP       24
+    
+    #define LEDS_ACTIVE_STATE 0
+    
+    #define LEDS_INV_MASK  LEDS_MASK
+    
+    #define LEDS_LIST { LED_1, LED_2, LED_3 }
+    
+    #define BSP_LED_0      LED_1
+    #define BSP_LED_1      LED_2
+    #define BSP_LED_2      LED_3
+    
+    #define BUTTONS_NUMBER 4
+    #define BUTTON_1       27    // Connect Grove-Button at Base Dock Grove Port#1
+    #define BUTTON_2       29    // Connect Grove-Button at Base Dock Grove Port#2
+    #define BUTTON_3       31    // Connect Grove-Button at Base Dock Grove Port#3
+    #define BUTTON_4       3     // Connect Grove-Button at Base Dock Grove Port#4
+    
+    #define BUTTON_PULL    NRF_GPIO_PIN_PULLDOWN
+    
+    #define BUTTONS_ACTIVE_STATE 1
+    
+    #define BUTTONS_LIST { BUTTON_1, BUTTON_2, BUTTON_3, BUTTON_4}
+    
+    #define BSP_BUTTON_0   BUTTON_1
+    #define BSP_BUTTON_1   BUTTON_2
+    #define BSP_BUTTON_2   BUTTON_3
+    #define BSP_BUTTON_3   BUTTON_4
+#endif
+
+
 #define RX_PIN_NUMBER  23
 #define TX_PIN_NUMBER  24
 #define HWFC           false
