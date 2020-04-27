@@ -118,6 +118,16 @@ INFO:pyocd.coresight.fpb:6 hardware breakpoints, 4 literal comparators
 [========================================]
 INFO:pyocd.flash.loader:Erased 0 bytes (0 sectors), programmed 0 bytes (0 pages), skipped 28672 bytes (7 pages) at 9.19 kB/s
 ```
+## Recieving Data Serially
+
+Nearly all of the project code prints messages or data serially. In order to receive this data, an SSH client is required. We used [PuTTY](https://www.putty.org/).
+
+Once you have downloaded PuTTy, you will need to set up the serial port. Make sure you know which serial port the device is using (i.e. COM9).
+
+The default setup for the USB serial port is 115200 baud, 8 bits, 1 stop bit, no parity (115200-8-N-1) - you will need to input this information into your SSH client in order to communicate.
+
+More information on using terminal with the development board can be found [here](https://wiki.makerdiary.com/nrf52832-mdk/getting-started/).
+
 ## Setting up PCB development environment
 Requirements:
 * GNU Arm Embedded Toolchain
